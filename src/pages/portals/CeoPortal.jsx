@@ -1,5 +1,6 @@
 import { useAuth } from '../../context/AuthContext'
 import ApprovalQueue from '../../components/ApprovalQueue'
+import GeneralLedger from '../../components/GeneralLedger'
 
 export default function CeoPortal() {
   const { profile, signOut } = useAuth()
@@ -23,7 +24,22 @@ export default function CeoPortal() {
           </div>
         </div>
 
-        <ApprovalQueue />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <ApprovalQueue />
+            <div className="mt-8">
+              <GeneralLedger readOnly={true} />
+            </div>
+          </div>
+          <div>
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">Reports</h3>
+            </div>
+            <div className="bg-white p-4 rounded border">
+              <a href="#financial-statements" className="text-indigo-600">Open Financial Statements</a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

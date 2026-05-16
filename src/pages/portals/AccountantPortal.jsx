@@ -1,5 +1,6 @@
 import { useAuth } from '../../context/AuthContext'
 import InvoiceList from '../../components/InvoiceList'
+import GeneralLedger from '../../components/GeneralLedger'
 
 export default function AccountantPortal() {
   const { profile, signOut } = useAuth()
@@ -23,7 +24,23 @@ export default function AccountantPortal() {
           </div>
         </div>
 
-        <InvoiceList />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <InvoiceList />
+            <div className="mt-8">
+              <GeneralLedger />
+            </div>
+          </div>
+          <div>
+            {/* Financial Statements panel */}
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">Reports</h3>
+            </div>
+            <div className="bg-white p-4 rounded border">
+              <a href="#financial-statements" className="text-indigo-600">Open Financial Statements</a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

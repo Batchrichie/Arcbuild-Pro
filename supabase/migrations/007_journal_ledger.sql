@@ -301,10 +301,10 @@ BEGIN
         currency, foreign_amount, fx_rate
     ) VALUES (
         journal_id, '1110', 'Accounts Receivable',
-        inv.total_gross * inv.exchange_rate, 0,
+        inv.gross_total_ghs, 0,
         'Invoice ' || inv.invoice_number,
         inv.client_id, inv.project_id, inv.division_id,
-        inv.currency, inv.total_gross, inv.exchange_rate
+        inv.currency, inv.gross_total, inv.fx_rate_to_ghs
     );
 
     INSERT INTO ledger_entries (
@@ -314,10 +314,10 @@ BEGIN
         currency, foreign_amount, fx_rate
     ) VALUES (
         journal_id, revenue_account, division_name || ' Revenue',
-        0, inv.subtotal * inv.exchange_rate,
+        0, COALESCE(inv.subtotal_ghs, inv.gross_total_ghs - COALESCE(inv.vat_amount_ghs,0) - COALESCE(inv.nhil_amount_ghs,0) - COALESCE(inv.getfund_amount_ghs,0)),
         'Invoice ' || inv.invoice_number,
         inv.client_id, inv.project_id, inv.division_id,
-        inv.currency, inv.subtotal, inv.exchange_rate
+        inv.currency, inv.subtotal, inv.fx_rate_to_ghs
     );
 
     IF inv.vat_amount > 0 THEN
@@ -326,7 +326,7 @@ BEGIN
             debit_amount, credit_amount, description, division_id
         ) VALUES (
             journal_id, '2102', 'VAT Payable',
-            0, inv.vat_amount * inv.exchange_rate,
+            0, inv.vat_amount_ghs,
             'VAT on Invoice ' || inv.invoice_number,
             inv.division_id
         );
@@ -338,7 +338,7 @@ BEGIN
             debit_amount, credit_amount, description, division_id
         ) VALUES (
             journal_id, '2103', 'NHIL Payable',
-            0, inv.nhil_amount * inv.exchange_rate,
+            0, inv.nhil_amount_ghs,
             'NHIL on Invoice ' || inv.invoice_number,
             inv.division_id
         );
@@ -350,7 +350,7 @@ BEGIN
             debit_amount, credit_amount, description, division_id
         ) VALUES (
             journal_id, '2104', 'GetFUND Levy Payable',
-            0, inv.getfund_amount * inv.exchange_rate,
+            0, inv.getfund_amount_ghs,
             'GetFUND on Invoice ' || inv.invoice_number,
             inv.division_id
         );
@@ -362,7 +362,7 @@ BEGIN
             debit_amount, credit_amount, description, client_id, division_id
         ) VALUES (
             journal_id, '1111', 'Withholding Tax Receivable',
-            inv.wht_amount * inv.exchange_rate, 0,
+            inv.wht_amount_ghs, 0,
             'WHT on Invoice ' || inv.invoice_number,
             inv.client_id, inv.division_id
         );
@@ -372,7 +372,7 @@ BEGIN
             debit_amount, credit_amount, description, client_id, division_id
         ) VALUES (
             journal_id, '1110', 'Accounts Receivable',
-            0, inv.wht_amount * inv.exchange_rate,
+            0, inv.wht_amount_ghs,
             'WHT reduction on Invoice ' || inv.invoice_number,
             inv.client_id, inv.division_id
         );
