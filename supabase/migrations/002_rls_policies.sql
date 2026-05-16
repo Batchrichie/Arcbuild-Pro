@@ -1,24 +1,176 @@
 -- =============================================================================
--- ARCBUILD PRO — Migration 002: Row Level Security
+-- ARCBUILD PRO — Migration 002: Row Level Security (idempotent)
 -- Phase 1, Step 4
 --
--- Structure of this file:
---   A. Two structural additions required for row-scoping (not in 001):
---        1. profiles.client_id  — links client portal users to their client record
---        2. project_assignments — links project managers to their projects
---   B. Helper functions:
---        get_user_role()        — returns the role of auth.uid()
---        get_user_profile_id()  — returns the profiles.id of auth.uid()
---        get_user_employee_id() — returns the employees.id of auth.uid()
---        get_user_client_id()   — returns the profiles.client_id of auth.uid()
---   C. Enable RLS on all 26 tables
---   D. Policies — one section per table, named [table]_[role]_[action]
---
--- NOTE ON DELETIONS:
---   Per the project plan, CEO has no DELETE on financial tables.
---   No other role has any DELETE permission anywhere.
---   Hard deletes are blocked system-wide at the RLS layer.
+-- This file is safe to re-run. All policies are dropped before recreation.
+-- Run order: drop all → structural additions → helper functions → enable RLS → create policies
 -- =============================================================================
+
+
+-- =============================================================================
+-- PRE-FLIGHT: DROP ALL EXISTING POLICIES (IF EXISTS — safe on first run)
+-- =============================================================================
+
+DROP POLICY IF EXISTS roles_ceo_all ON roles;
+DROP POLICY IF EXISTS roles_staff_select ON roles;
+DROP POLICY IF EXISTS profiles_ceo_all ON profiles;
+DROP POLICY IF EXISTS profiles_hr_select ON profiles;
+DROP POLICY IF EXISTS profiles_hr_update ON profiles;
+DROP POLICY IF EXISTS profiles_accountant_select ON profiles;
+DROP POLICY IF EXISTS profiles_own_select ON profiles;
+DROP POLICY IF EXISTS profiles_own_update ON profiles;
+DROP POLICY IF EXISTS divisions_ceo_all ON divisions;
+DROP POLICY IF EXISTS divisions_staff_select ON divisions;
+DROP POLICY IF EXISTS clients_ceo_all ON clients;
+DROP POLICY IF EXISTS clients_accountant_select ON clients;
+DROP POLICY IF EXISTS clients_accountant_insert ON clients;
+DROP POLICY IF EXISTS clients_accountant_update ON clients;
+DROP POLICY IF EXISTS clients_pm_select ON clients;
+DROP POLICY IF EXISTS clients_client_select ON clients;
+DROP POLICY IF EXISTS projects_ceo_all ON projects;
+DROP POLICY IF EXISTS projects_accountant_select ON projects;
+DROP POLICY IF EXISTS projects_pm_select ON projects;
+DROP POLICY IF EXISTS projects_pm_update ON projects;
+DROP POLICY IF EXISTS projects_client_select ON projects;
+DROP POLICY IF EXISTS contracts_ceo_all ON contracts;
+DROP POLICY IF EXISTS contracts_accountant_select ON contracts;
+DROP POLICY IF EXISTS contracts_accountant_insert ON contracts;
+DROP POLICY IF EXISTS contracts_accountant_update ON contracts;
+DROP POLICY IF EXISTS contracts_pm_select ON contracts;
+DROP POLICY IF EXISTS coa_ceo_all ON chart_of_accounts;
+DROP POLICY IF EXISTS coa_accountant_select ON chart_of_accounts;
+DROP POLICY IF EXISTS coa_accountant_insert ON chart_of_accounts;
+DROP POLICY IF EXISTS coa_accountant_update ON chart_of_accounts;
+DROP POLICY IF EXISTS coa_pm_select ON chart_of_accounts;
+DROP POLICY IF EXISTS coa_hr_select ON chart_of_accounts;
+DROP POLICY IF EXISTS journal_entries_ceo_select ON journal_entries;
+DROP POLICY IF EXISTS journal_entries_ceo_insert ON journal_entries;
+DROP POLICY IF EXISTS journal_entries_ceo_update ON journal_entries;
+DROP POLICY IF EXISTS journal_entries_accountant_select ON journal_entries;
+DROP POLICY IF EXISTS journal_entries_accountant_insert ON journal_entries;
+DROP POLICY IF EXISTS journal_entries_accountant_update ON journal_entries;
+DROP POLICY IF EXISTS journal_lines_ceo_select ON journal_lines;
+DROP POLICY IF EXISTS journal_lines_ceo_insert ON journal_lines;
+DROP POLICY IF EXISTS journal_lines_ceo_update ON journal_lines;
+DROP POLICY IF EXISTS journal_lines_accountant_select ON journal_lines;
+DROP POLICY IF EXISTS journal_lines_accountant_insert ON journal_lines;
+DROP POLICY IF EXISTS journal_lines_accountant_update ON journal_lines;
+DROP POLICY IF EXISTS invoices_ceo_select ON invoices;
+DROP POLICY IF EXISTS invoices_ceo_insert ON invoices;
+DROP POLICY IF EXISTS invoices_ceo_update ON invoices;
+DROP POLICY IF EXISTS invoices_accountant_select ON invoices;
+DROP POLICY IF EXISTS invoices_accountant_insert ON invoices;
+DROP POLICY IF EXISTS invoices_accountant_update ON invoices;
+DROP POLICY IF EXISTS invoices_pm_select ON invoices;
+DROP POLICY IF EXISTS invoices_client_select ON invoices;
+DROP POLICY IF EXISTS invoice_line_items_ceo_select ON invoice_line_items;
+DROP POLICY IF EXISTS invoice_line_items_ceo_insert ON invoice_line_items;
+DROP POLICY IF EXISTS invoice_line_items_ceo_update ON invoice_line_items;
+DROP POLICY IF EXISTS invoice_line_items_accountant_select ON invoice_line_items;
+DROP POLICY IF EXISTS invoice_line_items_accountant_insert ON invoice_line_items;
+DROP POLICY IF EXISTS invoice_line_items_accountant_update ON invoice_line_items;
+DROP POLICY IF EXISTS invoice_line_items_pm_select ON invoice_line_items;
+DROP POLICY IF EXISTS invoice_line_items_client_select ON invoice_line_items;
+DROP POLICY IF EXISTS employees_ceo_all ON employees;
+DROP POLICY IF EXISTS employees_hr_select ON employees;
+DROP POLICY IF EXISTS employees_hr_insert ON employees;
+DROP POLICY IF EXISTS employees_hr_update ON employees;
+DROP POLICY IF EXISTS employees_accountant_select ON employees;
+DROP POLICY IF EXISTS employees_employee_select ON employees;
+DROP POLICY IF EXISTS payroll_runs_ceo_select ON payroll_runs;
+DROP POLICY IF EXISTS payroll_runs_ceo_insert ON payroll_runs;
+DROP POLICY IF EXISTS payroll_runs_ceo_update ON payroll_runs;
+DROP POLICY IF EXISTS payroll_runs_accountant_select ON payroll_runs;
+DROP POLICY IF EXISTS payroll_runs_accountant_insert ON payroll_runs;
+DROP POLICY IF EXISTS payroll_runs_accountant_update ON payroll_runs;
+DROP POLICY IF EXISTS payroll_runs_hr_select ON payroll_runs;
+DROP POLICY IF EXISTS payroll_runs_hr_insert ON payroll_runs;
+DROP POLICY IF EXISTS payroll_runs_hr_update ON payroll_runs;
+DROP POLICY IF EXISTS payroll_lines_ceo_select ON payroll_lines;
+DROP POLICY IF EXISTS payroll_lines_ceo_insert ON payroll_lines;
+DROP POLICY IF EXISTS payroll_lines_ceo_update ON payroll_lines;
+DROP POLICY IF EXISTS payroll_lines_accountant_select ON payroll_lines;
+DROP POLICY IF EXISTS payroll_lines_accountant_insert ON payroll_lines;
+DROP POLICY IF EXISTS payroll_lines_accountant_update ON payroll_lines;
+DROP POLICY IF EXISTS payroll_lines_hr_select ON payroll_lines;
+DROP POLICY IF EXISTS payroll_lines_hr_insert ON payroll_lines;
+DROP POLICY IF EXISTS payroll_lines_hr_update ON payroll_lines;
+DROP POLICY IF EXISTS payroll_lines_employee_select ON payroll_lines;
+DROP POLICY IF EXISTS assets_ceo_all ON assets;
+DROP POLICY IF EXISTS assets_accountant_select ON assets;
+DROP POLICY IF EXISTS assets_accountant_insert ON assets;
+DROP POLICY IF EXISTS assets_accountant_update ON assets;
+DROP POLICY IF EXISTS assets_pm_select ON assets;
+DROP POLICY IF EXISTS subcontractors_ceo_all ON subcontractors;
+DROP POLICY IF EXISTS subcontractors_accountant_select ON subcontractors;
+DROP POLICY IF EXISTS subcontractors_accountant_insert ON subcontractors;
+DROP POLICY IF EXISTS subcontractors_accountant_update ON subcontractors;
+DROP POLICY IF EXISTS subcontractors_pm_select ON subcontractors;
+DROP POLICY IF EXISTS project_costs_ceo_all ON project_costs;
+DROP POLICY IF EXISTS project_costs_accountant_select ON project_costs;
+DROP POLICY IF EXISTS project_costs_pm_select ON project_costs;
+DROP POLICY IF EXISTS project_costs_pm_insert ON project_costs;
+DROP POLICY IF EXISTS project_costs_pm_update ON project_costs;
+DROP POLICY IF EXISTS milestones_ceo_all ON milestones;
+DROP POLICY IF EXISTS milestones_accountant_select ON milestones;
+DROP POLICY IF EXISTS milestones_pm_select ON milestones;
+DROP POLICY IF EXISTS milestones_pm_insert ON milestones;
+DROP POLICY IF EXISTS milestones_pm_update ON milestones;
+DROP POLICY IF EXISTS milestones_client_select ON milestones;
+DROP POLICY IF EXISTS documents_ceo_all ON documents;
+DROP POLICY IF EXISTS documents_accountant_select ON documents;
+DROP POLICY IF EXISTS documents_accountant_insert ON documents;
+DROP POLICY IF EXISTS documents_accountant_update ON documents;
+DROP POLICY IF EXISTS documents_pm_select ON documents;
+DROP POLICY IF EXISTS documents_pm_insert ON documents;
+DROP POLICY IF EXISTS documents_hr_select ON documents;
+DROP POLICY IF EXISTS documents_hr_insert ON documents;
+DROP POLICY IF EXISTS documents_client_select ON documents;
+DROP POLICY IF EXISTS documents_employee_select ON documents;
+DROP POLICY IF EXISTS messages_ceo_all ON messages;
+DROP POLICY IF EXISTS messages_accountant_select ON messages;
+DROP POLICY IF EXISTS messages_accountant_insert ON messages;
+DROP POLICY IF EXISTS messages_pm_select ON messages;
+DROP POLICY IF EXISTS messages_pm_insert ON messages;
+DROP POLICY IF EXISTS messages_client_select ON messages;
+DROP POLICY IF EXISTS messages_client_insert ON messages;
+DROP POLICY IF EXISTS staff_loans_ceo_all ON staff_loans;
+DROP POLICY IF EXISTS staff_loans_hr_select ON staff_loans;
+DROP POLICY IF EXISTS staff_loans_hr_insert ON staff_loans;
+DROP POLICY IF EXISTS staff_loans_hr_update ON staff_loans;
+DROP POLICY IF EXISTS staff_loans_accountant_select ON staff_loans;
+DROP POLICY IF EXISTS staff_loans_employee_select ON staff_loans;
+DROP POLICY IF EXISTS leave_requests_ceo_all ON leave_requests;
+DROP POLICY IF EXISTS leave_requests_hr_select ON leave_requests;
+DROP POLICY IF EXISTS leave_requests_hr_insert ON leave_requests;
+DROP POLICY IF EXISTS leave_requests_hr_update ON leave_requests;
+DROP POLICY IF EXISTS leave_requests_employee_select ON leave_requests;
+DROP POLICY IF EXISTS leave_requests_employee_insert ON leave_requests;
+DROP POLICY IF EXISTS timesheets_ceo_all ON timesheets;
+DROP POLICY IF EXISTS timesheets_hr_select ON timesheets;
+DROP POLICY IF EXISTS timesheets_pm_select ON timesheets;
+DROP POLICY IF EXISTS timesheets_pm_insert ON timesheets;
+DROP POLICY IF EXISTS timesheets_pm_update ON timesheets;
+DROP POLICY IF EXISTS timesheets_employee_select ON timesheets;
+DROP POLICY IF EXISTS timesheets_employee_insert ON timesheets;
+DROP POLICY IF EXISTS tax_rates_ceo_all ON tax_rates;
+DROP POLICY IF EXISTS tax_rates_accountant_select ON tax_rates;
+DROP POLICY IF EXISTS tax_rates_accountant_insert ON tax_rates;
+DROP POLICY IF EXISTS tax_rates_accountant_update ON tax_rates;
+DROP POLICY IF EXISTS tax_rates_pm_select ON tax_rates;
+DROP POLICY IF EXISTS tax_rates_hr_select ON tax_rates;
+DROP POLICY IF EXISTS fx_rates_ceo_all ON fx_rates;
+DROP POLICY IF EXISTS fx_rates_accountant_select ON fx_rates;
+DROP POLICY IF EXISTS fx_rates_accountant_insert ON fx_rates;
+DROP POLICY IF EXISTS fx_rates_accountant_update ON fx_rates;
+DROP POLICY IF EXISTS fx_rates_pm_select ON fx_rates;
+DROP POLICY IF EXISTS audit_log_ceo_select ON audit_log;
+DROP POLICY IF EXISTS audit_log_ceo_insert ON audit_log;
+DROP POLICY IF EXISTS audit_log_accountant_select ON audit_log;
+DROP POLICY IF EXISTS audit_log_accountant_insert ON audit_log;
+DROP POLICY IF EXISTS project_assignments_ceo_all ON project_assignments;
+DROP POLICY IF EXISTS project_assignments_accountant_select ON project_assignments;
+DROP POLICY IF EXISTS project_assignments_pm_select ON project_assignments;
 
 
 -- =============================================================================
