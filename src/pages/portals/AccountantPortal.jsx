@@ -1,6 +1,7 @@
 import { useAuth } from '../../context/AuthContext'
 import InvoiceList from '../../components/InvoiceList'
 import GeneralLedger from '../../components/GeneralLedger'
+import FinancialStatements from '../../components/FinancialStatements'
 
 export default function AccountantPortal() {
   const { profile, signOut } = useAuth()
@@ -29,6 +30,9 @@ export default function AccountantPortal() {
             <InvoiceList />
             <div className="mt-8">
               <GeneralLedger />
+            </div>
+            <div id="financial-statements" className="mt-8">
+              <FinancialStatements />
             </div>
           </div>
           <div>

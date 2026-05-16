@@ -1,6 +1,7 @@
 import { useAuth } from '../../context/AuthContext'
 import ApprovalQueue from '../../components/ApprovalQueue'
 import GeneralLedger from '../../components/GeneralLedger'
+import FinancialStatements from '../../components/FinancialStatements'
 
 export default function CeoPortal() {
   const { profile, signOut } = useAuth()
@@ -29,6 +30,9 @@ export default function CeoPortal() {
             <ApprovalQueue />
             <div className="mt-8">
               <GeneralLedger readOnly={true} />
+            </div>
+            <div id="financial-statements" className="mt-8">
+              <FinancialStatements />
             </div>
           </div>
           <div>
