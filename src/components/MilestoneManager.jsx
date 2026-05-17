@@ -15,7 +15,14 @@ const STATUS_LABELS = {
   invoiced: 'Invoiced',
 };
 
-export default function MilestoneManager({ userRole, userId, projectId = null, readOnly = false }) {
+export default function MilestoneManager({
+  userRole,
+  userId,
+  projectId = null,
+  readOnly = false,
+  hideProjectSelector = false,
+  inProgressOnly = false,
+}) {
   const [projects, setProjects] = useState([]);
   const [milestones, setMilestones] = useState([]);
   const [contract, setContract] = useState(null);
@@ -191,6 +198,9 @@ export default function MilestoneManager({ userRole, userId, projectId = null, r
   };
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
+  const visibleMilestones = inProgressOnly
+    ? milestones.filter((m) => m.status === 'in_progress')
+    : milestones;
 
   return (
     <div className="space-y-6">
@@ -218,27 +228,28 @@ export default function MilestoneManager({ userRole, userId, projectId = null, r
           </div>
         )}
 
-        {/* Project Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Select Project</label>
-          <select
-            value={selectedProjectId}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
-            disabled={loading}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-          >
-            <option value="">Choose a project</option>
-            {projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name} ({project.divisions?.name})
-              </option>
-            ))}
-          </select>
-        </div>
+        {!hideProjectSelector && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Select Project</label>
+            <select
+              value={selectedProjectId}
+              onChange={(e) => setSelectedProjectId(e.target.value)}
+              disabled={loading}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+            >
+              <option value="">Choose a project</option>
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name} ({project.divisions?.name})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Add Milestone Form */}
-      {showAddForm && !readOnly && (
+      {showAddForm && !readOnly && !inProgressOnly && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Milestone</h3>
           <form onSubmit={handleAddMilestone} className="space-y-4">
@@ -340,10 +351,10 @@ export default function MilestoneManager({ userRole, userId, projectId = null, r
         <div className="space-y-4">
           {loading ? (
             <div className="text-center py-8 text-gray-500">Loading milestones...</div>
-          ) : milestones.length === 0 ? (
+          ) : visibleMilestones.length === 0 ? (
             <div className="text-center py-8 text-gray-500">No milestones for this project</div>
           ) : (
-            milestones.map((milestone) => (
+            visibleMilestones.map((milestone) => (
               <div
                 key={milestone.id}
                 className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow"

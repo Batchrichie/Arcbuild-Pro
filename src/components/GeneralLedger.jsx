@@ -82,7 +82,7 @@ export default function GeneralLedger({ readOnly = false }) {
         </div>
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-3xl border border-white/10 bg-slate-950/70">
+      <div className="portal-table-scroll mt-4 rounded-3xl border border-white/10 bg-slate-950/70">
         <table className="w-full table-auto text-sm dark-table text-slate-200">
           <thead>
             <tr className="text-left text-slate-400">

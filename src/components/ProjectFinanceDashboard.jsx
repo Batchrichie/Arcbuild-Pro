@@ -4,7 +4,12 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 
 const COST_CATEGORIES = ['Materials', 'Labour', 'Subcontractors', 'Equipment Hire', 'Other']
 
-export default function ProjectFinanceDashboard({ userRole = 'accountant', currentUserProfileId = null }) {
+export default function ProjectFinanceDashboard({
+  userRole = 'accountant',
+  currentUserProfileId = null,
+  initialProjectId = null,
+  hideProjectSelector = false,
+}) {
   const [projects, setProjects] = useState([])
   const [selectedProject, setSelectedProject] = useState(null)
   const [finance, setFinance] = useState(null)
@@ -44,9 +49,11 @@ export default function ProjectFinanceDashboard({ userRole = 'accountant', curre
         if (err) throw err
         setProjects(data || [])
 
-        // Set default to most recently created
         if (data && data.length > 0) {
-          setSelectedProject(data[0].id)
+          const preferred = initialProjectId && data.some((p) => p.id === initialProjectId)
+            ? initialProjectId
+            : data[0].id
+          setSelectedProject(preferred)
         }
       } catch (err) {
         setError('Failed to load projects')
@@ -57,7 +64,7 @@ export default function ProjectFinanceDashboard({ userRole = 'accountant', curre
     }
 
     fetchProjects()
-  }, [userRole, currentUserProfileId])
+  }, [userRole, currentUserProfileId, initialProjectId])
 
   // Fetch finance data when project changes
   useEffect(() => {
@@ -193,21 +200,22 @@ export default function ProjectFinanceDashboard({ userRole = 'accountant', curre
         </div>
       )}
 
-      {/* Project Selector */}
-      <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
-        <label className="text-xs uppercase tracking-[0.16em] text-slate-400 block mb-3">Select Project</label>
-        <select
-          value={selectedProject || ''}
-          onChange={(e) => setSelectedProject(e.target.value)}
-          className="w-full px-4 py-3 rounded-2xl border border-white/20 bg-white/5 text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
-        >
-          {projects.map(p => (
-            <option key={p.id} value={p.id}>
-              {p.name} — {projects.find(x => x.id === p.id)?.division_name || 'N/A'}
-            </option>
-          ))}
-        </select>
-      </div>
+      {!hideProjectSelector && (
+        <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+          <label className="text-sm uppercase tracking-[0.16em] text-slate-400 block mb-3">Select Project</label>
+          <select
+            value={selectedProject || ''}
+            onChange={(e) => setSelectedProject(e.target.value)}
+            className="w-full min-touch px-4 py-3 rounded-2xl border border-white/20 bg-white/5 text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+          >
+            {projects.map(p => (
+              <option key={p.id} value={p.id}>
+                {p.name} — {projects.find(x => x.id === p.id)?.division_name || 'N/A'}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {finance && (
         <>

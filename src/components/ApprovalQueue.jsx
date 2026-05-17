@@ -184,14 +184,14 @@ export default function ApprovalQueue() {
           <table className="min-w-full dark-table text-sm text-slate-200">
             <thead>
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Invoice</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Client</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Project</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Division</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Amount</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Submitted By</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Submitted Date</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Actions</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Invoice</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Client</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Project</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Division</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Amount</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Submitted By</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Submitted Date</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -231,14 +231,14 @@ export default function ApprovalQueue() {
                         <button
                           type="button"
                           onClick={() => handleApprove(invoice)}
-                          className="rounded-full bg-(--color-success) px-3 py-1 text-xs font-semibold text-white hover:bg-[#17915c]"
+                          className="min-touch rounded-full bg-(--color-success) px-4 py-2 text-sm font-semibold text-white hover:bg-[#17915c]"
                         >
                           Approve
                         </button>
                         <button
                           type="button"
                           onClick={() => openRejectModal(invoice)}
-                          className="rounded-full bg-(--color-danger) px-3 py-1 text-xs font-semibold text-white hover:bg-[#c03e3a]"
+                          className="min-touch rounded-full bg-(--color-danger) px-4 py-2 text-sm font-semibold text-white hover:bg-[#c03e3a]"
                         >
                           Reject
                         </button>

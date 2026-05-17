@@ -89,7 +89,7 @@ export default function EmployeePortal() {
             </div>
 
             <div className="space-y-3 rounded-[1.75rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5">
-              <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Employee workspace</p>
+              <p className="portal-eyebrow uppercase tracking-[0.28em] text-slate-500">Employee workspace</p>
               <p className="text-3xl font-semibold text-white">Welcome{profile?.full_name ? `, ${profile.full_name}` : ''}.</p>
               <p className="text-sm leading-6 text-slate-400">Track your assignments, projects, and time allocation.</p>
             </div>
@@ -107,7 +107,7 @@ export default function EmployeePortal() {
               <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-5">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Employee</p>
+                    <p className="portal-eyebrow uppercase tracking-[0.2em] text-slate-500">Employee</p>
                     <p className="mt-2 font-semibold text-white">{profile?.full_name ?? 'Team member'}</p>
                     <p className="text-sm text-slate-400">{profile?.email ?? 'employee@arcbuild.com'}</p>
                   </div>
@@ -127,7 +127,7 @@ export default function EmployeePortal() {
             <section className="grid gap-4 sm:grid-cols-3">
               {stats.map((item) => (
                 <div key={item.label} className="kpi-card">
-                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{item.label}</p>
+                  <p className="portal-eyebrow uppercase tracking-[0.24em] text-slate-500">{item.label}</p>
                   <p className={`mt-4 text-3xl font-semibold ${item.highlight}`}>{item.value}</p>
                 </div>
               ))}

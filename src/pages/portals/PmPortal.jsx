@@ -1,211 +1,298 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabase'
+import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
-import ProjectCostLedger from '../../components/ProjectCostLedger'
+import { PmProjectProvider, usePmProject } from '../../context/PmProjectContext'
+import PmDashboard from '../../components/pm/PmDashboard'
+import SitePhotoUpload from '../../components/pm/SitePhotoUpload'
+import IssueLog from '../../components/pm/IssueLog'
+import DailyProgressReport from '../../components/pm/DailyProgressReport'
 import MilestoneManager from '../../components/MilestoneManager'
+import CostEntryForm from '../../components/CostEntryForm'
+import ProjectCostLedger from '../../components/ProjectCostLedger'
+import PaymentCertificateForm from '../../components/PaymentCertificateForm'
+import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
 
-export default function PmPortal() {
+const NAV_SECTIONS = [
+  {
+    title: 'MY PROJECTS',
+    items: [
+      { id: 'dashboard', label: 'Project Overview' },
+      { id: 'budget', label: 'Budget vs Actual' },
+    ],
+  },
+  {
+    title: 'MILESTONES',
+    items: [
+      { id: 'milestones', label: 'Milestone Tracker' },
+      { id: 'mark-complete', label: 'Mark Complete' },
+    ],
+  },
+  {
+    title: 'COSTS',
+    items: [
+      { id: 'log-cost', label: 'Log Cost' },
+      { id: 'cost-ledger', label: 'Cost Ledger' },
+    ],
+  },
+  {
+    title: 'SUBCONTRACTORS',
+    items: [{ id: 'payment-cert', label: 'Payment Certificates' }],
+  },
+  {
+    title: 'DOCUMENTS',
+    items: [
+      { id: 'site-photos', label: 'Site Photos' },
+      { id: 'reports', label: 'Reports' },
+      { id: 'issues', label: 'Issues & Risks' },
+    ],
+  },
+]
+
+const MOBILE_TABS = [
+  { id: 'overview', label: 'Overview', icon: '📊' },
+  { id: 'milestones', label: 'Milestones', icon: '🎯' },
+  { id: 'costs', label: 'Costs', icon: '💰' },
+  { id: 'site', label: 'Site', icon: '📷' },
+  { id: 'more', label: 'More', icon: '⋯' },
+]
+
+const VIEW_TITLES = {
+  dashboard: 'Project Overview',
+  budget: 'Budget vs Actual',
+  milestones: 'Milestone Tracker',
+  'mark-complete': 'Mark Complete',
+  'log-cost': 'Log Cost',
+  'cost-ledger': 'Cost Ledger',
+  'payment-cert': 'Payment Certificates',
+  'site-photos': 'Site Photos',
+  reports: 'Daily Reports',
+  issues: 'Issues & Risks',
+}
+
+function PmPortalContent() {
   const { profile, signOut } = useAuth()
-  const [projects, setProjects] = useState([])
-  const [metrics, setMetrics] = useState({
-    totalProjects: 0,
-    activeProjects: 0,
-    completedProjects: 0,
-    teamSize: 0,
-  })
-  const [loading, setLoading] = useState(true)
+  const { selectedProjectId } = usePmProject()
+  const [activeView, setActiveView] = useState('dashboard')
+  const [mobileTab, setMobileTab] = useState('overview')
+  const [moreOpen, setMoreOpen] = useState(false)
+  const [sheet, setSheet] = useState(null)
+  const [ledgerCategory, setLedgerCategory] = useState('')
 
-  useEffect(() => {
-    async function loadPmData() {
-      setLoading(true)
-      try {
-        const { data: projectData } = await supabase
-          .from('projects')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(20)
+  const navigate = (view) => {
+    setActiveView(view)
+    setMoreOpen(false)
+    setSheet(null)
+  }
 
-        setProjects(projectData ?? [])
-        setMetrics({
-          totalProjects: projectData?.length || 0,
-          activeProjects: projectData?.filter(p => p.status === 'active').length || 0,
-          completedProjects: projectData?.filter(p => p.status === 'completed').length || 0,
-          teamSize: projectData?.reduce((sum, p) => sum + (Number(p.team_size) || 0), 0) || 0,
-        })
-      } catch (error) {
-        console.warn('PM data load failed', error)
-      } finally {
-        setLoading(false)
-      }
+  const handleMobileTab = (tabId) => {
+    if (tabId === 'more') {
+      setMoreOpen(true)
+      return
     }
+    setMobileTab(tabId)
+    setMoreOpen(false)
+    const map = {
+      overview: 'dashboard',
+      milestones: 'milestones',
+      costs: 'log-cost',
+      site: 'site-photos',
+    }
+    if (map[tabId]) navigate(map[tabId])
+  }
 
-    loadPmData()
-  }, [])
-
-  const stats = [
-    {
-      label: 'Total Projects',
-      value: metrics.totalProjects,
-      highlight: 'text-sky-300',
-    },
-    {
-      label: 'Active Projects',
-      value: metrics.activeProjects,
-      highlight: 'text-cyan-300',
-    },
-    {
-      label: 'Completed',
-      value: metrics.completedProjects,
-      highlight: 'text-emerald-300',
-    },
-  ]
+  const renderView = () => {
+    switch (activeView) {
+      case 'dashboard':
+        return (
+          <PmDashboard
+            onLogCost={() => setSheet('cost')}
+            onMarkMilestone={() => navigate('mark-complete')}
+            onPaymentCert={() => navigate('payment-cert')}
+            onOpenCostLedger={(cat) => {
+              setLedgerCategory(cat)
+              navigate('cost-ledger')
+            }}
+          />
+        )
+      case 'budget':
+        return (
+          <ProjectFinanceDashboard
+            userRole="project_manager"
+            currentUserProfileId={profile?.id}
+            initialProjectId={selectedProjectId}
+            hideProjectSelector
+          />
+        )
+      case 'milestones':
+        return (
+          <MilestoneManager
+            userRole="project_manager"
+            userId={profile?.id}
+            projectId={selectedProjectId}
+            hideProjectSelector
+          />
+        )
+      case 'mark-complete':
+        return (
+          <MilestoneManager
+            userRole="project_manager"
+            userId={profile?.id}
+            projectId={selectedProjectId}
+            hideProjectSelector
+            inProgressOnly
+          />
+        )
+      case 'log-cost':
+        return <CostEntryForm userRole="project_manager" userId={profile?.id} defaultProjectId={selectedProjectId} />
+      case 'cost-ledger':
+        return (
+          <ProjectCostLedger
+            userRole="project_manager"
+            userId={profile?.id}
+            projectId={selectedProjectId}
+            initialCostType={ledgerCategory}
+            hideProjectSelector
+          />
+        )
+      case 'payment-cert':
+        return <PaymentCertificateForm userRole="project_manager" userId={profile?.id} />
+      case 'site-photos':
+        return <SitePhotoUpload />
+      case 'reports':
+        return <DailyProgressReport />
+      case 'issues':
+        return <IssueLog />
+      default:
+        return null
+    }
+  }
 
   return (
-    <div className="portal-shell">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="portal-sidebar rounded-4xl border border-white/10 p-6 shadow-2xl shadow-black/20">
-            <div className="mb-8">
-              <div className="inline-flex items-center gap-3 rounded-3xl bg-[rgba(34,211,238,0.12)] px-4 py-3 text-sm font-semibold text-cyan-200">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-500 text-slate-950">AB</span>
-                <span>ArcBuild Pro</span>
-              </div>
+    <div className="portal-shell overflow-x-hidden">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-8 lg:px-8">
+        <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+          <aside className="portal-sidebar hidden rounded-4xl border border-white/10 p-5 shadow-2xl lg:block">
+            <div className="mb-6 inline-flex items-center gap-3 rounded-3xl bg-cyan-500/15 px-4 py-3 text-sm font-semibold text-cyan-200">
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-500 text-slate-950">AB</span>
+              ArcBuild Pro
             </div>
+            <p className="portal-eyebrow text-slate-500">Project Manager</p>
+            <p className="mt-1 font-semibold text-white">{profile?.full_name}</p>
 
-            <div className="space-y-3 rounded-[1.75rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5">
-              <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Project Management</p>
-              <p className="text-3xl font-semibold text-white">Welcome{profile?.full_name ? `, ${profile.full_name}` : ''}.</p>
-              <p className="text-sm leading-6 text-slate-400">Oversee all projects, manage teams, and track milestones in real-time.</p>
-            </div>
-
-            <div className="mt-8 space-y-4">
-              <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-5">
-                <div className="text-sm uppercase tracking-[0.2em] text-slate-500">Quick access</div>
-                <div className="mt-4 space-y-3">
-                  <a href="#milestones" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-rose-400/30 hover:bg-[rgba(244,63,94,0.08)]">Milestones</a>
-                  <a href="#project-finance" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-purple-400/30 hover:bg-[rgba(168,85,247,0.08)]">Project finance</a>
-                  <a href="#cost-ledger" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-emerald-400/30 hover:bg-[rgba(16,185,129,0.08)]">Cost ledger</a>
-                  <a href="#projects" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-sky-400/30 hover:bg-[rgba(34,211,238,0.08)]">All projects</a>
-                  <a href="#overview" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-cyan-400/30 hover:bg-[rgba(34,211,238,0.08)]">Portfolio view</a>
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">PM</p>
-                    <p className="mt-2 font-semibold text-white">{profile?.full_name ?? 'Project Manager'}</p>
-                    <p className="text-sm text-slate-400">{profile?.email ?? 'pm@arcbuild.com'}</p>
+            <nav className="mt-6 max-h-[calc(100vh-14rem)] space-y-5 overflow-y-auto">
+              {NAV_SECTIONS.map((section) => (
+                <div key={section.title}>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-500">{section.title}</p>
+                  <div className="space-y-1">
+                    {section.items.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => navigate(item.id)}
+                        className={`min-touch w-full rounded-xl px-3 py-2.5 text-left text-sm ${
+                          activeView === item.id
+                            ? 'bg-cyan-500/15 text-cyan-100'
+                            : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
                   </div>
-                  <button
-                    type="button"
-                    onClick={signOut}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white transition hover:border-sky-400/40 hover:bg-[rgba(34,211,238,0.16)]"
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              </div>
-            </div>
-          </aside>
-
-          <main className="portal-main space-y-8">
-            <section className="grid gap-4 sm:grid-cols-3">
-              {stats.map((item) => (
-                <div key={item.label} className="kpi-card">
-                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{item.label}</p>
-                  <p className={`mt-4 text-3xl font-semibold ${item.highlight}`}>{item.value}</p>
                 </div>
               ))}
-            </section>
+            </nav>
+            <button type="button" onClick={signOut} className="min-touch mt-6 w-full rounded-full border border-white/10 py-3 text-sm text-slate-300">
+              Sign Out
+            </button>
+          </aside>
 
-            <section id="milestones" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Execution</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-white">Project Milestones</h2>
-                </div>
-              </div>
-              <MilestoneManager userRole="project_manager" userId={profile?.id} />
-            </section>
+          <main className="portal-main portal-main-with-tabs min-w-0 overflow-x-hidden pb-32 lg:pb-8">
+            <div className="mb-4 flex items-center justify-between lg:hidden">
+              <h1 className="text-xl font-semibold text-white">{VIEW_TITLES[activeView]}</h1>
+              <button type="button" onClick={signOut} className="text-sm text-slate-400">
+                Sign out
+              </button>
+            </div>
 
-            <section id="project-finance" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Financial Tracking</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-white">Project Finance Dashboard</h2>
-                </div>
+            {activeView !== 'dashboard' && (
+              <div className="mb-4 hidden lg:block">
+                <h2 className="text-2xl font-semibold text-white">{VIEW_TITLES[activeView]}</h2>
               </div>
-              <ProjectFinanceDashboard userRole="project_manager" currentUserProfileId={profile?.id} />
-            </section>
+            )}
 
-            <section id="cost-ledger" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Cost Tracking</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-white">Project Cost Ledger</h2>
-                </div>
-              </div>
-              <ProjectCostLedger userRole="project_manager" userId={profile?.id} />
-            </section>
-
-            <section id="projects" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-              <div className="mb-6">
-                <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Portfolio</p>
-                <h2 className="mt-2 text-2xl font-semibold text-white">Project Overview</h2>
-              </div>
-              {loading ? (
-                <div className="text-center text-slate-400">Loading projects...</div>
-              ) : projects.length === 0 ? (
-                <div className="text-center text-slate-400">No projects</div>
-              ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {projects.map((project) => (
-                    <div key={project.id} className="rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-white/20">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-white">{project.name}</h3>
-                          <p className="mt-2 text-sm text-slate-400">{project.description}</p>
-                        </div>
-                      </div>
-                      <div className="mt-4 flex items-center justify-between">
-                        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                          project.status === 'active' ? 'bg-sky-500/20 text-sky-300' :
-                          project.status === 'completed' ? 'bg-emerald-500/20 text-emerald-300' :
-                          'bg-slate-500/20 text-slate-300'
-                        }`}>
-                          {project.status}
-                        </span>
-                        <span className="text-sm text-slate-400">{project.team_size || 0} members</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-
-            <section id="overview" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-              <div className="mb-6">
-                <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Metrics</p>
-                <h2 className="mt-2 text-2xl font-semibold text-white">Portfolio Status</h2>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                  <p className="text-sm text-slate-400">Success rate</p>
-                  <p className="mt-2 text-3xl font-semibold text-emerald-300">
-                    {metrics.totalProjects > 0 ? Math.round((metrics.completedProjects / metrics.totalProjects) * 100) : 0}%
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                  <p className="text-sm text-slate-400">Total team capacity</p>
-                  <p className="mt-2 text-3xl font-semibold text-sky-300">{metrics.teamSize}</p>
-                </div>
-              </div>
-            </section>
+            <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">{renderView()}</div>
           </main>
         </div>
       </div>
+
+      <div className="portal-mobile-quick-actions lg:hidden">
+        <button type="button" onClick={() => setSheet('cost')} className="min-touch flex-1 rounded-full bg-cyan-500 py-3 text-sm font-bold text-slate-950">
+          Log a Cost
+        </button>
+        <button type="button" onClick={() => navigate('mark-complete')} className="min-touch flex-1 rounded-full border border-cyan-400/40 bg-cyan-500/15 py-3 text-sm font-semibold text-cyan-100">
+          Mark Complete
+        </button>
+      </div>
+
+      <nav className="portal-mobile-nav lg:hidden">
+        <div className="mx-auto flex max-w-lg justify-around">
+          {MOBILE_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => handleMobileTab(tab.id)}
+              className={`flex min-h-[2.75rem] flex-1 flex-col items-center justify-center py-2 text-xs font-medium ${
+                mobileTab === tab.id ? 'text-cyan-300' : 'text-slate-500'
+              }`}
+            >
+              <span className="text-base">{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {moreOpen && (
+        <>
+          <button type="button" className="portal-drawer-backdrop" onClick={() => setMoreOpen(false)} aria-label="Close" />
+          <div className="portal-drawer-sheet">
+            <h3 className="mb-3 text-lg font-semibold text-white">More</h3>
+            {[
+              { id: 'payment-cert', label: 'Payment Certificates' },
+              { id: 'reports', label: 'Daily Reports' },
+              { id: 'issues', label: 'Issues & Risks' },
+              { id: 'budget', label: 'Budget vs Actual' },
+            ].map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => navigate(item.id)}
+                className="min-touch mb-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-slate-200"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {sheet === 'cost' && (
+        <>
+          <button type="button" className="portal-drawer-backdrop" onClick={() => setSheet(null)} aria-label="Close" />
+          <div className="portal-bottom-sheet max-h-[85vh] overflow-y-auto">
+            <h3 className="mb-4 text-lg font-semibold text-white">Log a Cost</h3>
+            <CostEntryForm userRole="project_manager" userId={profile?.id} defaultProjectId={selectedProjectId} />
+          </div>
+        </>
+      )}
     </div>
+  )
+}
+
+export default function PmPortal() {
+  return (
+    <PmProjectProvider>
+      <PmPortalContent />
+    </PmProjectProvider>
   )
 }

@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
-export default function ProjectCostLedger({ userRole, userId, projectId = null }) {
+export default function ProjectCostLedger({ userRole, userId, projectId = null, initialCostType = '', hideProjectSelector = false }) {
   const [projects, setProjects] = useState([]);
   const [costs, setCosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedProjectId, setSelectedProjectId] = useState(projectId);
   const [filters, setFilters] = useState({
-    costType: '',
+    costType: initialCostType || '',
     dateFrom: '',
     dateTo: '',
   });
+
+  useEffect(() => {
+    if (projectId) setSelectedProjectId(projectId)
+  }, [projectId])
+
+  useEffect(() => {
+    if (initialCostType) setFilters((prev) => ({ ...prev, costType: initialCostType }))
+  }, [initialCostType])
 
   // Load projects on mount
   useEffect(() => {
@@ -171,23 +179,24 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null }
           </div>
         )}
 
-        {/* Project Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Select Project</label>
-          <select
-            value={selectedProjectId}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
-            disabled={loading}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-          >
-            <option value="">Choose a project</option>
-            {projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name} ({project.divisions?.name})
-              </option>
-            ))}
-          </select>
-        </div>
+        {!hideProjectSelector && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Select Project</label>
+            <select
+              value={selectedProjectId}
+              onChange={(e) => setSelectedProjectId(e.target.value)}
+              disabled={loading}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+            >
+              <option value="">Choose a project</option>
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name} ({project.divisions?.name})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Filters */}

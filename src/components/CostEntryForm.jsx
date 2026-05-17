@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 const COST_TYPES = ['Materials', 'Labour', 'Subcontractors', 'Equipment Hire', 'Other'];
 const CURRENCIES = ['GHS', 'USD', 'GBP', 'EUR'];
 
-export default function CostEntryForm({ userRole, userId }) {
+export default function CostEntryForm({ userRole, userId, defaultProjectId = null }) {
   const [projects, setProjects] = useState([]);
   const [subcontractors, setSubcontractors] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -14,7 +14,7 @@ export default function CostEntryForm({ userRole, userId }) {
   const [budgetWarning, setBudgetWarning] = useState(null);
 
   const [formData, setFormData] = useState({
-    projectId: '',
+    projectId: defaultProjectId || '',
     costType: '',
     description: '',
     amount: '',
@@ -23,6 +23,12 @@ export default function CostEntryForm({ userRole, userId }) {
     subcontractorId: '',
     receiptUrl: '',
   });
+
+  useEffect(() => {
+    if (defaultProjectId) {
+      setFormData((prev) => ({ ...prev, projectId: defaultProjectId }))
+    }
+  }, [defaultProjectId])
 
   // Load projects on mount
   useEffect(() => {
@@ -71,8 +77,7 @@ export default function CostEntryForm({ userRole, userId }) {
     try {
       const { data, error: err } = await supabase
         .from('subcontractors')
-        .select('id, name, status')
-        .eq('status', 'active')
+        .select('id, name')
         .order('name');
 
       if (err) throw err;

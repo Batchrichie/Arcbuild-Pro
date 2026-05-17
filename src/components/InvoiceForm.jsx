@@ -14,7 +14,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { TAX_RATES, Currency } from '../../../supabase/functions/_shared/tax-constants';
+import { TAX_RATES, Currency } from '../lib/tax-constants';
 
 export default function InvoiceForm({ onSave, initialData = null }) {
   // ===== State Management =====

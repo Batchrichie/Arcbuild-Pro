@@ -18,9 +18,9 @@ function fmt(amount) {
   return neg ? `(${abs})` : abs
 }
 
-export default function FinancialStatements() {
+export default function FinancialStatements({ defaultTab = 'income' }) {
   const today = new Date()
-  const [tab, setTab] = useState('income')
+  const [tab, setTab] = useState(defaultTab)
   const [startDate, setStartDate] = useState(startOfYear(today))
   const [endDate, setEndDate] = useState(endOfYear(today))
   const [asAtDate, setAsAtDate] = useState(new Date().toISOString().slice(0,10))

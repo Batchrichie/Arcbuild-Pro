@@ -58,7 +58,7 @@ export default function InvoiceList() {
       let query = supabase
         .from('invoices')
         .select(
-          `id,invoice_number,currency,gross_total_ghs,status,requires_approval,rejected_at,rejection_note,created_at,created_by, client:clients(name), project:projects(name), division:divisions(name)`
+          `id,invoice_number,currency,gross_total_ghs,status,requires_approval,rejected_at,rejection_note,created_at,due_date,created_by, client:clients(name), project:projects(name), division:divisions(name)`
         )
         .order('created_at', { ascending: false })
 
@@ -175,8 +175,41 @@ export default function InvoiceList() {
     window.alert(`Invoice ${invoice.invoice_number} details are not yet implemented.`)
   }
 
+  const overdueCount = useMemo(() => {
+    const today = new Date()
+    return invoices.filter((inv) => {
+      if (inv.status !== 'sent') return false
+      const ref = inv.due_date ? new Date(inv.due_date) : new Date(inv.created_at)
+      const days = Math.floor((today - ref) / (1000 * 60 * 60 * 24))
+      return days > 30
+    }).length
+  }, [invoices])
+
+  const handleSendReminders = () => {
+    window.alert(
+      `Reminder automation will be available in Phase 5. ${overdueCount} overdue invoice(s) identified.`
+    )
+  }
+
   return (
     <div className="space-y-6">
+      {overdueCount > 0 && (
+        <div
+          className="flex flex-col gap-3 rounded-2xl border border-red-400/30 bg-red-500/10 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+          role="alert"
+        >
+          <p className="text-sm font-medium text-red-200">
+            {overdueCount} sent invoice{overdueCount === 1 ? '' : 's'} more than 30 days past due date.
+          </p>
+          <button
+            type="button"
+            onClick={handleSendReminders}
+            className="min-touch shrink-0 rounded-full border border-red-400/40 bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 hover:bg-red-500/30"
+          >
+            Send Reminders
+          </button>
+        </div>
+      )}
       <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] px-6 py-6 shadow-xl shadow-black/10">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -240,7 +273,7 @@ export default function InvoiceList() {
       )}
 
       <div className="overflow-hidden rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-xl shadow-black/10">
-        <div className="overflow-x-auto">
+        <div className="portal-table-scroll">
           <table className="min-w-full dark-table text-sm text-slate-200">
             <thead>
               <tr>

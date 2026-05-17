@@ -159,3 +159,298 @@ button {
   margin-top: 0.5rem;
   color: var(--color-muted-strong);
 }
+
+/* Section labels in portals (Execution Tracking, Cost Tracking, etc.) */
+.portal-section-eyebrow {
+  color: var(--color-muted-strong);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+
+.portal-main section.rounded-4xl > div:first-child .text-slate-500,
+.portal-main div.rounded-4xl.border > div:first-child .text-slate-500 {
+  color: var(--color-muted-strong) !important;
+}
+
+/*
+ * Legacy widgets (MilestoneManager, ProjectCostLedger, etc.) ship with light-theme
+ * Tailwind classes. Remap them when embedded in portal section bodies.
+ */
+.portal-main section.rounded-4xl > *:not(:first-child),
+.portal-main div.rounded-4xl.border > *:not(:first-child) {
+  color: var(--color-text);
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-white,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-white {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: none !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-gray-50,
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-gray-100,
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-blue-50,
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-red-50,
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-green-50,
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-amber-50,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-gray-50,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-gray-100,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-blue-50,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-red-50,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-green-50,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-amber-50 {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) .text-gray-900,
+.portal-main section.rounded-4xl > *:not(:first-child) .text-gray-800,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .text-gray-900,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .text-gray-800 {
+  color: var(--color-text) !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) .text-gray-700,
+.portal-main section.rounded-4xl > *:not(:first-child) .text-gray-600,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .text-gray-700,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .text-gray-600 {
+  color: var(--color-muted-strong) !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) input,
+.portal-main section.rounded-4xl > *:not(:first-child) select,
+.portal-main section.rounded-4xl > *:not(:first-child) textarea,
+.portal-main div.rounded-4xl.border > *:not(:first-child) input,
+.portal-main div.rounded-4xl.border > *:not(:first-child) select,
+.portal-main div.rounded-4xl.border > *:not(:first-child) textarea {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: var(--color-text) !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) input:disabled,
+.portal-main section.rounded-4xl > *:not(:first-child) select:disabled,
+.portal-main div.rounded-4xl.border > *:not(:first-child) input:disabled,
+.portal-main div.rounded-4xl.border > *:not(:first-child) select:disabled {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--color-muted) !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) option,
+.portal-main div.rounded-4xl.border > *:not(:first-child) option {
+  background: #0f172a;
+  color: var(--color-text);
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) .border-gray-200,
+.portal-main section.rounded-4xl > *:not(:first-child) .border-gray-300,
+.portal-main section.rounded-4xl > *:not(:first-child) .border-blue-200,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .border-gray-200,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .border-gray-300,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .border-blue-200 {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) thead,
+.portal-main div.rounded-4xl.border > *:not(:first-child) thead {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) th,
+.portal-main div.rounded-4xl.border > *:not(:first-child) th {
+  color: var(--color-muted) !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) td,
+.portal-main div.rounded-4xl.border > *:not(:first-child) td {
+  color: var(--color-muted-strong) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-blue-100,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-blue-100 {
+  background: rgba(59, 130, 246, 0.2) !important;
+}
+.portal-main section.rounded-4xl > *:not(:first-child) .text-blue-800,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .text-blue-800 {
+  color: #93c5fd !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-green-100,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-green-100 {
+  background: rgba(16, 185, 129, 0.2) !important;
+}
+.portal-main section.rounded-4xl > *:not(:first-child) .text-green-800,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .text-green-800 {
+  color: #6ee7b7 !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-purple-100,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-purple-100 {
+  background: rgba(168, 85, 247, 0.2) !important;
+}
+.portal-main section.rounded-4xl > *:not(:first-child) .text-purple-800,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .text-purple-800 {
+  color: #d8b4fe !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-orange-100,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-orange-100 {
+  background: rgba(249, 115, 22, 0.2) !important;
+}
+.portal-main section.rounded-4xl > *:not(:first-child) .text-orange-800,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .text-orange-800 {
+  color: #fdba74 !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-gray-100,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-gray-100 {
+  background: rgba(148, 163, 184, 0.2) !important;
+}
+.portal-main section.rounded-4xl > *:not(:first-child) .text-gray-800,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .text-gray-800 {
+  color: #e2e8f0 !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-amber-100,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-amber-100 {
+  background: rgba(245, 158, 11, 0.2) !important;
+}
+.portal-main section.rounded-4xl > *:not(:first-child) .text-amber-800,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .text-amber-800 {
+  color: #fcd34d !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) .bg-red-50,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .bg-red-50 {
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+.portal-main section.rounded-4xl > *:not(:first-child) .text-red-700,
+.portal-main section.rounded-4xl > *:not(:first-child) .border-red-500,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .text-red-700 {
+  color: #fca5a5 !important;
+}
+
+.portal-main section.rounded-4xl > *:not(:first-child) .text-green-700,
+.portal-main div.rounded-4xl.border > *:not(:first-child) .text-green-700 {
+  color: #6ee7b7 !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Portal typography — minimum 14px labels, 16px body (boardroom + mobile)
+ * --------------------------------------------------------------------------- */
+.portal-shell {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.portal-shell .portal-eyebrow,
+.portal-shell .portal-sidebar .text-xs,
+.portal-shell .portal-kpi-label {
+  font-size: 0.875rem;
+}
+
+.portal-shell .portal-main th.text-xs,
+.portal-shell .dark-table th.text-xs {
+  font-size: 0.875rem;
+}
+
+.portal-shell .min-touch {
+  min-height: 2.75rem;
+}
+
+.portal-mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  background: rgba(7, 12, 19, 0.98);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+.portal-slide-over-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.portal-slide-over-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 70;
+  height: 100%;
+  width: min(100%, 42rem);
+  overflow-y: auto;
+  background: #0d131f;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 1023px) {
+  .portal-main-with-tabs {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0));
+  }
+}
+
+.portal-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+.portal-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.pm-milestone-scroll {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.portal-mobile-quick-actions {
+  position: fixed;
+  bottom: calc(4.5rem + env(safe-area-inset-bottom, 0));
+  left: 0;
+  right: 0;
+  z-index: 48;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(to top, rgba(9, 12, 18, 0.98), rgba(9, 12, 18, 0.85));
+}
+
+.portal-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 65;
+  border-radius: 1.5rem 1.5rem 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: #0d131f;
+  padding: 1.25rem 1rem calc(5.5rem + env(safe-area-inset-bottom, 0));
+}
+
+.portal-drawer-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 56;
+  max-height: 70vh;
+  overflow-y: auto;
+  border-radius: 1.5rem 1.5rem 0 0;
+  background: #0d131f;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 1.25rem 1rem calc(1.25rem + env(safe-area-inset-bottom, 0));
+}
