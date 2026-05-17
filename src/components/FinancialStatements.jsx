@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { PDFDownloadLink } from '@react-pdf/renderer'
+import FinancialStatementPdf from './pdf/FinancialStatementPdf'
 import { supabase } from '../lib/supabase'
 
 function startOfYear(date) {
@@ -113,6 +115,17 @@ export default function FinancialStatements({ defaultTab = 'income' }) {
     return { netProfit, depreciation, receivables, payables, investing, financing }
   }, [glRows, incomeAgg])
 
+  const pdfStatementProps = {
+    startDate,
+    endDate,
+    asAtDate,
+    division,
+    incomeAgg,
+    bsRows,
+    trialAgg,
+    cashFlow,
+  }
+
   function exportCsvForTrial() {
     const cols = ['account_code','account_name','total_debits','total_credits']
     const csv = [cols.join(',')]
@@ -152,7 +165,13 @@ export default function FinancialStatements({ defaultTab = 'income' }) {
                 </select>
               </div>
               <div className="ml-auto">
-                <button onClick={()=>window.print()} className="rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-300 transition hover:border-amber-400/50 hover:bg-amber-500/20">Export to PDF</button>
+                <PDFDownloadLink
+                  document={<FinancialStatementPdf statementType="income" {...pdfStatementProps} />}
+                  fileName={`income-statement-${startDate}-${endDate}.pdf`}
+                  className="rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-300 transition hover:border-amber-400/50 hover:bg-amber-500/20"
+                >
+                  {({ loading: pdfLoading }) => (pdfLoading ? 'Preparing PDF…' : 'Export to PDF')}
+                </PDFDownloadLink>
               </div>
             </div>
 
@@ -206,7 +225,13 @@ export default function FinancialStatements({ defaultTab = 'income' }) {
                 <input type="date" value={asAtDate} onChange={e=>setAsAtDate(e.target.value)} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-400/50 focus:bg-white/10 outline-none" />
               </div>
               <div className="ml-auto">
-                <button onClick={()=>window.print()} className="rounded-lg border border-blue-400/30 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-300 transition hover:border-blue-400/50 hover:bg-blue-500/20">Export to PDF</button>
+                <PDFDownloadLink
+                  document={<FinancialStatementPdf statementType="balance" {...pdfStatementProps} />}
+                  fileName={`balance-sheet-${asAtDate}.pdf`}
+                  className="rounded-lg border border-blue-400/30 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-300 transition hover:border-blue-400/50 hover:bg-blue-500/20"
+                >
+                  {({ loading: pdfLoading }) => (pdfLoading ? 'Preparing PDF…' : 'Export to PDF')}
+                </PDFDownloadLink>
               </div>
             </div>
 
@@ -316,7 +341,13 @@ export default function FinancialStatements({ defaultTab = 'income' }) {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="text-sm text-slate-400">Period: <span className="text-white font-semibold">{startDate} — {endDate}</span></div>
-              <button onClick={()=>window.print()} className="rounded-lg border border-green-400/30 bg-green-500/10 px-4 py-2 text-sm font-semibold text-green-300 transition hover:border-green-400/50 hover:bg-green-500/20">Export to PDF</button>
+              <PDFDownloadLink
+                document={<FinancialStatementPdf statementType="cash" {...pdfStatementProps} />}
+                fileName={`cash-flow-${startDate}-${endDate}.pdf`}
+                className="rounded-lg border border-green-400/30 bg-green-500/10 px-4 py-2 text-sm font-semibold text-green-300 transition hover:border-green-400/50 hover:bg-green-500/20"
+              >
+                {({ loading: pdfLoading }) => (pdfLoading ? 'Preparing PDF…' : 'Export to PDF')}
+              </PDFDownloadLink>
             </div>
 
             <div className="grid gap-6">

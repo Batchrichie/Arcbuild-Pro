@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import RecordPaymentModal from './RecordPaymentModal'
 import StatusBadge from './ui/StatusBadge'
+import InvoicePdfLink from './pdf/InvoicePdfLink'
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All statuses' },
@@ -352,6 +353,7 @@ export default function InvoiceList() {
                             Revise
                           </button>
                         )}
+                        <InvoicePdfLink invoiceId={invoice.id} filename={`invoice-${invoice.invoice_number}.pdf`} />
                         <button
                           type="button"
                           onClick={() => handleView(invoice)}

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import PaymentCertificatePdf from './pdf/PaymentCertificatePdf';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
@@ -152,11 +154,19 @@ export default function PaymentCertificateForm({ userRole, userId }) {
       if (err) throw err;
       if (!data.success) throw new Error(data.error);
 
+      const selectedSubcontractor = subcontractors.find((sub) => sub.id === formData.subcontractorId)
+      const selectedProject = projects.find((project) => project.id === formData.projectId)
+
       setSuccess({
         certificateNumber: data.certificate_number,
         netPayable: data.net_payable,
         whtDeducted: data.wht_deducted,
         grossGhs: data.gross_amount_ghs,
+        subcontractorName: selectedSubcontractor?.name,
+        subcontractorTin: selectedSubcontractor?.tin || selectedSubcontractor?.tax_id,
+        projectName: selectedProject?.name,
+        description: formData.description,
+        paymentDate: formData.paymentDate,
       });
 
       setFormData({
@@ -197,6 +207,15 @@ export default function PaymentCertificateForm({ userRole, userId }) {
               <span className="text-slate-400"> (WHT deducted: GHS {formatGhs(success.whtDeducted)})</span>
             )}
           </p>
+          <div className="mt-3">
+            <PDFDownloadLink
+              document={<PaymentCertificatePdf certificate={success} />}
+              fileName={`payment-certificate-${success.certificateNumber || 'certificate'}.pdf`}
+              className="inline-flex rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+            >
+              {({ loading: pdfLoading }) => (pdfLoading ? 'Preparing PDF…' : 'Download Certificate')}
+            </PDFDownloadLink>
+          </div>
         </div>
       )}
 

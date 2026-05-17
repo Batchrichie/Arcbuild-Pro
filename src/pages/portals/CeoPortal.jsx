@@ -10,13 +10,21 @@ import KpiStrip from '../../components/ceo/KpiStrip'
 import DivisionPerformanceCards from '../../components/ceo/DivisionPerformanceCards'
 import ProjectHealthTable from '../../components/ceo/ProjectHealthTable'
 import TaxDueAlerts from '../../components/ceo/TaxDueAlerts'
+import TaxCentre from '../../components/tax/TaxCentre'
 import IssueLog from '../../components/pm/IssueLog'
+import ManualJournalList from '../../components/accounting/ManualJournalList'
+import DebtorsLedger from '../../components/accounting/DebtorsLedger'
+import AlertLog from '../../components/alerts/AlertLog'
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'approvals', label: 'Approvals', icon: '✓' },
   { id: 'projects', label: 'Projects', icon: '📁' },
   { id: 'financials', label: 'Financials', icon: '💰' },
+  { id: 'journal-history', label: 'Journals', icon: '📒' },
+  { id: 'debtors-ledger', label: 'Debtors Ledger', icon: '📋' },
+  { id: 'alerts', label: 'Alerts', icon: '🚨' },
+  { id: 'tax-centre', label: 'Tax Centre', icon: '🏛️' },
   { id: 'reports', label: 'Reports', icon: '📈' },
 ]
 
@@ -231,7 +239,10 @@ export default function CeoPortal() {
   }, [])
 
   useEffect(() => {
-    loadDashboardData()
+    const initialize = async () => {
+      await loadDashboardData()
+    }
+    initialize()
   }, [loadDashboardData])
 
   return (
@@ -388,6 +399,33 @@ export default function CeoPortal() {
               <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="General ledger" subtitle="Read-only view" />
                 <GeneralLedger readOnly />
+              </section>
+            )}
+
+            {activeTab === 'journal-history' && (
+              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                <SectionHeader title="Journal history" subtitle="Manual journal postings" />
+                <ManualJournalList readOnly />
+              </section>
+            )}
+
+            {activeTab === 'debtors-ledger' && (
+              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                <SectionHeader title="Debtors Ledger" subtitle="Aged receivables" />
+                <DebtorsLedger readOnly />
+              </section>
+            )}
+
+            {activeTab === 'alerts' && (
+              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                <SectionHeader title="Alerts" subtitle="Smart Alert System log" />
+                <AlertLog readOnly />
+              </section>
+            )}
+
+            {activeTab === 'tax-centre' && (
+              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                <TaxCentre readOnly />
               </section>
             )}
 

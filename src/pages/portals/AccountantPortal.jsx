@@ -15,8 +15,12 @@ import AccountantDashboard from '../../components/accountant/AccountantDashboard
 import PayeSchedule from '../../components/accountant/PayeSchedule'
 import SsnitSchedule from '../../components/accountant/SsnitSchedule'
 import BankReconciliationStub from '../../components/accountant/BankReconciliationStub'
-import TaxOverview from '../../components/accountant/TaxOverview'
+import TaxCentre from '../../components/tax/TaxCentre'
 import JournalDrillDown from '../../components/accountant/JournalDrillDown'
+import ManualJournalForm from '../../components/accounting/ManualJournalForm'
+import ManualJournalList from '../../components/accounting/ManualJournalList'
+import DebtorsLedger from '../../components/accounting/DebtorsLedger'
+import AlertLog from '../../components/alerts/AlertLog'
 
 const NAV_SECTIONS = [
   {
@@ -28,9 +32,17 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    title: 'JOURNALS',
+    items: [
+      { id: 'new-journal', label: 'New Journal' },
+      { id: 'journal-history', label: 'Journal History' },
+    ],
+  },
+  {
     title: 'LEDGER & REPORTS',
     items: [
       { id: 'general-ledger', label: 'General Ledger' },
+      { id: 'debtors-ledger', label: 'Debtors Ledger' },
       { id: 'financial-statements', label: 'Financial Statements' },
       { id: 'trial-balance', label: 'Trial Balance' },
       { id: 'bank-reconciliation', label: 'Bank Reconciliation' },
@@ -54,8 +66,9 @@ const NAV_SECTIONS = [
   {
     title: 'TAX',
     items: [
-      { id: 'tax-overview', label: 'Tax Overview' },
+      { id: 'tax-centre', label: 'Tax Centre' },
       { id: 'fx-rates', label: 'FX Rates' },
+      { id: 'alert-log', label: 'Alerts' },
     ],
   },
   {
@@ -83,6 +96,7 @@ const MOBILE_SUB_NAV = {
   ],
   ledger: [
     { id: 'general-ledger', label: 'GL' },
+    { id: 'journal-history', label: 'Journals' },
     { id: 'financial-statements', label: 'Statements' },
     { id: 'trial-balance', label: 'Trial' },
     { id: 'bank-reconciliation', label: 'Bank' },
@@ -99,7 +113,8 @@ const MOBILE_SUB_NAV = {
 }
 
 const MORE_DRAWER_ITEMS = [
-  { id: 'tax-overview', label: 'Tax Overview', icon: '🏛️' },
+  { id: 'tax-centre', label: 'Tax Centre', icon: '🏛️' },
+  { id: 'alert-log', label: 'Alerts', icon: '🚨' },
   { id: 'asset-register', label: 'Asset Register', icon: '🏗️' },
   { id: 'subcontractors', label: 'Subcontractors', icon: '👷' },
   { id: 'fx-rates', label: 'FX Rates', icon: '💱' },
@@ -110,6 +125,9 @@ const VIEW_TITLES = {
   'invoice-list': 'Invoice List',
   'create-invoice': 'Create Invoice',
   'milestone-queue': 'Milestone Queue',
+  'new-journal': 'New Journal',
+  'journal-history': 'Journal History',
+  'debtors-ledger': 'Debtors Ledger',
   'general-ledger': 'General Ledger',
   'financial-statements': 'Financial Statements',
   'trial-balance': 'Trial Balance',
@@ -119,7 +137,8 @@ const VIEW_TITLES = {
   'ssnit-schedule': 'SSNIT Schedule',
   'project-finance': 'Project Finance',
   'cost-ledger': 'Cost Ledger',
-  'tax-overview': 'Tax Overview',
+  'tax-centre': 'Tax Centre',
+  'alert-log': 'Alerts',
   'fx-rates': 'FX Rates',
   'asset-register': 'Asset Register',
   subcontractors: 'Subcontractors',
@@ -137,7 +156,7 @@ function viewFromMobileTab(tab, currentView) {
 
 function mobileTabForView(view) {
   if (['invoice-list', 'create-invoice', 'milestone-queue'].includes(view)) return 'invoices'
-  if (['general-ledger', 'financial-statements', 'trial-balance', 'bank-reconciliation'].includes(view))
+  if (['general-ledger', 'journal-history', 'new-journal', 'financial-statements', 'trial-balance', 'bank-reconciliation'].includes(view))
     return 'ledger'
   if (['payroll-runs', 'paye-schedule', 'ssnit-schedule'].includes(view)) return 'payroll'
   if (['project-finance', 'cost-ledger'].includes(view)) return 'projects'
@@ -191,6 +210,14 @@ export default function AccountantPortal() {
         return <FinancialStatements defaultTab="trial" />
       case 'bank-reconciliation':
         return <BankReconciliationStub />
+      case 'new-journal':
+        return <ManualJournalForm />
+      case 'journal-history':
+        return <ManualJournalList />
+      case 'debtors-ledger':
+        return <DebtorsLedger readOnly={false} />
+      case 'alert-log':
+        return <AlertLog readOnly={false} />
       case 'payroll-runs':
         return (
           <div className="space-y-10">
@@ -213,8 +240,8 @@ export default function AccountantPortal() {
         return <ProjectFinanceDashboard userRole="accountant" currentUserProfileId={profile?.id} />
       case 'cost-ledger':
         return <ProjectCostLedger userRole="accountant" userId={profile?.id} />
-      case 'tax-overview':
-        return <TaxOverview />
+      case 'tax-centre':
+        return <TaxCentre />
       case 'fx-rates':
         return <FxRateManager />
       case 'asset-register':

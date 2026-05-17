@@ -2,12 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useClient } from '../../context/ClientContext'
 import { formatGhs, INVOICE_STATUS_STYLE } from '../../lib/client-utils'
+import InvoicePdfLink from '../pdf/InvoicePdfLink'
 
 export default function ClientInvoices() {
   const { clientId } = useClient()
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
-  const [toast, setToast] = useState(null)
 
   const load = useCallback(async () => {
     if (!clientId) return
@@ -29,11 +29,6 @@ export default function ClientInvoices() {
   const outstanding = rows
     .filter((r) => r.status === 'sent')
     .reduce((s, r) => s + Number(r.expected_receipt_ghs || r.gross_total_ghs || 0), 0)
-
-  const downloadPdf = () => {
-    setToast('PDF generation coming soon')
-    setTimeout(() => setToast(null), 3000)
-  }
 
   return (
     <div className="space-y-6">
@@ -81,9 +76,7 @@ export default function ClientInvoices() {
                   </td>
                   <td className="px-4 py-3 text-slate-600">{row.due_date ?? '—'}</td>
                   <td className="px-4 py-3">
-                    <button type="button" onClick={downloadPdf} className="text-sm font-medium text-teal-700 hover:text-teal-900">
-                      Download PDF
-                    </button>
+                    <InvoicePdfLink invoiceId={row.id} filename={`invoice-${row.invoice_number}.pdf`} />
                   </td>
                 </tr>
               ))}

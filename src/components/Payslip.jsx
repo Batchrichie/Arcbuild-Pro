@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import PayslipPdf from './pdf/PayslipPdf';
 import { supabase } from '../lib/supabase';
 
 export default function Payslip({ payrollLineId, employeeId, payrollRunId }) {
@@ -61,14 +63,14 @@ export default function Payslip({ payrollLineId, employeeId, payrollRunId }) {
       {/* Print Button */}
       <div className="p-4 border-b border-gray-200 flex justify-between items-center print:hidden">
         <h1 className="text-xl font-bold text-gray-900">Payslip</h1>
-        <button
-          onClick={() => window.print()}
+        <PDFDownloadLink
+          document={<PayslipPdf line={line} employee={employee} run={run} />}
+          fileName={`payslip-${employee.employee_number || line.id}.pdf`}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
         >
-          Print Payslip
-        </button>
+          {({ loading: pdfLoading }) => (pdfLoading ? 'Preparing PDF…' : 'Download Payslip')}
+        </PDFDownloadLink>
       </div>
-
       {/* Payslip Content */}
       <div className="p-8 print:p-0">
         {/* Header */}
