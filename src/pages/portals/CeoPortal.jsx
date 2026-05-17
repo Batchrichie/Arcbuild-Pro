@@ -4,6 +4,9 @@ import { useAuth } from '../../context/AuthContext'
 import ApprovalQueue from '../../components/ApprovalQueue'
 import GeneralLedger from '../../components/GeneralLedger'
 import FinancialStatements from '../../components/FinancialStatements'
+import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
+import ProjectCostLedger from '../../components/ProjectCostLedger'
+import MilestoneManager from '../../components/MilestoneManager'
 
 export default function CeoPortal() {
   const { profile, signOut } = useAuth()
@@ -13,13 +16,14 @@ export default function CeoPortal() {
     netProfit: 0,
     activeProjects: 0,
   })
+  const [payrollRuns, setPayrollRuns] = useState([])
   const [loadingMetrics, setLoadingMetrics] = useState(true)
 
   useEffect(() => {
     async function loadMetrics() {
       setLoadingMetrics(true)
       try {
-        const [{ data: revenueData }, { data: approvalData }, { data: projectData }] = await Promise.all([
+        const [{ data: revenueData }, { data: approvalData }, { data: projectData }, { data: payrollData }] = await Promise.all([
           supabase
             .from('invoices')
             .select('gross_total_ghs', { count: 'exact' })
@@ -32,6 +36,11 @@ export default function CeoPortal() {
             .from('projects')
             .select('id', { count: 'exact' })
             .eq('status', 'active'),
+          supabase
+            .from('payroll_runs')
+            .select('*')
+            .order('period_end', { ascending: false })
+            .limit(10),
         ])
 
         const revenue = (revenueData ?? []).reduce((sum, item) => sum + Number(item.gross_total_ghs || 0), 0)
@@ -44,6 +53,7 @@ export default function CeoPortal() {
           netProfit: Math.round(revenue * 0.25),
           activeProjects,
         })
+        setPayrollRuns(payrollData || [])
       } catch (error) {
         console.warn('CEO metrics load failed', error)
       } finally {
@@ -101,6 +111,10 @@ export default function CeoPortal() {
               <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-5">
                 <div className="text-sm uppercase tracking-[0.2em] text-slate-500">Quick actions</div>
                 <div className="mt-4 space-y-3">
+                  <a href="#milestones" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-rose-400/30 hover:bg-[rgba(244,63,94,0.08)]">Milestones</a>
+                  <a href="#project-finance" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-purple-400/30 hover:bg-[rgba(168,85,247,0.08)]">Project finance</a>
+                  <a href="#cost-ledger" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-emerald-400/30 hover:bg-[rgba(16,185,129,0.08)]">Cost ledger</a>
+                  <a href="#payroll" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-indigo-400/30 hover:bg-[rgba(99,102,241,0.08)]">Payroll</a>
                   <a href="#pending-approvals" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-amber-400/30 hover:bg-[rgba(245,166,35,0.08)]">Pending approvals</a>
                   <a href="#ledger" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-teal-400/30 hover:bg-[rgba(20,184,166,0.08)]">General ledger</a>
                   <a href="#financial-statements" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-blue-400/30 hover:bg-[rgba(56,138,221,0.08)]">Financial statements</a>
@@ -135,6 +149,100 @@ export default function CeoPortal() {
                   {item.suffix && <span className="text-sm text-slate-400">{item.suffix}</span>}
                 </div>
               ))}
+            </section>
+
+            <section id="milestones" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Execution Tracking</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Project Milestones</h2>
+                </div>
+              </div>
+              <MilestoneManager userRole="ceo" userId={profile?.id} readOnly={true} />
+            </section>
+
+            <section id="project-finance" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Financial Oversight</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Project Finance Dashboard</h2>
+                </div>
+              </div>
+              <ProjectFinanceDashboard userRole="ceo" currentUserProfileId={profile?.id} />
+            </section>
+
+            <section id="cost-ledger" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Cost Tracking</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Project Cost Ledger</h2>
+                </div>
+              </div>
+              <ProjectCostLedger userRole="ceo" userId={profile?.id} />
+            </section>
+
+            <section id="payroll" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">People Operations</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Payroll Summary</h2>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Period</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-400">Gross Pay</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-400">PAYE</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-400">SSNIT (Employee)</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-400">SSNIT (Employer)</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-400">Net Pay</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payrollRuns.length === 0 ? (
+                      <tr>
+                        <td colSpan="7" className="px-4 py-4 text-center text-sm text-slate-400">No payroll runs</td>
+                      </tr>
+                    ) : (
+                      payrollRuns.map((run) => (
+                        <tr key={run.id} className="border-b border-white/5 hover:bg-white/5">
+                          <td className="px-4 py-3 text-sm text-white">
+                            {new Date(run.period_start).toLocaleDateString('en-GH')} to{' '}
+                            {new Date(run.period_end).toLocaleDateString('en-GH')}
+                          </td>
+                          <td className="px-4 py-3 text-right text-sm text-slate-300">
+                            {(run.total_gross_pay || 0).toLocaleString('en-GH', { maximumFractionDigits: 2 })}
+                          </td>
+                          <td className="px-4 py-3 text-right text-sm text-slate-300">
+                            {(run.total_paye || 0).toLocaleString('en-GH', { maximumFractionDigits: 2 })}
+                          </td>
+                          <td className="px-4 py-3 text-right text-sm text-slate-300">
+                            {(run.total_ssnit_employee || 0).toLocaleString('en-GH', { maximumFractionDigits: 2 })}
+                          </td>
+                          <td className="px-4 py-3 text-right text-sm text-slate-300">
+                            {(run.total_ssnit_employer || 0).toLocaleString('en-GH', { maximumFractionDigits: 2 })}
+                          </td>
+                          <td className="px-4 py-3 text-right text-sm font-semibold text-teal-300">
+                            {(run.total_net_pay || 0).toLocaleString('en-GH', { maximumFractionDigits: 2 })}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            <span
+                              className={`rounded-full px-2 py-1 text-xs font-semibold ${
+                                run.status === 'posted' ? 'bg-green-500/20 text-green-300' : 'bg-amber-500/20 text-amber-300'
+                              }`}
+                            >
+                              {run.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </section>
 
             <div id="pending-approvals" className="space-y-6 rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">

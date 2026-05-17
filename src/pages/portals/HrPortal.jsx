@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import PayrollRunManager from '../../components/PayrollRunManager'
 
 export default function HrPortal() {
   const { profile, signOut } = useAuth()
   const [employees, setEmployees] = useState([])
+  const [activeSection, setActiveSection] = useState('dashboard')
   const [metrics, setMetrics] = useState({
     totalEmployees: 0,
     activeProjects: 0,
@@ -78,8 +80,9 @@ export default function HrPortal() {
               <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-5">
                 <div className="text-sm uppercase tracking-[0.2em] text-slate-500">Navigation</div>
                 <div className="mt-4 space-y-3">
-                  <a href="#directory" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-violet-400/30 hover:bg-[rgba(139,92,246,0.08)]">Employee directory</a>
-                  <a href="#metrics" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-purple-400/30 hover:bg-[rgba(147,51,234,0.08)]">Team metrics</a>
+                  <button onClick={() => setActiveSection('dashboard')} className="block w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-violet-400/30 hover:bg-[rgba(139,92,246,0.08)] text-left">Employee directory</button>
+                  <button onClick={() => setActiveSection('metrics')} className="block w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-purple-400/30 hover:bg-[rgba(147,51,234,0.08)] text-left">Team metrics</button>
+                  <button onClick={() => setActiveSection('payroll')} className="block w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-blue-400/30 hover:bg-[rgba(59,130,246,0.08)] text-left">Payroll Management</button>
                 </div>
               </div>
 
@@ -103,72 +106,84 @@ export default function HrPortal() {
           </aside>
 
           <main className="portal-main space-y-8">
-            <section className="grid gap-4 sm:grid-cols-3">
-              {stats.map((item) => (
-                <div key={item.label} className="kpi-card">
-                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{item.label}</p>
-                  <p className={`mt-4 text-3xl font-semibold ${item.highlight}`}>{item.value}</p>
-                </div>
-              ))}
-            </section>
+            {activeSection === 'dashboard' && (
+              <>
+                <section className="grid gap-4 sm:grid-cols-3">
+                  {stats.map((item) => (
+                    <div key={item.label} className="kpi-card">
+                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{item.label}</p>
+                      <p className={`mt-4 text-3xl font-semibold ${item.highlight}`}>{item.value}</p>
+                    </div>
+                  ))}
+                </section>
 
-            <section id="directory" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-              <div className="mb-6">
-                <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Team</p>
-                <h2 className="mt-2 text-2xl font-semibold text-white">Employee Directory</h2>
-              </div>
-              {loading ? (
-                <div className="text-center text-slate-400">Loading employees...</div>
-              ) : employees.length === 0 ? (
-                <div className="text-center text-slate-400">No employees</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-white/10">
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Name</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Email</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Role</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {employees.map((emp) => (
-                        <tr key={emp.id} className="border-b border-white/5 hover:bg-white/5">
-                          <td className="px-4 py-3 text-sm text-white">{emp.full_name}</td>
-                          <td className="px-4 py-3 text-sm text-slate-400">{emp.email}</td>
-                          <td className="px-4 py-3 text-sm text-slate-300 capitalize">{emp.role}</td>
-                          <td className="px-4 py-3 text-sm">
-                            <span className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                              emp.status === 'active' ? 'bg-green-500/20 text-green-300' : 'bg-slate-500/20 text-slate-300'
-                            }`}>
-                              {emp.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </section>
+                <section id="directory" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+                  <div className="mb-6">
+                    <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Team</p>
+                    <h2 className="mt-2 text-2xl font-semibold text-white">Employee Directory</h2>
+                  </div>
+                  {loading ? (
+                    <div className="text-center text-slate-400">Loading employees...</div>
+                  ) : employees.length === 0 ? (
+                    <div className="text-center text-slate-400">No employees</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-white/10">
+                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Name</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Email</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Role</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {employees.map((emp) => (
+                            <tr key={emp.id} className="border-b border-white/5 hover:bg-white/5">
+                              <td className="px-4 py-3 text-sm text-white">{emp.full_name}</td>
+                              <td className="px-4 py-3 text-sm text-slate-400">{emp.email}</td>
+                              <td className="px-4 py-3 text-sm text-slate-300 capitalize">{emp.role}</td>
+                              <td className="px-4 py-3 text-sm">
+                                <span className={`rounded-full px-2 py-1 text-xs font-semibold ${
+                                  emp.status === 'active' ? 'bg-green-500/20 text-green-300' : 'bg-slate-500/20 text-slate-300'
+                                }`}>
+                                  {emp.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </section>
+              </>
+            )}
 
-            <section id="metrics" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-              <div className="mb-6">
-                <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Analytics</p>
-                <h2 className="mt-2 text-2xl font-semibold text-white">Team Metrics</h2>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                  <p className="text-sm text-slate-400">Total headcount</p>
-                  <p className="mt-2 text-3xl font-semibold text-violet-300">{metrics.totalEmployees}</p>
+            {activeSection === 'metrics' && (
+              <section id="metrics" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+                <div className="mb-6">
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Analytics</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Team Metrics</h2>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                  <p className="text-sm text-slate-400">Team utilization</p>
-                  <p className="mt-2 text-3xl font-semibold text-purple-300">{metrics.averageUtilization}%</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                    <p className="text-sm text-slate-400">Total headcount</p>
+                    <p className="mt-2 text-3xl font-semibold text-violet-300">{metrics.totalEmployees}</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                    <p className="text-sm text-slate-400">Team utilization</p>
+                    <p className="mt-2 text-3xl font-semibold text-purple-300">{metrics.averageUtilization}%</p>
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            )}
+
+            {activeSection === 'payroll' && (
+              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+                <PayrollRunManager userRole="hr" userId={profile?.id} />
+              </section>
+            )}
           </main>
         </div>
       </div>

@@ -3,6 +3,12 @@ import InvoiceList from '../../components/InvoiceList'
 import GeneralLedger from '../../components/GeneralLedger'
 import FinancialStatements from '../../components/FinancialStatements'
 import FxRateManager from '../../components/FxRateManager'
+import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
+import CostEntryForm from '../../components/CostEntryForm'
+import ProjectCostLedger from '../../components/ProjectCostLedger'
+import MilestoneManager from '../../components/MilestoneManager'
+import MilestoneInvoiceQueue from '../../components/MilestoneInvoiceQueue'
+import PayrollRunManager from '../../components/PayrollRunManager'
 
 export default function AccountantPortal() {
   const { profile, signOut } = useAuth()
@@ -29,10 +35,16 @@ export default function AccountantPortal() {
               <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-5">
                 <div className="text-sm uppercase tracking-[0.2em] text-slate-500">Navigation</div>
                 <div className="mt-4 space-y-3">
+                  <a href="#milestones" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-rose-400/30 hover:bg-[rgba(244,63,94,0.08)]">Milestones</a>
+                  <a href="#invoice-queue" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-rose-400/30 hover:bg-[rgba(244,63,94,0.08)]">Invoice queue</a>
+                  <a href="#payroll" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-indigo-400/30 hover:bg-[rgba(99,102,241,0.08)]">Payroll Review</a>
+                  <a href="#project-finance" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-purple-400/30 hover:bg-[rgba(168,85,247,0.08)]">Project finance</a>
+                  <a href="#cost-entry" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-emerald-400/30 hover:bg-[rgba(16,185,129,0.08)]">Post cost</a>
+                  <a href="#cost-ledger" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-emerald-400/30 hover:bg-[rgba(16,185,129,0.08)]">Cost ledger</a>
                   <a href="#invoice-list" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-teal-400/30 hover:bg-[rgba(20,184,166,0.08)]">Invoice list</a>
                   <a href="#ledger" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-blue-400/30 hover:bg-[rgba(56,138,221,0.08)]">General ledger</a>
                   <a href="#financial-statements" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-amber-400/30 hover:bg-[rgba(245,166,35,0.08)]">Financial statements</a>
-                  <a href="#fx-rates" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-purple-400/30 hover:bg-[rgba(168,85,247,0.08)]">Exchange rates</a>
+                  <a href="#fx-rates" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-teal-400/40 hover:bg-[rgba(20,184,166,0.16)]">Exchange rates</a>
                 </div>
               </div>
 
@@ -55,6 +67,66 @@ export default function AccountantPortal() {
           </aside>
 
           <main className="portal-main space-y-8">
+            <section id="milestones" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Project Execution</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Milestones (View Only)</h2>
+                </div>
+              </div>
+              <MilestoneManager userRole="accountant" userId={profile?.id} readOnly={true} />
+            </section>
+
+            <section id="invoice-queue" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Invoicing</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Milestone Invoice Queue</h2>
+                </div>
+              </div>
+              <MilestoneInvoiceQueue userRole="accountant" userId={profile?.id} />
+            </section>
+
+            <section id="payroll" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Payroll Processing</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Monthly Payroll Review</h2>
+                </div>
+              </div>
+              <PayrollRunManager userRole="accountant" userId={profile?.id} readOnly={false} />
+            </section>
+
+            <section id="project-finance" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Financial Oversight</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Project Finance Dashboard</h2>
+                </div>
+              </div>
+              <ProjectFinanceDashboard userRole="accountant" currentUserProfileId={profile?.id} />
+            </section>
+
+            <section id="cost-entry" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Cost Management</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Post Project Cost</h2>
+                </div>
+              </div>
+              <CostEntryForm userRole="accountant" userId={profile?.id} />
+            </section>
+
+            <section id="cost-ledger" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Cost Tracking</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Project Cost Ledger</h2>
+                </div>
+              </div>
+              <ProjectCostLedger userRole="accountant" userId={profile?.id} />
+            </section>
+
             <section id="invoice-list" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>

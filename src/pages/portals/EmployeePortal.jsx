@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import Payslip from '../../components/Payslip'
 
 export default function EmployeePortal() {
   const { profile, signOut } = useAuth()
   const [assignments, setAssignments] = useState([])
+  const [payslips, setPayslips] = useState([])
+  const [selectedPayslip, setSelectedPayslip] = useState(null)
   const [metrics, setMetrics] = useState({
     activeAssignments: 0,
     completedTasks: 0,
@@ -28,6 +31,23 @@ export default function EmployeePortal() {
           completedTasks: assignmentData?.filter(a => a.status === 'completed').length || 0,
           hoursLogged: assignmentData?.reduce((sum, a) => sum + (Number(a.hours_allocated) || 0), 0) || 0,
         })
+
+        const { data: empData } = await supabase
+          .from('employees')
+          .select('id')
+          .eq('profile_id', profile?.id)
+          .single()
+
+        if (empData) {
+          const { data: payslipData } = await supabase
+            .from('payroll_lines')
+            .select('id, payroll_run_id, created_at')
+            .eq('employee_id', empData.id)
+            .order('created_at', { ascending: false })
+            .limit(12)
+
+          setPayslips(payslipData ?? [])
+        }
       } catch (error) {
         console.warn('Employee data load failed', error)
       } finally {
@@ -80,6 +100,7 @@ export default function EmployeePortal() {
                 <div className="mt-4 space-y-3">
                   <a href="#assignments" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-orange-400/30 hover:bg-[rgba(249,115,22,0.08)]">My assignments</a>
                   <a href="#overview" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-blue-400/30 hover:bg-[rgba(56,138,221,0.08)]">Overview</a>
+                  <a href="#payslips" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-green-400/30 hover:bg-[rgba(34,197,94,0.08)]">Payslips</a>
                 </div>
               </div>
 
@@ -160,6 +181,47 @@ export default function EmployeePortal() {
                 </div>
               </div>
             </section>
+
+            {selectedPayslip ? (
+              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+                <button
+                  onClick={() => setSelectedPayslip(null)}
+                  className="mb-4 text-sm text-blue-400 hover:text-blue-300 transition"
+                >
+                  ← Back to payslips list
+                </button>
+                <Payslip payrollLineId={selectedPayslip.id} />
+              </section>
+            ) : (
+              <section id="payslips" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+                <div className="mb-6">
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Compensation</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">My Payslips</h2>
+                </div>
+                {loading ? (
+                  <div className="text-center text-slate-400">Loading payslips...</div>
+                ) : payslips.length === 0 ? (
+                  <div className="text-center text-slate-400">No payslips yet</div>
+                ) : (
+                  <div className="space-y-3">
+                    {payslips.map((slip) => (
+                      <button
+                        key={slip.id}
+                        onClick={() => setSelectedPayslip(slip)}
+                        className="w-full text-left rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:bg-white/10 hover:border-green-400/30"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-white">
+                            Payslip from {new Date(slip.created_at).toLocaleDateString('en-GH')}
+                          </span>
+                          <span className="text-sm text-slate-400">View →</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
           </main>
         </div>
       </div>

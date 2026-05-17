@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
+import ProjectCostLedger from '../../components/ProjectCostLedger'
+import MilestoneManager from '../../components/MilestoneManager'
 
 export default function PmPortal() {
   const { profile, signOut } = useAuth()
@@ -80,6 +83,9 @@ export default function PmPortal() {
               <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-5">
                 <div className="text-sm uppercase tracking-[0.2em] text-slate-500">Quick access</div>
                 <div className="mt-4 space-y-3">
+                  <a href="#milestones" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-rose-400/30 hover:bg-[rgba(244,63,94,0.08)]">Milestones</a>
+                  <a href="#project-finance" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-purple-400/30 hover:bg-[rgba(168,85,247,0.08)]">Project finance</a>
+                  <a href="#cost-ledger" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-emerald-400/30 hover:bg-[rgba(16,185,129,0.08)]">Cost ledger</a>
                   <a href="#projects" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-sky-400/30 hover:bg-[rgba(34,211,238,0.08)]">All projects</a>
                   <a href="#overview" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-cyan-400/30 hover:bg-[rgba(34,211,238,0.08)]">Portfolio view</a>
                 </div>
@@ -112,6 +118,36 @@ export default function PmPortal() {
                   <p className={`mt-4 text-3xl font-semibold ${item.highlight}`}>{item.value}</p>
                 </div>
               ))}
+            </section>
+
+            <section id="milestones" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Execution</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Project Milestones</h2>
+                </div>
+              </div>
+              <MilestoneManager userRole="project_manager" userId={profile?.id} />
+            </section>
+
+            <section id="project-finance" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Financial Tracking</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Project Finance Dashboard</h2>
+                </div>
+              </div>
+              <ProjectFinanceDashboard userRole="project_manager" currentUserProfileId={profile?.id} />
+            </section>
+
+            <section id="cost-ledger" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Cost Tracking</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Project Cost Ledger</h2>
+                </div>
+              </div>
+              <ProjectCostLedger userRole="project_manager" userId={profile?.id} />
             </section>
 
             <section id="projects" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
