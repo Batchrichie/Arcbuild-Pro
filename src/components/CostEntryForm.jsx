@@ -208,18 +208,18 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
   const selectedProject = projects.find((p) => p.id === formData.projectId);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 max-w-2xl">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900">Post Project Cost</h2>
+    <div className="rounded-4xl border border-white/10 bg-slate-950 p-6 max-w-2xl">
+      <h2 className="text-2xl font-semibold mb-6 text-white">Post Project Cost</h2>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+        <div className="mb-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-rose-100">
           <p className="font-semibold">Error</p>
           <p>{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="mb-4 p-4 bg-green-50 border-l-4 border-green-500 text-green-700">
+        <div className="mb-4 rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-emerald-100">
           <p className="font-semibold">Success</p>
           <p>{success}</p>
         </div>
@@ -227,12 +227,12 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
 
       {budgetWarning && (
         <div
-          className={`mb-4 p-4 rounded-lg ${
+          className={`mb-4 rounded-3xl p-4 ${
             budgetWarning.status === 'over_budget'
-              ? 'bg-red-50 border-l-4 border-red-500 text-red-700'
+              ? 'border border-rose-500/20 bg-rose-500/10 text-rose-100'
               : budgetWarning.status === 'at_risk'
-              ? 'bg-amber-50 border-l-4 border-amber-500 text-amber-700'
-              : 'bg-blue-50 border-l-4 border-blue-500 text-blue-700'
+              ? 'border border-amber-500/20 bg-amber-500/10 text-amber-100'
+              : 'border border-cyan-500/20 bg-cyan-500/10 text-cyan-100'
           }`}
         >
           <p className="font-semibold">Budget {budgetWarning.status.replace('_', ' ').toUpperCase()}</p>
@@ -249,8 +249,8 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Project Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Project <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-slate-400 mb-2">
+            Project <span className="text-rose-400">*</span>
           </label>
           <select
             name="projectId"
@@ -258,7 +258,7 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
             onChange={handleInputChange}
             required
             disabled={loading}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:bg-slate-800"
           >
             <option value="">Select a project</option>
             {projects.map((project) => (
@@ -279,7 +279,7 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
             value={formData.costType}
             onChange={handleInputChange}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
             <option value="">Select cost type</option>
             {COST_TYPES.map((type) => (
@@ -315,8 +315,8 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-slate-400 mb-2">
+            Description <span className="text-rose-400">*</span>
           </label>
           <textarea
             name="description"
@@ -325,7 +325,7 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
             required
             rows="3"
             placeholder="Enter cost description"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           />
         </div>
 
@@ -391,9 +391,9 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
 
         {/* Project Info (display only) */}
         {selectedProject && (
-          <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-            <p className="text-sm text-gray-600">
-              <span className="font-semibold">Division:</span> {selectedProject.divisions?.name}
+          <div className="rounded-2xl border border-white/10 bg-slate-900 p-3">
+            <p className="text-sm text-slate-300">
+              <span className="font-semibold text-white">Division:</span> {selectedProject.divisions?.name}
             </p>
           </div>
         )}
@@ -402,7 +402,7 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
         <button
           type="submit"
           disabled={submitting || loading}
-          className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+          className="w-full rounded-2xl bg-cyan-500 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:bg-slate-700"
         >
           {submitting ? 'Posting...' : 'Post Cost'}
         </button>

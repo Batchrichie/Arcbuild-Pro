@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { COMPANY } from '../../lib/company-config'
+import logo from '../../assets/ModuloDevLogo.png'
 import InvoiceList from '../../components/InvoiceList'
 import InvoiceForm from '../../components/InvoiceForm'
 import GeneralLedger from '../../components/GeneralLedger'
@@ -14,12 +16,14 @@ import AssetRegister from '../../components/AssetRegister'
 import AccountantDashboard from '../../components/accountant/AccountantDashboard'
 import PayeSchedule from '../../components/accountant/PayeSchedule'
 import SsnitSchedule from '../../components/accountant/SsnitSchedule'
-import BankReconciliationStub from '../../components/accountant/BankReconciliationStub'
 import TaxCentre from '../../components/tax/TaxCentre'
 import JournalDrillDown from '../../components/accountant/JournalDrillDown'
 import ManualJournalForm from '../../components/accounting/ManualJournalForm'
 import ManualJournalList from '../../components/accounting/ManualJournalList'
 import DebtorsLedger from '../../components/accounting/DebtorsLedger'
+import BankAccountRegistry from '../../components/banking/BankAccountRegistry'
+import BankStatementImport from '../../components/banking/BankStatementImport'
+import ReconciliationWorkspace from '../../components/banking/ReconciliationWorkspace'
 import AlertLog from '../../components/alerts/AlertLog'
 
 const NAV_SECTIONS = [
@@ -45,6 +49,8 @@ const NAV_SECTIONS = [
       { id: 'debtors-ledger', label: 'Debtors Ledger' },
       { id: 'financial-statements', label: 'Financial Statements' },
       { id: 'trial-balance', label: 'Trial Balance' },
+      { id: 'bank-accounts', label: 'Bank Accounts' },
+      { id: 'import-statement', label: 'Import Statement' },
       { id: 'bank-reconciliation', label: 'Bank Reconciliation' },
     ],
   },
@@ -99,6 +105,8 @@ const MOBILE_SUB_NAV = {
     { id: 'journal-history', label: 'Journals' },
     { id: 'financial-statements', label: 'Statements' },
     { id: 'trial-balance', label: 'Trial' },
+    { id: 'bank-accounts', label: 'Bank accounts' },
+    { id: 'import-statement', label: 'Import' },
     { id: 'bank-reconciliation', label: 'Bank' },
   ],
   payroll: [
@@ -131,6 +139,8 @@ const VIEW_TITLES = {
   'general-ledger': 'General Ledger',
   'financial-statements': 'Financial Statements',
   'trial-balance': 'Trial Balance',
+  'bank-accounts': 'Bank Accounts',
+  'import-statement': 'Import Statement',
   'bank-reconciliation': 'Bank Reconciliation',
   'payroll-runs': 'Payroll Runs',
   'paye-schedule': 'PAYE Schedule',
@@ -156,7 +166,7 @@ function viewFromMobileTab(tab, currentView) {
 
 function mobileTabForView(view) {
   if (['invoice-list', 'create-invoice', 'milestone-queue'].includes(view)) return 'invoices'
-  if (['general-ledger', 'journal-history', 'new-journal', 'financial-statements', 'trial-balance', 'bank-reconciliation'].includes(view))
+  if (['general-ledger', 'journal-history', 'new-journal', 'financial-statements', 'trial-balance', 'bank-accounts', 'import-statement', 'bank-reconciliation'].includes(view))
     return 'ledger'
   if (['payroll-runs', 'paye-schedule', 'ssnit-schedule'].includes(view)) return 'payroll'
   if (['project-finance', 'cost-ledger'].includes(view)) return 'projects'
@@ -170,6 +180,7 @@ export default function AccountantPortal() {
   const [mobileTab, setMobileTab] = useState('invoices')
   const [moreOpen, setMoreOpen] = useState(false)
   const [journalDrillId, setJournalDrillId] = useState(null)
+  const [journalDraft, setJournalDraft] = useState(null)
 
   const navigate = (viewId) => {
     setActiveView(viewId)
@@ -208,10 +219,22 @@ export default function AccountantPortal() {
         return <FinancialStatements />
       case 'trial-balance':
         return <FinancialStatements defaultTab="trial" />
+      case 'bank-accounts':
+        return <BankAccountRegistry />
+      case 'import-statement':
+        return <BankStatementImport />
       case 'bank-reconciliation':
-        return <BankReconciliationStub />
+        return <ReconciliationWorkspace onCreateJournal={(draft) => {
+          setJournalDraft(draft)
+          navigate('new-journal')
+        }} />
       case 'new-journal':
-        return <ManualJournalForm />
+        return <ManualJournalForm
+          initialDescription={journalDraft?.description}
+          initialReference={journalDraft?.reference}
+          initialJournalDate={journalDraft?.journalDate}
+          initialLines={journalDraft?.lines || []}
+        />
       case 'journal-history':
         return <ManualJournalList />
       case 'debtors-ledger':
@@ -262,8 +285,8 @@ export default function AccountantPortal() {
           <aside className="portal-sidebar hidden rounded-4xl border border-white/10 p-5 shadow-2xl shadow-black/20 lg:block">
             <div className="mb-6">
               <div className="inline-flex items-center gap-3 rounded-3xl bg-[rgba(20,184,166,0.12)] px-4 py-3 text-sm font-semibold text-teal-200">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-500 text-slate-950">AB</span>
-                <span>ArcBuild Pro</span>
+                <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
+                <span>{COMPANY.shortName}</span>
               </div>
             </div>
 
@@ -369,7 +392,7 @@ export default function AccountantPortal() {
               key={tab.id}
               type="button"
               onClick={() => handleMobileTab(tab.id)}
-              className={`flex min-h-[2.75rem] min-w-[3rem] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium ${
+              className={`flex min-h-11 min-w-12 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium ${
                 mobileTab === tab.id || (tab.id === 'more' && moreOpen) ? 'text-teal-300' : 'text-slate-500'
               }`}
             >

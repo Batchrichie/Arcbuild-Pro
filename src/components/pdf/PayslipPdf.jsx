@@ -1,5 +1,7 @@
-import { Document, Page, Text, View } from '@react-pdf/renderer'
+import { Document, Page, Text, View, Image } from '@react-pdf/renderer'
 import { pdfStyles, colors } from './PdfTheme'
+import { COMPANY } from '../../lib/company-config'
+import logo from '../../assets/ModuloDevLogo.png'
 
 function formatCurrency(value) {
   const amount = Number(value || 0)
@@ -36,12 +38,15 @@ export default function PayslipPdf({ line, employee, run }) {
     <Document>
       <Page style={pdfStyles.page}>
         <View style={pdfStyles.headerBar}>
-          <Text style={pdfStyles.companyName}>ARCBUILD PRO</Text>
-          <Text style={pdfStyles.companyTagline}>PAYSLIP — CONFIDENTIAL</Text>
-        </View>
-
-        <View style={pdfStyles.sectionRow}>
-          <Text style={pdfStyles.sectionTitle}>Employee Details</Text>
+          <View style={pdfStyles.headerBar}>
+            <View style={pdfStyles.headerTop}>
+              <Image src={logo} style={pdfStyles.logoImage} />
+              <View style={pdfStyles.headerTextGroup}>
+                <Text style={pdfStyles.companyName}>{COMPANY.name}</Text>
+                <Text style={pdfStyles.companyTagline}>PAYSLIP — CONFIDENTIAL</Text>
+              </View>
+            </View>
+          </View>
           <Text style={pdfStyles.label}>Name</Text>
           <Text style={pdfStyles.value}>{employeeName}</Text>
           <Text style={pdfStyles.label}>Employee Number</Text>
@@ -129,7 +134,7 @@ export default function PayslipPdf({ line, employee, run }) {
           <Text style={{ fontSize: 14, fontWeight: 'bold', color: colors.amber }}>{formatCurrency(netPay)}</Text>
         </View>
 
-        <Text style={pdfStyles.footer}>This is a computer-generated payslip. ARCBUILD PRO.</Text>
+        <Text style={pdfStyles.footer}>This is a computer-generated payslip — {COMPANY.name}.</Text>
       </Page>
     </Document>
   )

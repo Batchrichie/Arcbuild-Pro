@@ -1,5 +1,7 @@
-import { Document, Page, Text, View } from '@react-pdf/renderer'
+import { Document, Page, Text, View, Image } from '@react-pdf/renderer'
 import { pdfStyles, colors } from './PdfTheme'
+import { COMPANY } from '../../lib/company-config'
+import logo from '../../assets/ModuloDevLogo.png'
 
 function formatGhs(value) {
   const amount = Number(value || 0)
@@ -11,8 +13,13 @@ export default function PaymentCertificatePdf({ certificate }) {
     <Document>
       <Page style={pdfStyles.page}>
         <View style={pdfStyles.headerBar}>
-          <Text style={pdfStyles.companyName}>ARCBUILD PRO</Text>
-          <Text style={pdfStyles.companyTagline}>PAYMENT CERTIFICATE</Text>
+          <View style={pdfStyles.headerTop}>
+            <Image src={logo} style={pdfStyles.logoImage} />
+            <View style={pdfStyles.headerTextGroup}>
+              <Text style={pdfStyles.companyName}>{COMPANY.name}</Text>
+              <Text style={pdfStyles.companyTagline}>PAYMENT CERTIFICATE</Text>
+            </View>
+          </View>
         </View>
 
         <View style={pdfStyles.sectionRow}>
@@ -65,18 +72,18 @@ export default function PaymentCertificatePdf({ certificate }) {
 
         <View style={pdfStyles.sectionRow}>
           <Text style={pdfStyles.value}>
-            Payment certified by ARCBUILD PRO for works completed as described.
+            Payment certified by {COMPANY.name} for works completed as described.
           </Text>
         </View>
 
         <View style={[pdfStyles.sectionRow, { marginTop: 24 }]}> 
           <Text style={pdfStyles.label}>Authorised by</Text>
-          <Text style={pdfStyles.value}>ARCBUILD PRO Finance</Text>
+          <Text style={pdfStyles.value}>{COMPANY.shortName} Finance</Text>
           <Text style={pdfStyles.label}>Date</Text>
           <Text style={pdfStyles.value}>{new Date().toLocaleDateString('en-GH')}</Text>
         </View>
 
-        <Text style={pdfStyles.footer}>This is a computer-generated payment certificate — ARCBUILD PRO.</Text>
+        <Text style={pdfStyles.footer}>This is a computer-generated payment certificate — {COMPANY.name}.</Text>
       </Page>
     </Document>
   )

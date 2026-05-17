@@ -1,5 +1,7 @@
-import { Document, Page, Text, View } from '@react-pdf/renderer'
+import { Document, Page, Text, View, Image } from '@react-pdf/renderer'
 import { pdfStyles, colors } from './PdfTheme'
+import { COMPANY } from '../../lib/company-config'
+import logo from '../../assets/ModuloDevLogo.png'
 
 function fmtCurrency(value) {
   const amount = Number(value || 0)
@@ -163,14 +165,19 @@ export default function FinancialStatementPdf({ statementType, startDate, endDat
     <Document>
       <Page style={pdfStyles.page}>
         <View style={pdfStyles.headerBar}>
-          <Text style={pdfStyles.companyName}>ARCBUILD PRO</Text>
-          <Text style={pdfStyles.companyTagline}>Financial Statement</Text>
+          <View style={pdfStyles.headerTop}>
+            <Image src={logo} style={pdfStyles.logoImage} />
+            <View style={pdfStyles.headerTextGroup}>
+              <Text style={pdfStyles.companyName}>{COMPANY.name}</Text>
+              <Text style={pdfStyles.companyTagline}>Financial Statement</Text>
+            </View>
+          </View>
         </View>
         {statementType === 'income' && renderIncome()}
         {statementType === 'balance' && renderBalance()}
         {statementType === 'trial' && renderTrial()}
         {statementType === 'cash' && renderCash()}
-        <Text style={pdfStyles.footer}>This is a computer-generated financial statement — ARCBUILD PRO.</Text>
+        <Text style={pdfStyles.footer}>This is a computer-generated financial statement — {COMPANY.name}.</Text>
       </Page>
     </Document>
   )

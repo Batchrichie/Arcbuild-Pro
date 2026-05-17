@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { ClientProvider, useClient } from '../../context/ClientContext'
+import { COMPANY } from '../../lib/company-config'
+import logo from '../../assets/ModuloDevLogo.png'
 import ClientProjects from '../../components/client/ClientProjects'
 import ClientInvoices from '../../components/client/ClientInvoices'
 import ClientDocuments from '../../components/client/ClientDocuments'
@@ -41,12 +43,10 @@ function ClientPortalContent() {
     <div className="client-portal min-h-screen bg-slate-50 text-slate-900">
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-700 text-sm font-bold text-white">
-              AB
-            </span>
+            <div className="flex items-center gap-3">
+            <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-xl object-cover" />
             <div className="hidden sm:block">
-              <p className="text-sm font-bold text-slate-900">ArcBuild Pro</p>
+              <p className="text-sm font-bold text-slate-900">{COMPANY.shortName}</p>
               <p className="text-xs text-slate-500">Client portal</p>
             </div>
           </div>

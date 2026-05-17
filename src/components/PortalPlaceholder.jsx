@@ -3,6 +3,8 @@
  * Temporary component used by all 6 portal routes.
  * Will be replaced with full portal UI in Phase 4.
  */
+import { COMPANY } from '../lib/company-config'
+
 export function PortalPlaceholder({ label, profile, signOut, navigate, color }) {
   const colors = {
     amber:   'border-amber-500 text-amber-500',
@@ -26,7 +28,7 @@ export function PortalPlaceholder({ label, profile, signOut, navigate, color }) 
           style={{ backgroundColor: 'currentColor' }}
         />
         <p className="text-stone-600 text-xs tracking-[0.25em] uppercase mb-2">
-          ArcBuild Pro
+          {COMPANY.shortName}
         </p>
         <h1 className={`text-4xl font-black tracking-tight mb-2 ${accent.split(' ')[1]}`}>
           {label}

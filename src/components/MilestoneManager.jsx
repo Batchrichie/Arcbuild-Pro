@@ -205,16 +205,16 @@ export default function MilestoneManager({
   return (
     <div className="space-y-6">
       {/* Header & Project Selector */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="rounded-4xl border border-white/10 bg-slate-950 p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Milestone Manager</h2>
-            <p className="text-sm text-gray-600 mt-1">Track project milestones and trigger billing</p>
+            <h2 className="text-2xl font-semibold text-white">Milestone Manager</h2>
+            <p className="text-sm text-slate-400 mt-1">Track project milestones and trigger billing</p>
           </div>
           {!readOnly && (userRole === 'project_manager' || userRole === 'accountant') && (
             <button
               onClick={() => setShowAddForm(!showAddForm)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="min-touch rounded-2xl bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
             >
               {showAddForm ? 'Cancel' : '+ Add Milestone'}
             </button>
@@ -222,7 +222,7 @@ export default function MilestoneManager({
         </div>
 
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+          <div className="mb-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-rose-100">
             <p className="font-semibold">Error</p>
             <p>{error}</p>
           </div>
@@ -230,12 +230,12 @@ export default function MilestoneManager({
 
         {!hideProjectSelector && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Select Project</label>
+            <label className="block text-sm font-medium text-slate-400 mb-2">Select Project</label>
             <select
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
               disabled={loading}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+              className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:bg-slate-800"
             >
               <option value="">Choose a project</option>
               {projects.map((project) => (
@@ -250,12 +250,12 @@ export default function MilestoneManager({
 
       {/* Add Milestone Form */}
       {showAddForm && !readOnly && !inProgressOnly && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Milestone</h3>
+        <div className="rounded-4xl border border-white/10 bg-slate-950 p-6">
+          <h3 className="text-lg font-semibold text-white mb-4">Add New Milestone</h3>
           <form onSubmit={handleAddMilestone} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Title *</label>
                 <input
                   type="text"
                   value={addFormData.title}
@@ -263,23 +263,23 @@ export default function MilestoneManager({
                     setAddFormData((prev) => ({ ...prev, title: e.target.value }))
                   }
                   placeholder="e.g., Foundation Complete"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Due Date *</label>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Due Date *</label>
                 <input
                   type="date"
                   value={addFormData.dueDate}
                   onChange={(e) =>
                     setAddFormData((prev) => ({ ...prev, dueDate: e.target.value }))
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label className="block text-sm font-medium text-slate-400 mb-1">Description</label>
               <textarea
                 value={addFormData.description}
                 onChange={(e) =>
@@ -287,12 +287,12 @@ export default function MilestoneManager({
                 }
                 placeholder="Milestone description..."
                 rows="2"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-400 mb-1">
                   Percentage Complete (%) *
                 </label>
                 <input
@@ -304,11 +304,11 @@ export default function MilestoneManager({
                     setAddFormData((prev) => ({ ...prev, percentageComplete: e.target.value }))
                   }
                   placeholder="0-100"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-400 mb-1">
                   Billing Amount Override (GHS) (Optional)
                 </label>
                 <input
@@ -327,17 +327,17 @@ export default function MilestoneManager({
                 />
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-3">
               <button
                 type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="min-touch rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
               >
                 Add Milestone
               </button>
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+                className="min-touch rounded-2xl border border-white/10 bg-slate-900 px-5 py-3 text-sm font-medium text-slate-200 hover:bg-slate-900/80"
               >
                 Cancel
               </button>
@@ -352,18 +352,18 @@ export default function MilestoneManager({
           {loading ? (
             <div className="text-center py-8 text-gray-500">Loading milestones...</div>
           ) : visibleMilestones.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No milestones for this project</div>
+            <div className="text-center py-8 text-slate-400">No milestones for this project</div>
           ) : (
             visibleMilestones.map((milestone) => (
               <div
                 key={milestone.id}
-                className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow"
+                className="rounded-4xl border border-white/10 bg-slate-950 p-6 shadow-sm transition-shadow hover:border-cyan-400/30"
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Left: Title & Description */}
                   <div className="md:col-span-1">
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{milestone.title}</h3>
+                      <h3 className="text-lg font-semibold text-white">{milestone.title}</h3>
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
                           STATUS_COLORS[milestone.status]
@@ -373,9 +373,9 @@ export default function MilestoneManager({
                       </span>
                     </div>
                     {milestone.description && (
-                      <p className="text-sm text-gray-600 mb-3">{milestone.description}</p>
+                      <p className="text-sm text-slate-300 mb-3">{milestone.description}</p>
                     )}
-                    <div className="text-xs text-gray-500 space-y-1">
+                    <div className="text-xs text-slate-400 space-y-1">
                       <p>
                         <span className="font-semibold">Due:</span>{' '}
                         {new Date(milestone.due_date).toLocaleDateString('en-GH')}
@@ -395,14 +395,14 @@ export default function MilestoneManager({
                       {/* Completion Percentage */}
                       <div>
                         <div className="flex justify-between items-center mb-1">
-                          <label className="text-sm font-medium text-gray-700">Completion</label>
-                          <span className="text-sm font-semibold text-gray-900">
+                          <label className="text-sm font-medium text-slate-400">Completion</label>
+                          <span className="text-sm font-semibold text-white">
                             {milestone.percentage_complete}%
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-slate-800 rounded-full h-2">
                           <div
-                            className="bg-blue-600 h-2 rounded-full transition-all"
+                            className="bg-cyan-500 h-2 rounded-full transition-all"
                             style={{ width: `${milestone.percentage_complete}%` }}
                           />
                         </div>

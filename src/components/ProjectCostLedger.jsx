@@ -169,11 +169,11 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Project Cost Ledger</h2>
+      <div className="rounded-4xl border border-white/10 bg-slate-950 p-6">
+        <h2 className="text-2xl font-semibold text-white mb-4">Project Cost Ledger</h2>
 
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+          <div className="mb-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-rose-100">
             <p className="font-semibold">Error</p>
             <p>{error}</p>
           </div>
@@ -181,12 +181,12 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
 
         {!hideProjectSelector && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Select Project</label>
+            <label className="block text-sm font-medium text-slate-400 mb-2">Select Project</label>
             <select
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
               disabled={loading}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+              className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:bg-slate-800"
             >
               <option value="">Choose a project</option>
               {projects.map((project) => (
@@ -201,16 +201,16 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
 
       {/* Filters */}
       {selectedProjectId && (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
+        <div className="rounded-4xl border border-white/10 bg-slate-950 p-6">
+          <h3 className="text-lg font-semibold text-white mb-4">Filters</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Cost Type</label>
+              <label className="block text-sm font-medium text-slate-400 mb-2">Cost Type</label>
               <select
                 name="costType"
                 value={filters.costType}
                 onChange={handleFilterChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
               >
                 <option value="">All Types</option>
                 <option value="Materials">Materials</option>
@@ -227,17 +227,17 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
                 name="dateFrom"
                 value={filters.dateFrom}
                 onChange={handleFilterChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">To Date</label>
+              <label className="block text-sm font-medium text-slate-400 mb-2">To Date</label>
               <input
                 type="date"
                 name="dateTo"
                 value={filters.dateTo}
                 onChange={handleFilterChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
             </div>
           </div>
@@ -248,16 +248,16 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
       {selectedProjectId && !loading && costs.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
           {[
-            { label: 'Materials', value: totals.materials, color: 'bg-blue-50' },
-            { label: 'Labour', value: totals.labour, color: 'bg-green-50' },
-            { label: 'Subcontractors', value: totals.subcontractors, color: 'bg-purple-50' },
-            { label: 'Equipment', value: totals.equipment, color: 'bg-orange-50' },
-            { label: 'Other', value: totals.other, color: 'bg-gray-50' },
-            { label: 'Total', value: grandTotal, color: 'bg-teal-50 col-span-2 md:col-span-1' },
+            { label: 'Materials', value: totals.materials, color: 'bg-slate-900 border-white/10 text-cyan-100' },
+            { label: 'Labour', value: totals.labour, color: 'bg-slate-900 border-white/10 text-emerald-100' },
+            { label: 'Subcontractors', value: totals.subcontractors, color: 'bg-slate-900 border-white/10 text-violet-100' },
+            { label: 'Equipment', value: totals.equipment, color: 'bg-slate-900 border-white/10 text-orange-200' },
+            { label: 'Other', value: totals.other, color: 'bg-slate-900 border-white/10 text-slate-200' },
+            { label: 'Total', value: grandTotal, color: 'bg-slate-900 border-white/10 text-cyan-100 col-span-2 md:col-span-1' },
           ].map((item) => (
-            <div key={item.label} className={`${item.color} rounded-lg p-4 border border-gray-200`}>
-              <p className="text-xs font-semibold text-gray-600 uppercase">{item.label}</p>
-              <p className="text-lg font-bold text-gray-900">
+            <div key={item.label} className={`rounded-2xl border p-4 ${item.color}`}>
+              <p className="text-xs font-semibold uppercase text-slate-400">{item.label}</p>
+              <p className="text-lg font-bold">
                 GHS {item.value.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
@@ -267,38 +267,38 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
 
       {/* Costs Table */}
       {selectedProjectId && (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="rounded-4xl border border-white/10 bg-slate-950 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-100 border-b border-gray-200">
+              <thead className="bg-slate-900/80 border-b border-white/10">
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Description</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Reference</th>
-                  <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Amount (Orig.)</th>
-                  <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Amount (GHS)</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Posted By</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">Date</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">Type</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">Description</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">Reference</th>
+                  <th className="px-6 py-3 text-right text-sm font-semibold text-slate-300">Amount (Orig.)</th>
+                  <th className="px-6 py-3 text-right text-sm font-semibold text-slate-300">Amount (GHS)</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">Posted By</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="8" className="px-6 py-4 text-center text-slate-400">
                       Loading costs...
                     </td>
                   </tr>
                 ) : costs.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="8" className="px-6 py-4 text-center text-slate-400">
                       No costs found for this project
                     </td>
                   </tr>
                 ) : (
                   costs.map((cost) => (
-                    <tr key={cost.id} className="border-b border-gray-200 hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm text-gray-700">
+                    <tr key={cost.id} className="border-b border-white/10 hover:bg-slate-900/70">
+                      <td className="px-6 py-4 text-sm text-slate-300">
                         {new Date(cost.date_incurred).toLocaleDateString('en-GH')}
                       </td>
                       <td className="px-6 py-4 text-sm">
@@ -306,31 +306,31 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
                           {cost.cost_type}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate">{cost.description}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="px-6 py-4 text-sm text-slate-300 max-w-xs truncate">{cost.description}</td>
+                      <td className="px-6 py-4 text-sm text-slate-400">
                         <div className="text-xs">
-                          <p className="font-mono">{getAccountCodeLabel(cost.account_code)}</p>
-                          <p className="text-gray-500">JE: {cost.journal_entry_id.substring(0, 8)}</p>
+                          <p className="font-mono text-slate-300">{getAccountCodeLabel(cost.account_code)}</p>
+                          <p className="text-slate-500">JE: {cost.journal_entry_id.substring(0, 8)}</p>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-right text-gray-700">
+                      <td className="px-6 py-4 text-sm text-right text-slate-300">
                         {cost.currency} {cost.amount.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
-                      <td className="px-6 py-4 text-sm text-right font-semibold text-gray-900">
+                      <td className="px-6 py-4 text-sm text-right font-semibold text-white">
                         GHS{' '}
                         {cost.amount_ghs.toLocaleString('en-GH', {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{cost.profiles?.full_name || 'Unknown'}</td>
+                      <td className="px-6 py-4 text-sm text-slate-300">{cost.profiles?.full_name || 'Unknown'}</td>
                       <td className="px-6 py-4 text-sm">
                         {cost.receipt_url ? (
-                          <a href={cost.receipt_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">
+                          <a href={cost.receipt_url} target="_blank" rel="noopener noreferrer" className="text-cyan-300 hover:text-cyan-100 underline">
                             Receipt
                           </a>
                         ) : (
-                          <span className="text-gray-400">—</span>
+                          <span className="text-slate-500">—</span>
                         )}
                       </td>
                     </tr>
@@ -342,11 +342,11 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
 
           {/* Table Footer with Grand Total */}
           {costs.length > 0 && (
-            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+            <div className="bg-slate-900/80 px-6 py-4 border-t border-white/10">
               <div className="flex justify-end items-center space-x-8">
                 <div>
-                  <p className="text-sm text-gray-600">Grand Total (GHS)</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm text-slate-400">Grand Total (GHS)</p>
+                  <p className="text-2xl font-bold text-white">
                     {grandTotal.toLocaleString('en-GH', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,

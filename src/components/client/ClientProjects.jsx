@@ -113,7 +113,7 @@ export default function ClientProjects({ selectedProjectId, onSelectProject }) {
   }
 
   if (!clientId) {
-    return <p className="text-slate-600">Your account is not linked to a client record. Contact ARCBUILD PRO.</p>
+    return <p className="text-slate-600">Your account is not linked to a client record. Contact Modulo Development Limited.</p>
   }
 
   if (!selectedProjectId && projects.length > 1) {

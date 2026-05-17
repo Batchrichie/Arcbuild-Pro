@@ -1,5 +1,7 @@
-import { Document, Page, Text, View } from '@react-pdf/renderer'
+import { Document, Page, Text, View, Image } from '@react-pdf/renderer'
 import { pdfStyles, colors } from './PdfTheme'
+import { COMPANY } from '../../lib/company-config'
+import logo from '../../assets/ModuloDevLogo.png'
 
 function formatGhs(value) {
   const amount = Number(value || 0)
@@ -17,10 +19,14 @@ function formatDate(value) {
 
 export default function InvoicePdf({ invoice, lineItems = [], client = {} }) {
   const subtotal = lineItems.reduce((sum, item) => sum + Number(item.quantity || 0) * Number(item.unit_price || 0), 0)
-  const vat = subtotal * 0.15
-  const nhil = subtotal * 0.025
-  const getfund = subtotal * 0.025
-  const grossTotal = subtotal + vat + nhil + getfund
+  const discountRate = Number(invoice?.discount_rate ?? invoice?.discount_percent ?? 0)
+  const discountAmount = Number(invoice?.discount_amount ?? (subtotal * discountRate) / 100)
+  const subtotalAfterDiscount = subtotal - discountAmount
+  const nhil = subtotalAfterDiscount * 0.025
+  const getfund = subtotalAfterDiscount * 0.025
+  const taxableAmount = subtotalAfterDiscount + nhil + getfund
+  const vat = taxableAmount * 0.15
+  const grossTotal = subtotalAfterDiscount + nhil + getfund + vat
   const whtDeduction = Number(invoice?.expected_receipt_ghs) ? Math.max(0, grossTotal - Number(invoice.expected_receipt_ghs)) : 0
   const expectedReceipt = Number(invoice?.expected_receipt_ghs) || grossTotal - whtDeduction
 
@@ -28,8 +34,13 @@ export default function InvoicePdf({ invoice, lineItems = [], client = {} }) {
     <Document>
       <Page style={pdfStyles.page}>
         <View style={pdfStyles.headerBar}>
-          <Text style={pdfStyles.companyName}>ARCBUILD PRO</Text>
-          <Text style={pdfStyles.companyTagline}>Invoice Document</Text>
+          <View style={pdfStyles.headerTop}>
+            <Image src={logo} style={pdfStyles.logoImage} />
+            <View style={pdfStyles.headerTextGroup}>
+              <Text style={pdfStyles.companyName}>{COMPANY.name}</Text>
+              <Text style={pdfStyles.companyTagline}>INVOICE</Text>
+            </View>
+          </View>
         </View>
 
         <View style={pdfStyles.sectionRow}>
@@ -64,11 +75,11 @@ export default function InvoicePdf({ invoice, lineItems = [], client = {} }) {
 
         <View style={pdfStyles.sectionRow}>
           <Text style={pdfStyles.sectionTitle}>From</Text>
-          <Text style={pdfStyles.label}>ARCBUILD PRO</Text>
-          <Text style={pdfStyles.value}>24A Accra Avenue, Accra, Ghana</Text>
-          <Text style={pdfStyles.value}>TIN: 123-456-789</Text>
-          <Text style={pdfStyles.value}>Email: finance@arcbuildpro.com</Text>
-          <Text style={pdfStyles.value}>Phone: +233 24 000 0000</Text>
+          <Text style={pdfStyles.label}>{COMPANY.name}</Text>
+          <Text style={pdfStyles.value}>{COMPANY.address}</Text>
+          <Text style={pdfStyles.value}>{COMPANY.city}</Text>
+          <Text style={pdfStyles.value}>Email: {COMPANY.email}</Text>
+          <Text style={pdfStyles.value}>Phone: {COMPANY.phone}</Text>
         </View>
 
         <View style={pdfStyles.sectionRow}>
@@ -105,16 +116,28 @@ export default function InvoicePdf({ invoice, lineItems = [], client = {} }) {
               <Text style={pdfStyles.amountCell}>{formatGhs(subtotal)}</Text>
             </View>
             <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}>
-              <Text style={pdfStyles.tableCell}>VAT (15%)</Text>
-              <Text style={pdfStyles.amountCell}>{formatGhs(vat)}</Text>
+              <Text style={pdfStyles.tableCell}>Discount</Text>
+              <Text style={pdfStyles.amountCell}>{formatGhs(discountAmount)}</Text>
             </View>
-            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}>
+            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}> 
+              <Text style={pdfStyles.tableCell}>Subtotal after discount</Text>
+              <Text style={pdfStyles.amountCell}>{formatGhs(subtotalAfterDiscount)}</Text>
+            </View>
+            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}> 
               <Text style={pdfStyles.tableCell}>NHIL (2.5%)</Text>
               <Text style={pdfStyles.amountCell}>{formatGhs(nhil)}</Text>
             </View>
-            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}>
+            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}> 
               <Text style={pdfStyles.tableCell}>GetFUND (2.5%)</Text>
               <Text style={pdfStyles.amountCell}>{formatGhs(getfund)}</Text>
+            </View>
+            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}> 
+              <Text style={pdfStyles.tableCell}>Taxable Amount</Text>
+              <Text style={pdfStyles.amountCell}>{formatGhs(taxableAmount)}</Text>
+            </View>
+            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}> 
+              <Text style={pdfStyles.tableCell}>VAT (15%)</Text>
+              <Text style={pdfStyles.amountCell}>{formatGhs(vat)}</Text>
             </View>
             <View style={pdfStyles.totalRow}>
               <Text style={pdfStyles.tableCell}>Gross Total</Text>
@@ -135,12 +158,12 @@ export default function InvoicePdf({ invoice, lineItems = [], client = {} }) {
           <Text style={pdfStyles.sectionTitle}>Payment Terms</Text>
           <Text style={pdfStyles.value}>Payment is due within 30 days of the invoice date. Please remit payment to the account below.</Text>
           <Text style={pdfStyles.value}>Bank: Ghana Commercial Bank</Text>
-          <Text style={pdfStyles.value}>Account Name: ARCBUILD PRO</Text>
+          <Text style={pdfStyles.value}>Account Name: {COMPANY.shortName}</Text>
           <Text style={pdfStyles.value}>Account Number: 1234567890</Text>
           <Text style={pdfStyles.value}>Branch: Accra Main Branch</Text>
         </View>
 
-        <Text style={pdfStyles.footer}>This is a computer-generated invoice — ARCBUILD PRO</Text>
+        <Text style={pdfStyles.footer}>This is a computer-generated invoice — {COMPANY.name}</Text>
       </Page>
     </Document>
   )

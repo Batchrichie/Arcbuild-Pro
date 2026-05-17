@@ -30,7 +30,7 @@ export function AuthProvider({ children }) {
       setUser(session.user)
       const profileData = await fetchProfile(session.user.id)
       setProfile(profileData)
-      setRole(profileData?.role ?? null)
+      setRole(profileData?.role ? String(profileData.role).toLowerCase() : null)
     } else {
       setUser(null)
       setProfile(null)

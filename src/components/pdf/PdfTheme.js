@@ -9,12 +9,13 @@ Font.register({
 })
 
 export const colors = {
-  amber: '#F59E0B',
-  dark: '#0F1117',
-  surface: '#1A1D27',
-  textPrimary: '#1F2937',
+  amber: '#F4BF4D',
+  navy: '#0B1730',
+  dark: '#111827',
+  surface: '#1F2937',
+  textPrimary: '#0F172A',
   textSecondary: '#6B7280',
-  border: '#E5E7EB',
+  border: '#CBD5E1',
   green: '#10B981',
   red: '#EF4444',
   white: '#FFFFFF',
@@ -29,20 +30,49 @@ export const pdfStyles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   headerBar: {
-    backgroundColor: colors.dark,
+    backgroundColor: colors.navy,
     padding: 20,
     marginBottom: 24,
     borderRadius: 4,
   },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  logoPlaceholder: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    backgroundColor: colors.amber,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  logoPlaceholderText: {
+    color: colors.dark,
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  logoImage: {
+    width: 44,
+    height: 44,
+    marginRight: 14,
+    objectFit: 'contain',
+  },
+  headerTextGroup: {
+    flex: 1,
+  },
   companyName: {
     color: colors.amber,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   companyTagline: {
     color: colors.white,
-    fontSize: 8,
-    marginTop: 2,
+    fontSize: 9,
+    marginTop: 4,
   },
   sectionTitle: {
     fontSize: 11,
@@ -53,7 +83,7 @@ export const pdfStyles = StyleSheet.create({
     borderBottom: `1px solid ${colors.border}`,
   },
   sectionRow: {
-    marginBottom: 8,
+    marginBottom: 10,
   },
   label: {
     fontSize: 9,
@@ -75,13 +105,13 @@ export const pdfStyles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: colors.dark,
+    backgroundColor: colors.amber,
     paddingVertical: 8,
     paddingHorizontal: 4,
     marginBottom: 2,
   },
   tableHeaderCell: {
-    color: colors.white,
+    color: colors.dark,
     fontSize: 8,
     fontWeight: 'bold',
     flex: 1,
@@ -99,7 +129,7 @@ export const pdfStyles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: 8,
     paddingHorizontal: 4,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#F8FAFC',
     fontWeight: 'bold',
   },
   footer: {

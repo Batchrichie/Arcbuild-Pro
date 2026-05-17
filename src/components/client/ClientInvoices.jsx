@@ -32,12 +32,6 @@ export default function ClientInvoices() {
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900" role="status">
-          {toast}
-        </div>
-      )}
-
       <div className="client-card border-teal-100 bg-teal-50/50">
         <p className="text-xs font-semibold uppercase tracking-wider text-teal-800">Outstanding balance</p>
         <p className="mt-2 text-3xl font-semibold text-slate-900">{loading ? '—' : formatGhs(outstanding)}</p>

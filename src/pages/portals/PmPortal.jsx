@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { COMPANY } from '../../lib/company-config'
+import logo from '../../assets/ModuloDevLogo.png'
 import { PmProjectProvider, usePmProject } from '../../context/PmProjectContext'
 import PmDashboard from '../../components/pm/PmDashboard'
 import SitePhotoUpload from '../../components/pm/SitePhotoUpload'
@@ -68,6 +70,25 @@ const VIEW_TITLES = {
   issues: 'Issues & Risks',
 }
 
+function viewFromMobileTab(tab, currentView) {
+  const map = {
+    overview: 'dashboard',
+    milestones: 'milestones',
+    costs: 'log-cost',
+    site: 'site-photos',
+  }
+  return map[tab] || currentView
+}
+
+function mobileTabForView(view) {
+  if (['dashboard', 'budget'].includes(view)) return 'overview'
+  if (['milestones', 'mark-complete'].includes(view)) return 'milestones'
+  if (['log-cost', 'cost-ledger'].includes(view)) return 'costs'
+  if (['site-photos'].includes(view)) return 'site'
+  if (['payment-cert', 'reports', 'issues'].includes(view)) return 'more'
+  return 'overview'
+}
+
 function PmPortalContent() {
   const { profile, signOut } = useAuth()
   const { selectedProjectId } = usePmProject()
@@ -79,6 +100,7 @@ function PmPortalContent() {
 
   const navigate = (view) => {
     setActiveView(view)
+    setMobileTab(mobileTabForView(view))
     setMoreOpen(false)
     setSheet(null)
   }
@@ -90,13 +112,7 @@ function PmPortalContent() {
     }
     setMobileTab(tabId)
     setMoreOpen(false)
-    const map = {
-      overview: 'dashboard',
-      milestones: 'milestones',
-      costs: 'log-cost',
-      site: 'site-photos',
-    }
-    if (map[tabId]) navigate(map[tabId])
+    navigate(viewFromMobileTab(tabId, activeView))
   }
 
   const renderView = () => {
@@ -172,8 +188,8 @@ function PmPortalContent() {
         <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
           <aside className="portal-sidebar hidden rounded-4xl border border-white/10 p-5 shadow-2xl lg:block">
             <div className="mb-6 inline-flex items-center gap-3 rounded-3xl bg-cyan-500/15 px-4 py-3 text-sm font-semibold text-cyan-200">
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-500 text-slate-950">AB</span>
-              ArcBuild Pro
+              <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
+              {COMPANY.shortName}
             </div>
             <p className="portal-eyebrow text-slate-500">Project Manager</p>
             <p className="mt-1 font-semibold text-white">{profile?.full_name}</p>
@@ -190,8 +206,8 @@ function PmPortalContent() {
                         onClick={() => navigate(item.id)}
                         className={`min-touch w-full rounded-xl px-3 py-2.5 text-left text-sm ${
                           activeView === item.id
-                            ? 'bg-cyan-500/15 text-cyan-100'
-                            : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+                            ? 'border border-cyan-400/20 bg-cyan-500/15 text-cyan-100'
+                            : 'text-slate-200 hover:bg-white/5 hover:text-slate-100'
                         }`}
                       >
                         {item.label}
@@ -214,11 +230,9 @@ function PmPortalContent() {
               </button>
             </div>
 
-            {activeView !== 'dashboard' && (
-              <div className="mb-4 hidden lg:block">
-                <h2 className="text-2xl font-semibold text-white">{VIEW_TITLES[activeView]}</h2>
-              </div>
-            )}
+            <div className="mb-4 hidden lg:block">
+              <h2 className="text-2xl font-semibold text-white">{VIEW_TITLES[activeView]}</h2>
+            </div>
 
             <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">{renderView()}</div>
           </main>
@@ -226,10 +240,10 @@ function PmPortalContent() {
       </div>
 
       <div className="portal-mobile-quick-actions lg:hidden">
-        <button type="button" onClick={() => setSheet('cost')} className="min-touch flex-1 rounded-full bg-cyan-500 py-3 text-sm font-bold text-slate-950">
+        <button type="button" onClick={() => setSheet('cost')} className="min-touch flex-1 rounded-2xl border border-cyan-400/30 bg-cyan-500/15 px-4 py-3 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-500/25">
           Log a Cost
         </button>
-        <button type="button" onClick={() => navigate('mark-complete')} className="min-touch flex-1 rounded-full border border-cyan-400/40 bg-cyan-500/15 py-3 text-sm font-semibold text-cyan-100">
+        <button type="button" onClick={() => navigate('mark-complete')} className="min-touch flex-1 rounded-2xl border border-cyan-400/30 bg-cyan-500/15 px-4 py-3 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-500/25">
           Mark Complete
         </button>
       </div>
@@ -241,7 +255,7 @@ function PmPortalContent() {
               key={tab.id}
               type="button"
               onClick={() => handleMobileTab(tab.id)}
-              className={`flex min-h-[2.75rem] flex-1 flex-col items-center justify-center py-2 text-xs font-medium ${
+              className={`flex min-h-11 flex-1 flex-col items-center justify-center py-2 text-xs font-medium ${
                 mobileTab === tab.id ? 'text-cyan-300' : 'text-slate-500'
               }`}
             >

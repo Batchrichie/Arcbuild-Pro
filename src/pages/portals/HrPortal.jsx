@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { COMPANY } from '../../lib/company-config'
+import logo from '../../assets/ModuloDevLogo.png'
 import HrDashboard from '../../components/hr/HrDashboard'
 import EmployeeRegistry from '../../components/hr/EmployeeRegistry'
 import VariablePayInput from '../../components/hr/VariablePayInput'
@@ -147,8 +149,8 @@ export default function HrPortal() {
         <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
           <aside className="portal-sidebar hidden rounded-4xl border border-white/10 p-5 shadow-2xl lg:block">
             <div className="mb-6 inline-flex items-center gap-3 rounded-3xl bg-violet-500/15 px-4 py-3 text-sm font-semibold text-violet-200">
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-500 text-slate-950">AB</span>
-              ArcBuild Pro
+              <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
+              {COMPANY.shortName}
             </div>
             <p className="portal-eyebrow text-slate-500">HR Manager</p>
             <p className="mt-1 font-semibold text-white">{profile?.full_name}</p>

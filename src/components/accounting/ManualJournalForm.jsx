@@ -54,15 +54,15 @@ const TEMPLATES = [
 
 const clsInput = 'w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white'
 
-export default function ManualJournalForm() {
+export default function ManualJournalForm({ initialDescription = '', initialReference = '', initialJournalDate = '', initialLines = [] }) {
   const { user } = useAuth()
   const [accounts, setAccounts] = useState([])
   const [projects, setProjects] = useState([])
   const [divisions, setDivisions] = useState([])
-  const [journalDate, setJournalDate] = useState(new Date().toISOString().split('T')[0])
-  const [description, setDescription] = useState('')
-  const [reference, setReference] = useState('')
-  const [lines, setLines] = useState([createEmptyLine(), createEmptyLine()])
+  const [journalDate, setJournalDate] = useState(initialJournalDate || new Date().toISOString().split('T')[0])
+  const [description, setDescription] = useState(initialDescription)
+  const [reference, setReference] = useState(initialReference)
+  const [lines, setLines] = useState(initialLines.length ? initialLines.map((line) => ({ ...createEmptyLine(), ...line })) : [createEmptyLine(), createEmptyLine()])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -91,6 +91,15 @@ export default function ManualJournalForm() {
 
     loadLookups()
   }, [])
+
+  useEffect(() => {
+    if (initialLines.length) {
+      setLines(initialLines.map((line) => ({ ...createEmptyLine(), ...line })))
+    }
+    if (initialDescription) setDescription(initialDescription)
+    if (initialReference) setReference(initialReference)
+    if (initialJournalDate) setJournalDate(initialJournalDate)
+  }, [initialDescription, initialJournalDate, initialLines, initialReference])
 
   const getAccountName = (code) => accounts.find((a) => a.account_code === code)?.account_name || ''
   const getProjectDivisionId = (projectId) => projects.find((p) => p.id === projectId)?.divisions?.id || ''

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
+import logo from '../../assets/ModuloDevLogo.png'
+import { COMPANY } from '../../lib/company-config'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { liabilityBalance } from '../../lib/formatGhs'
@@ -15,6 +17,7 @@ import IssueLog from '../../components/pm/IssueLog'
 import ManualJournalList from '../../components/accounting/ManualJournalList'
 import DebtorsLedger from '../../components/accounting/DebtorsLedger'
 import AlertLog from '../../components/alerts/AlertLog'
+import CeoBankAccountsView from '../../components/banking/CeoBankAccountsView'
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -253,8 +256,8 @@ export default function CeoPortal() {
           <aside className="portal-sidebar hidden rounded-4xl border border-white/10 p-5 shadow-2xl shadow-black/20 lg:block">
             <div className="mb-6">
               <div className="inline-flex items-center gap-3 rounded-3xl bg-[rgba(245,166,35,0.12)] px-4 py-3 text-sm font-semibold text-amber-200">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500 text-slate-950">AB</span>
-                <span>ArcBuild Pro</span>
+                <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
+                <span>{COMPANY.shortName}</span>
               </div>
             </div>
 
@@ -338,6 +341,11 @@ export default function CeoPortal() {
                 <section id="tax-alerts">
                   <SectionHeader title="Tax due" subtitle="Ledger balances" />
                   <TaxDueAlerts balances={taxBalances} loading={loading} />
+                </section>
+
+                <section id="bank-overview">
+                  <SectionHeader title="Bank accounts" subtitle="Read-only cash position" />
+                  <CeoBankAccountsView />
                 </section>
               </>
             )}
@@ -447,7 +455,7 @@ export default function CeoPortal() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex min-h-[2.75rem] min-w-[3rem] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium transition ${
+              className={`flex min-h-11 min-w-12 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium transition ${
                 activeTab === tab.id ? 'text-amber-300' : 'text-slate-500'
               }`}
             >

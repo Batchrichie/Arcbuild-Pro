@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import PayslipPdf from './pdf/PayslipPdf';
+import { COMPANY } from '../lib/company-config';
 import { supabase } from '../lib/supabase';
 
 export default function Payslip({ payrollLineId, employeeId, payrollRunId }) {
@@ -75,8 +76,7 @@ export default function Payslip({ payrollLineId, employeeId, payrollRunId }) {
       <div className="p-8 print:p-0">
         {/* Header */}
         <div className="text-center mb-8 pb-8 border-b-2 border-gray-300">
-          <h2 className="text-3xl font-bold text-gray-900">ARCBUILD PRO</h2>
-          <p className="text-gray-600 mt-1">Monthly Payslip</p>
+            <h2 className="text-3xl font-bold text-gray-900">{COMPANY.name}</h2>
           <p className="text-sm text-gray-500 mt-4">
             Period: {new Date(run.period_start).toLocaleDateString('en-GH')} to{' '}
             {new Date(run.period_end).toLocaleDateString('en-GH')}

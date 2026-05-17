@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { COMPANY } from '../lib/company-config'
+import logo from '../assets/ModuloDevLogo.png'
 
 // Role → portal route mapping
 const ROLE_ROUTES = {
@@ -66,9 +68,9 @@ export default function Login() {
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-3xl bg-amber-500 flex items-center justify-center text-sm font-black text-slate-950">
-              AB
+              MD
             </div>
-            <span className="text-stone-200 font-bold tracking-widest text-xs uppercase">ArcBuild Pro</span>
+            <span className="text-stone-200 font-bold tracking-widest text-xs uppercase">{COMPANY.shortName}</span>
           </div>
         </div>
 
@@ -98,8 +100,8 @@ export default function Login() {
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center gap-3 mb-12">
-            <div className="w-10 h-10 rounded-3xl bg-amber-500 flex items-center justify-center text-sm font-black text-slate-950">AB</div>
-            <span className="text-stone-200 font-bold tracking-widest text-xs uppercase">ArcBuild Pro</span>
+            <img src={logo} alt={COMPANY.shortName} className="w-10 h-10 rounded-3xl object-cover" />
+            <span className="text-stone-200 font-bold tracking-widest text-xs uppercase">{COMPANY.shortName}</span>
           </div>
 
           <div className="mb-10">
@@ -123,7 +125,7 @@ export default function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@arcbuild.com"
+                placeholder="you@modulodevelopmentltd@yahoo.com"
                 className="bg-stone-900 border border-stone-800 text-stone-100 px-4 py-3 text-sm placeholder-stone-700 focus:outline-none focus:border-amber-500 transition-colors duration-150"
               />
             </div>
