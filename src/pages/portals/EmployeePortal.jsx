@@ -1,230 +1,116 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabase'
+import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import Payslip from '../../components/Payslip'
+import { EmployeeProvider } from '../../context/EmployeeContext'
+import EmployeeHome from '../../components/employee/EmployeeHome'
+import EmployeePayslips from '../../components/employee/EmployeePayslips'
+import EmployeeLeave from '../../components/employee/EmployeeLeave'
+import EmployeeLoans from '../../components/employee/EmployeeLoans'
+import EmployeeProfile from '../../components/employee/EmployeeProfile'
 
-export default function EmployeePortal() {
+const TABS = [
+  { id: 'home', label: 'Home', icon: '🏠' },
+  { id: 'payslips', label: 'Payslips', icon: '💵' },
+  { id: 'leave', label: 'Leave', icon: '🏖️' },
+  { id: 'loans', label: 'Loans', icon: '🏦' },
+  { id: 'profile', label: 'Profile', icon: '👤' },
+]
+
+const TITLES = {
+  home: 'Home',
+  payslips: 'Payslips',
+  leave: 'Leave',
+  loans: 'Loans',
+  profile: 'Profile',
+}
+
+function EmployeePortalContent() {
   const { profile, signOut } = useAuth()
-  const [assignments, setAssignments] = useState([])
-  const [payslips, setPayslips] = useState([])
-  const [selectedPayslip, setSelectedPayslip] = useState(null)
-  const [metrics, setMetrics] = useState({
-    activeAssignments: 0,
-    completedTasks: 0,
-    hoursLogged: 0,
-  })
-  const [loading, setLoading] = useState(true)
+  const [tab, setTab] = useState('home')
+  const [payslipLineId, setPayslipLineId] = useState(null)
 
-  useEffect(() => {
-    async function loadEmployeeData() {
-      setLoading(true)
-      try {
-        const { data: assignmentData } = await supabase
-          .from('project_assignments')
-          .select('*')
-          .eq('employee_id', profile?.id)
-          .order('created_at', { ascending: false })
+  const goPayslip = (line) => {
+    setPayslipLineId(line?.id ?? null)
+    setTab('payslips')
+  }
 
-        setAssignments(assignmentData ?? [])
-        setMetrics({
-          activeAssignments: assignmentData?.filter(a => a.status === 'active').length || 0,
-          completedTasks: assignmentData?.filter(a => a.status === 'completed').length || 0,
-          hoursLogged: assignmentData?.reduce((sum, a) => sum + (Number(a.hours_allocated) || 0), 0) || 0,
-        })
-
-        const { data: empData } = await supabase
-          .from('employees')
-          .select('id')
-          .eq('profile_id', profile?.id)
-          .single()
-
-        if (empData) {
-          const { data: payslipData } = await supabase
-            .from('payroll_lines')
-            .select('id, payroll_run_id, created_at')
-            .eq('employee_id', empData.id)
-            .order('created_at', { ascending: false })
-            .limit(12)
-
-          setPayslips(payslipData ?? [])
-        }
-      } catch (error) {
-        console.warn('Employee data load failed', error)
-      } finally {
-        setLoading(false)
-      }
+  const render = () => {
+    switch (tab) {
+      case 'home':
+        return <EmployeeHome onViewPayslip={goPayslip} />
+      case 'payslips':
+        return <EmployeePayslips initialLineId={payslipLineId} onClearInitial={() => setPayslipLineId(null)} />
+      case 'leave':
+        return <EmployeeLeave />
+      case 'loans':
+        return <EmployeeLoans />
+      case 'profile':
+        return <EmployeeProfile />
+      default:
+        return <EmployeeHome onViewPayslip={goPayslip} />
     }
-
-    if (profile?.id) loadEmployeeData()
-  }, [profile?.id])
-
-  const stats = [
-    {
-      label: 'Active Assignments',
-      value: metrics.activeAssignments,
-      highlight: 'text-orange-300',
-    },
-    {
-      label: 'Completed Tasks',
-      value: metrics.completedTasks,
-      highlight: 'text-green-300',
-    },
-    {
-      label: 'Hours Allocated',
-      value: metrics.hoursLogged,
-      highlight: 'text-blue-300',
-    },
-  ]
+  }
 
   return (
-    <div className="portal-shell">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="portal-sidebar rounded-4xl border border-white/10 p-6 shadow-2xl shadow-black/20">
-            <div className="mb-8">
-              <div className="inline-flex items-center gap-3 rounded-3xl bg-[rgba(249,115,22,0.12)] px-4 py-3 text-sm font-semibold text-orange-200">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-500 text-slate-950">AB</span>
-                <span>ArcBuild Pro</span>
-              </div>
-            </div>
-
-            <div className="space-y-3 rounded-[1.75rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5">
-              <p className="portal-eyebrow uppercase tracking-[0.28em] text-slate-500">Employee workspace</p>
-              <p className="text-3xl font-semibold text-white">Welcome{profile?.full_name ? `, ${profile.full_name}` : ''}.</p>
-              <p className="text-sm leading-6 text-slate-400">Track your assignments, projects, and time allocation.</p>
-            </div>
-
-            <div className="mt-8 space-y-4">
-              <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-5">
-                <div className="text-sm uppercase tracking-[0.2em] text-slate-500">Navigation</div>
-                <div className="mt-4 space-y-3">
-                  <a href="#assignments" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-orange-400/30 hover:bg-[rgba(249,115,22,0.08)]">My assignments</a>
-                  <a href="#overview" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-blue-400/30 hover:bg-[rgba(56,138,221,0.08)]">Overview</a>
-                  <a href="#payslips" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-green-400/30 hover:bg-[rgba(34,197,94,0.08)]">Payslips</a>
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="portal-eyebrow uppercase tracking-[0.2em] text-slate-500">Employee</p>
-                    <p className="mt-2 font-semibold text-white">{profile?.full_name ?? 'Team member'}</p>
-                    <p className="text-sm text-slate-400">{profile?.email ?? 'employee@arcbuild.com'}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={signOut}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white transition hover:border-orange-400/40 hover:bg-[rgba(249,115,22,0.16)]"
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              </div>
-            </div>
+    <div className="portal-shell overflow-x-hidden">
+      <div className="mx-auto max-w-3xl px-4 py-6 lg:max-w-6xl lg:py-8">
+        <div className="grid gap-6 lg:grid-cols-[200px_minmax(0,1fr)]">
+          <aside className="portal-sidebar hidden rounded-3xl border border-white/10 p-4 lg:block">
+            <p className="portal-eyebrow text-slate-500">Employee</p>
+            <p className="mt-1 truncate font-semibold text-white">{profile?.full_name}</p>
+            <nav className="mt-6 space-y-1">
+              {TABS.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTab(t.id)}
+                  className={`min-touch w-full rounded-xl px-3 py-2.5 text-left text-sm ${
+                    tab === t.id ? 'bg-orange-500/15 text-orange-100' : 'text-slate-400 hover:bg-white/5'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </nav>
+            <button type="button" onClick={signOut} className="mt-6 w-full rounded-full border border-white/10 py-2.5 text-sm text-slate-400">
+              Sign out
+            </button>
           </aside>
 
-          <main className="portal-main space-y-8">
-            <section className="grid gap-4 sm:grid-cols-3">
-              {stats.map((item) => (
-                <div key={item.label} className="kpi-card">
-                  <p className="portal-eyebrow uppercase tracking-[0.24em] text-slate-500">{item.label}</p>
-                  <p className={`mt-4 text-3xl font-semibold ${item.highlight}`}>{item.value}</p>
-                </div>
-              ))}
-            </section>
-
-            <section id="assignments" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-              <div className="mb-6">
-                <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Workload</p>
-                <h2 className="mt-2 text-2xl font-semibold text-white">My Assignments</h2>
-              </div>
-              {loading ? (
-                <div className="text-center text-slate-400">Loading assignments...</div>
-              ) : assignments.length === 0 ? (
-                <div className="text-center text-slate-400">No assignments yet</div>
-              ) : (
-                <div className="space-y-3">
-                  {assignments.map((assignment) => (
-                    <div key={assignment.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-white">{assignment.role || 'Assigned Role'}</h3>
-                          <p className="mt-1 text-sm text-slate-400">Hours: {assignment.hours_allocated || 0}h</p>
-                        </div>
-                        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                          assignment.status === 'active' ? 'bg-green-500/20 text-green-300' :
-                          assignment.status === 'completed' ? 'bg-blue-500/20 text-blue-300' :
-                          'bg-slate-500/20 text-slate-300'
-                        }`}>
-                          {assignment.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-
-            <section id="overview" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-              <div className="mb-6">
-                <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Summary</p>
-                <h2 className="mt-2 text-2xl font-semibold text-white">Work Distribution</h2>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                  <p className="text-sm text-slate-400">Active this month</p>
-                  <p className="mt-2 text-3xl font-semibold text-orange-300">{metrics.activeAssignments}</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                  <p className="text-sm text-slate-400">Total hours allocated</p>
-                  <p className="mt-2 text-3xl font-semibold text-blue-300">{metrics.hoursLogged}h</p>
-                </div>
-              </div>
-            </section>
-
-            {selectedPayslip ? (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-                <button
-                  onClick={() => setSelectedPayslip(null)}
-                  className="mb-4 text-sm text-blue-400 hover:text-blue-300 transition"
-                >
-                  ← Back to payslips list
-                </button>
-                <Payslip payrollLineId={selectedPayslip.id} />
-              </section>
-            ) : (
-              <section id="payslips" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-                <div className="mb-6">
-                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Compensation</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-white">My Payslips</h2>
-                </div>
-                {loading ? (
-                  <div className="text-center text-slate-400">Loading payslips...</div>
-                ) : payslips.length === 0 ? (
-                  <div className="text-center text-slate-400">No payslips yet</div>
-                ) : (
-                  <div className="space-y-3">
-                    {payslips.map((slip) => (
-                      <button
-                        key={slip.id}
-                        onClick={() => setSelectedPayslip(slip)}
-                        className="w-full text-left rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:bg-white/10 hover:border-green-400/30"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-white">
-                            Payslip from {new Date(slip.created_at).toLocaleDateString('en-GH')}
-                          </span>
-                          <span className="text-sm text-slate-400">View →</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </section>
-            )}
+          <main className="portal-main portal-employee-main min-w-0">
+            <div className="mb-4 flex items-center justify-between lg:hidden">
+              <h1 className="text-xl font-semibold text-white">{TITLES[tab]}</h1>
+              <button type="button" onClick={signOut} className="text-sm text-slate-400">Sign out</button>
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">{render()}</div>
           </main>
         </div>
       </div>
+
+      <nav className="portal-mobile-nav" aria-label="Employee navigation">
+        <div className="mx-auto flex max-w-lg justify-around px-0.5">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTab(t.id)}
+              className={`flex min-h-[3rem] min-w-[3.5rem] flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[0.65rem] font-medium sm:text-xs ${
+                tab === t.id ? 'text-orange-300' : 'text-slate-500'
+              }`}
+            >
+              <span className="text-lg leading-none" aria-hidden>{t.icon}</span>
+              <span>{t.label}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
     </div>
+  )
+}
+
+export default function EmployeePortal() {
+  return (
+    <EmployeeProvider>
+      <EmployeePortalContent />
+    </EmployeeProvider>
   )
 }

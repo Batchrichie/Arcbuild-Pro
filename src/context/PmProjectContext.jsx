@@ -85,7 +85,5 @@ export function PmProjectProvider({ children }) {
 }
 
 export function usePmProject() {
-  const ctx = useContext(PmProjectContext)
-  if (!ctx) throw new Error('usePmProject must be used within PmProjectProvider')
-  return ctx
+  return useContext(PmProjectContext)
 }

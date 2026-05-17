@@ -399,6 +399,17 @@ button {
   }
 }
 
+/* Employee portal: bottom tabs on all breakpoints */
+.portal-employee-main {
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0));
+}
+
+@media (min-width: 1024px) {
+  .portal-employee-main {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0));
+  }
+}
+
 .portal-table-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -453,4 +464,50 @@ button {
   background: #0d131f;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   padding: 1.25rem 1rem calc(1.25rem + env(safe-area-inset-bottom, 0));
+}
+
+/* Client portal — light external theme (Module 4.6) */
+.client-portal {
+  font-family: inherit;
+}
+
+.client-card {
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.client-drawer {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+@media print {
+  .client-portal header {
+    display: none;
+  }
+}
+
+/* Client portal — light external theme (Module 4.6) */
+.client-portal {
+  font-family: inherit;
+}
+
+.client-card {
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.client-drawer {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+@media print {
+  .client-portal header {
+    display: none;
+  }
 }

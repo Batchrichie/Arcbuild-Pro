@@ -10,6 +10,7 @@ import KpiStrip from '../../components/ceo/KpiStrip'
 import DivisionPerformanceCards from '../../components/ceo/DivisionPerformanceCards'
 import ProjectHealthTable from '../../components/ceo/ProjectHealthTable'
 import TaxDueAlerts from '../../components/ceo/TaxDueAlerts'
+import IssueLog from '../../components/pm/IssueLog'
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -101,6 +102,7 @@ export default function CeoPortal() {
   const [projectHealth, setProjectHealth] = useState([])
   const [taxBalances, setTaxBalances] = useState({})
   const [slideOverProjectId, setSlideOverProjectId] = useState(null)
+  const [projectsSubview, setProjectsSubview] = useState('health')
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true)
@@ -339,13 +341,46 @@ export default function CeoPortal() {
             )}
 
             {activeTab === 'projects' && (
-              <section>
-                <SectionHeader title="Project health" subtitle="Tap a row for full finance detail" />
-                <ProjectHealthTable
-                  projects={projectHealth}
-                  loading={loading}
-                  onSelectProject={setSlideOverProjectId}
-                />
+              <section className="space-y-6">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setProjectsSubview('health')}
+                    className={`min-touch rounded-full border px-4 py-2 text-sm font-medium ${
+                      projectsSubview === 'health'
+                        ? 'border-amber-400/40 bg-amber-500/15 text-amber-100'
+                        : 'border-white/10 text-slate-400'
+                    }`}
+                  >
+                    Project health
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProjectsSubview('issues')}
+                    className={`min-touch rounded-full border px-4 py-2 text-sm font-medium ${
+                      projectsSubview === 'issues'
+                        ? 'border-amber-400/40 bg-amber-500/15 text-amber-100'
+                        : 'border-white/10 text-slate-400'
+                    }`}
+                  >
+                    Issue log
+                  </button>
+                </div>
+                {projectsSubview === 'health' ? (
+                  <>
+                    <SectionHeader title="Project health" subtitle="Tap a row for full finance detail" />
+                    <ProjectHealthTable
+                      projects={projectHealth}
+                      loading={loading}
+                      onSelectProject={setSlideOverProjectId}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <SectionHeader title="Issue log" subtitle="Read-only — all projects" />
+                    <IssueLog readOnly allProjects />
+                  </>
+                )}
               </section>
             )}
 

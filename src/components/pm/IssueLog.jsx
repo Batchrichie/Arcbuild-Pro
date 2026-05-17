@@ -24,9 +24,10 @@ const EMPTY_FORM = {
   due_date: '',
 }
 
-export default function IssueLog({ readOnly = false }) {
+export default function IssueLog({ readOnly = false, allProjects = false }) {
   const { profile } = useAuth()
-  const { selectedProjectId } = usePmProject()
+  const pmContext = usePmProject()
+  const selectedProjectId = allProjects ? null : pmContext?.selectedProjectId
   const [issues, setIssues] = useState([])
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
@@ -34,15 +35,21 @@ export default function IssueLog({ readOnly = false }) {
   const [resolveId, setResolveId] = useState(null)
   const [resolutionNotes, setResolutionNotes] = useState('')
   const [error, setError] = useState(null)
+  const [projectFilter, setProjectFilter] = useState('')
 
   const load = useCallback(async () => {
-    if (!selectedProjectId) return
+    if (!allProjects && !selectedProjectId) return
     setLoading(true)
-    const { data, error: err } = await supabase
+    let query = supabase
       .from('issue_log')
-      .select('*')
-      .eq('project_id', selectedProjectId)
+      .select('*, projects(name)')
       .order('created_at', { ascending: false })
+
+    if (!allProjects && selectedProjectId) {
+      query = query.eq('project_id', selectedProjectId)
+    }
+
+    const { data, error: err } = await query
 
     if (err) {
       console.warn('Issue log load failed', err)
@@ -51,7 +58,7 @@ export default function IssueLog({ readOnly = false }) {
       setIssues(data ?? [])
     }
     setLoading(false)
-  }, [selectedProjectId])
+  }, [allProjects, selectedProjectId])
 
   useEffect(() => {
     load()
@@ -100,12 +107,35 @@ export default function IssueLog({ readOnly = false }) {
     load()
   }
 
-  if (!selectedProjectId) {
+  const projectOptions = allProjects
+    ? [...new Map(issues.map((i) => [i.project_id, i.projects?.name || 'Project'])).entries()]
+    : []
+
+  const filtered = projectFilter
+    ? issues.filter((i) => i.project_id === projectFilter)
+    : issues
+
+  if (!allProjects && !selectedProjectId) {
     return <p className="text-sm text-slate-500">Select a project to view issues and risks.</p>
   }
 
   return (
     <div className="space-y-4 pb-24 lg:pb-4">
+      {allProjects && projectOptions.length > 0 && (
+        <select
+          value={projectFilter}
+          onChange={(e) => setProjectFilter(e.target.value)}
+          className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white sm:max-w-xs"
+        >
+          <option value="">All projects</option>
+          {projectOptions.map(([id, name]) => (
+            <option key={id} value={id}>
+              {name}
+            </option>
+          ))}
+        </select>
+      )}
+
       {!readOnly && (
         <button
           type="button"
@@ -174,13 +204,16 @@ export default function IssueLog({ readOnly = false }) {
 
       {loading ? (
         <div className="h-24 animate-pulse rounded-2xl bg-white/5" />
-      ) : issues.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <p className="text-sm text-slate-500">No issues logged.</p>
       ) : (
         <ul className="space-y-3">
-          {issues.map((item) => (
+          {filtered.map((item) => (
             <li key={item.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <div className="flex flex-wrap gap-2">
+                {allProjects && item.projects?.name && (
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-slate-300">{item.projects.name}</span>
+                )}
                 <span className={`rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${TYPE_STYLES[item.issue_type]}`}>
                   {item.issue_type}
                 </span>
@@ -191,9 +224,7 @@ export default function IssueLog({ readOnly = false }) {
               </div>
               <h4 className="mt-2 font-semibold text-white">{item.title}</h4>
               {item.description && <p className="mt-1 text-sm text-slate-400">{item.description}</p>}
-              <p className="mt-2 text-xs text-slate-500">
-                {item.due_date ? `Due ${item.due_date}` : ''}
-              </p>
+              <p className="mt-2 text-xs text-slate-500">{item.due_date ? `Due ${item.due_date}` : ''}</p>
               {!readOnly && ['open', 'in_progress'].includes(item.status) && (
                 <button
                   type="button"

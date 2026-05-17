@@ -1,192 +1,237 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabase'
+import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import PayrollRunManager from '../../components/PayrollRunManager'
+import HrDashboard from '../../components/hr/HrDashboard'
+import EmployeeRegistry from '../../components/hr/EmployeeRegistry'
+import VariablePayInput from '../../components/hr/VariablePayInput'
+import PayrollReview from '../../components/hr/PayrollReview'
+import LeaveCalendar from '../../components/hr/LeaveCalendar'
+import LeaveApprovals from '../../components/hr/LeaveApprovals'
+import LeaveBalances from '../../components/hr/LeaveBalances'
+import ComplianceTracker from '../../components/hr/ComplianceTracker'
+import EmployeeCostReport from '../../components/hr/EmployeeCostReport'
+import HeadcountReport from '../../components/hr/HeadcountReport'
+
+const NAV_SECTIONS = [
+  {
+    title: 'EMPLOYEES',
+    items: [
+      { id: 'dashboard', label: 'HR Dashboard' },
+      { id: 'registry', label: 'Employee Registry' },
+      { id: 'onboarding', label: 'Onboarding' },
+      { id: 'compliance', label: 'Contracts & Compliance' },
+    ],
+  },
+  {
+    title: 'PAYROLL',
+    items: [
+      { id: 'variable-pay', label: 'Variable Pay Input' },
+      { id: 'payroll-review', label: 'Payroll Review' },
+    ],
+  },
+  {
+    title: 'LEAVE',
+    items: [
+      { id: 'leave-calendar', label: 'Leave Calendar' },
+      { id: 'leave-approvals', label: 'Leave Approvals' },
+      { id: 'leave-balances', label: 'Leave Balances' },
+    ],
+  },
+  {
+    title: 'REPORTS',
+    items: [
+      { id: 'cost-report', label: 'Employee Cost Report' },
+      { id: 'headcount', label: 'Headcount Report' },
+    ],
+  },
+]
+
+const MOBILE_TABS = [
+  { id: 'employees', label: 'Employees', icon: '👥' },
+  { id: 'payroll', label: 'Payroll', icon: '💼' },
+  { id: 'leave', label: 'Leave', icon: '🏖️' },
+  { id: 'reports', label: 'Reports', icon: '📊' },
+  { id: 'more', label: 'More', icon: '⋯' },
+]
+
+const VIEW_TITLES = {
+  dashboard: 'HR Dashboard',
+  registry: 'Employee Registry',
+  onboarding: 'Onboarding',
+  compliance: 'Contracts & Compliance',
+  'variable-pay': 'Variable Pay Input',
+  'payroll-review': 'Payroll Review',
+  'leave-calendar': 'Leave Calendar',
+  'leave-approvals': 'Leave Approvals',
+  'leave-balances': 'Leave Balances',
+  'cost-report': 'Employee Cost Report',
+  headcount: 'Headcount Report',
+}
+
+const MOBILE_MAP = {
+  employees: 'dashboard',
+  payroll: 'variable-pay',
+  leave: 'leave-calendar',
+  reports: 'cost-report',
+}
+
+const MORE_ITEMS = [
+  { id: 'registry', label: 'Employee Registry' },
+  { id: 'onboarding', label: 'Onboarding' },
+  { id: 'compliance', label: 'Compliance' },
+  { id: 'payroll-review', label: 'Payroll Review' },
+  { id: 'leave-approvals', label: 'Leave Approvals' },
+  { id: 'leave-balances', label: 'Leave Balances' },
+  { id: 'headcount', label: 'Headcount' },
+]
 
 export default function HrPortal() {
   const { profile, signOut } = useAuth()
-  const [employees, setEmployees] = useState([])
-  const [activeSection, setActiveSection] = useState('dashboard')
-  const [metrics, setMetrics] = useState({
-    totalEmployees: 0,
-    activeProjects: 0,
-    averageUtilization: 0,
-  })
-  const [loading, setLoading] = useState(true)
+  const [activeView, setActiveView] = useState('dashboard')
+  const [mobileTab, setMobileTab] = useState('employees')
+  const [moreOpen, setMoreOpen] = useState(false)
 
-  useEffect(() => {
-    async function loadHrData() {
-      setLoading(true)
-      try {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('role', 'employee')
-          .order('created_at', { ascending: false })
+  const navigate = (view) => {
+    setActiveView(view)
+    setMoreOpen(false)
+  }
 
-        setEmployees(profileData ?? [])
-        setMetrics({
-          totalEmployees: profileData?.length || 0,
-          activeProjects: profileData?.filter(e => e.status === 'active').length || 0,
-          averageUtilization: 75,
-        })
-      } catch (error) {
-        console.warn('HR data load failed', error)
-      } finally {
-        setLoading(false)
-      }
+  const handleMobileTab = (tabId) => {
+    if (tabId === 'more') {
+      setMoreOpen(true)
+      return
     }
+    setMobileTab(tabId)
+    setMoreOpen(false)
+    if (MOBILE_MAP[tabId]) navigate(MOBILE_MAP[tabId])
+  }
 
-    loadHrData()
-  }, [])
-
-  const stats = [
-    {
-      label: 'Total Employees',
-      value: metrics.totalEmployees,
-      highlight: 'text-violet-300',
-    },
-    {
-      label: 'Active Team Members',
-      value: metrics.activeProjects,
-      highlight: 'text-purple-300',
-    },
-    {
-      label: 'Avg Utilization',
-      value: `${metrics.averageUtilization}%`,
-      highlight: 'text-pink-300',
-    },
-  ]
+  const renderView = () => {
+    switch (activeView) {
+      case 'dashboard':
+        return <HrDashboard onNavigate={navigate} />
+      case 'registry':
+        return <EmployeeRegistry />
+      case 'onboarding':
+        return (
+          <div className="space-y-4 text-sm text-slate-300">
+            <p>Use the four-step wizard in Employee Registry to onboard new staff.</p>
+            <button type="button" onClick={() => navigate('registry')} className="rounded-full bg-violet-500 px-5 py-2.5 font-semibold text-white">
+              Open Employee Registry
+            </button>
+          </div>
+        )
+      case 'compliance':
+        return <ComplianceTracker />
+      case 'variable-pay':
+        return <VariablePayInput />
+      case 'payroll-review':
+        return <PayrollReview />
+      case 'leave-calendar':
+        return <LeaveCalendar />
+      case 'leave-approvals':
+        return <LeaveApprovals />
+      case 'leave-balances':
+        return <LeaveBalances />
+      case 'cost-report':
+        return <EmployeeCostReport />
+      case 'headcount':
+        return <HeadcountReport />
+      default:
+        return <HrDashboard onNavigate={navigate} />
+    }
+  }
 
   return (
-    <div className="portal-shell">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="portal-sidebar rounded-4xl border border-white/10 p-6 shadow-2xl shadow-black/20">
-            <div className="mb-8">
-              <div className="inline-flex items-center gap-3 rounded-3xl bg-[rgba(139,92,246,0.12)] px-4 py-3 text-sm font-semibold text-violet-200">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-500 text-slate-950">AB</span>
-                <span>ArcBuild Pro</span>
-              </div>
+    <div className="portal-shell overflow-x-hidden">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-8 lg:px-8">
+        <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+          <aside className="portal-sidebar hidden rounded-4xl border border-white/10 p-5 shadow-2xl lg:block">
+            <div className="mb-6 inline-flex items-center gap-3 rounded-3xl bg-violet-500/15 px-4 py-3 text-sm font-semibold text-violet-200">
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-500 text-slate-950">AB</span>
+              ArcBuild Pro
             </div>
+            <p className="portal-eyebrow text-slate-500">HR Manager</p>
+            <p className="mt-1 font-semibold text-white">{profile?.full_name}</p>
 
-            <div className="space-y-3 rounded-[1.75rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5">
-              <p className="portal-eyebrow uppercase tracking-[0.28em] text-slate-500">HR workspace</p>
-              <p className="text-3xl font-semibold text-white">Welcome{profile?.full_name ? `, ${profile.full_name}` : ''}.</p>
-              <p className="text-sm leading-6 text-slate-400">Manage team, monitor utilization, and view employee information.</p>
-            </div>
-
-            <div className="mt-8 space-y-4">
-              <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-5">
-                <div className="text-sm uppercase tracking-[0.2em] text-slate-500">Navigation</div>
-                <div className="mt-4 space-y-3">
-                  <button onClick={() => setActiveSection('dashboard')} className="block w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-violet-400/30 hover:bg-[rgba(139,92,246,0.08)] text-left">Employee directory</button>
-                  <button onClick={() => setActiveSection('metrics')} className="block w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-purple-400/30 hover:bg-[rgba(147,51,234,0.08)] text-left">Team metrics</button>
-                  <button onClick={() => setActiveSection('payroll')} className="block w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-blue-400/30 hover:bg-[rgba(59,130,246,0.08)] text-left">Payroll Management</button>
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="portal-eyebrow uppercase tracking-[0.2em] text-slate-500">HR Manager</p>
-                    <p className="mt-2 font-semibold text-white">{profile?.full_name ?? 'Manager'}</p>
-                    <p className="text-sm text-slate-400">{profile?.email ?? 'hr@arcbuild.com'}</p>
+            <nav className="mt-6 max-h-[calc(100vh-14rem)] space-y-5 overflow-y-auto">
+              {NAV_SECTIONS.map((section) => (
+                <div key={section.title}>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-500">{section.title}</p>
+                  <div className="space-y-1">
+                    {section.items.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => navigate(item.id)}
+                        className={`min-touch w-full rounded-xl px-3 py-2.5 text-left text-sm ${
+                          activeView === item.id
+                            ? 'bg-violet-500/15 text-violet-100'
+                            : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
                   </div>
-                  <button
-                    type="button"
-                    onClick={signOut}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white transition hover:border-violet-400/40 hover:bg-[rgba(139,92,246,0.16)]"
-                  >
-                    Sign Out
-                  </button>
                 </div>
-              </div>
-            </div>
+              ))}
+            </nav>
+            <button type="button" onClick={signOut} className="min-touch mt-6 w-full rounded-full border border-white/10 py-3 text-sm text-slate-300">
+              Sign Out
+            </button>
           </aside>
 
-          <main className="portal-main space-y-8">
-            {activeSection === 'dashboard' && (
-              <>
-                <section className="grid gap-4 sm:grid-cols-3">
-                  {stats.map((item) => (
-                    <div key={item.label} className="kpi-card">
-                      <p className="portal-eyebrow uppercase tracking-[0.24em] text-slate-500">{item.label}</p>
-                      <p className={`mt-4 text-3xl font-semibold ${item.highlight}`}>{item.value}</p>
-                    </div>
-                  ))}
-                </section>
-
-                <section id="directory" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-                  <div className="mb-6">
-                    <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Team</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-white">Employee Directory</h2>
-                  </div>
-                  {loading ? (
-                    <div className="text-center text-slate-400">Loading employees...</div>
-                  ) : employees.length === 0 ? (
-                    <div className="text-center text-slate-400">No employees</div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-white/10">
-                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Name</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Email</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Role</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {employees.map((emp) => (
-                            <tr key={emp.id} className="border-b border-white/5 hover:bg-white/5">
-                              <td className="px-4 py-3 text-sm text-white">{emp.full_name}</td>
-                              <td className="px-4 py-3 text-sm text-slate-400">{emp.email}</td>
-                              <td className="px-4 py-3 text-sm text-slate-300 capitalize">{emp.role}</td>
-                              <td className="px-4 py-3 text-sm">
-                                <span className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                                  emp.status === 'active' ? 'bg-green-500/20 text-green-300' : 'bg-slate-500/20 text-slate-300'
-                                }`}>
-                                  {emp.status}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </section>
-              </>
+          <main className="portal-main portal-main-with-tabs min-w-0 overflow-x-hidden pb-24 lg:pb-8">
+            <div className="mb-4 flex items-center justify-between lg:hidden">
+              <h1 className="text-xl font-semibold text-white">{VIEW_TITLES[activeView]}</h1>
+              <button type="button" onClick={signOut} className="text-sm text-slate-400">Sign out</button>
+            </div>
+            {activeView !== 'dashboard' && (
+              <div className="mb-4 hidden lg:block">
+                <h2 className="text-2xl font-semibold text-white">{VIEW_TITLES[activeView]}</h2>
+              </div>
             )}
-
-            {activeSection === 'metrics' && (
-              <section id="metrics" className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-                <div className="mb-6">
-                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Analytics</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-white">Team Metrics</h2>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                    <p className="text-sm text-slate-400">Total headcount</p>
-                    <p className="mt-2 text-3xl font-semibold text-violet-300">{metrics.totalEmployees}</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                    <p className="text-sm text-slate-400">Team utilization</p>
-                    <p className="mt-2 text-3xl font-semibold text-purple-300">{metrics.averageUtilization}%</p>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {activeSection === 'payroll' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
-                <PayrollRunManager userRole="hr" userId={profile?.id} />
-              </section>
-            )}
+            <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">{renderView()}</div>
           </main>
         </div>
       </div>
+
+      <nav className="portal-mobile-nav lg:hidden">
+        <div className="mx-auto flex max-w-lg justify-around">
+          {MOBILE_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => handleMobileTab(tab.id)}
+              className={`flex min-h-[2.75rem] flex-1 flex-col items-center justify-center py-2 text-xs font-medium ${
+                mobileTab === tab.id ? 'text-violet-300' : 'text-slate-500'
+              }`}
+            >
+              <span className="text-base">{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {moreOpen && (
+        <>
+          <button type="button" className="portal-drawer-backdrop" onClick={() => setMoreOpen(false)} aria-label="Close" />
+          <div className="portal-drawer-sheet">
+            <h3 className="mb-3 text-lg font-semibold text-white">More</h3>
+            {MORE_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => navigate(item.id)}
+                className="mb-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-slate-200"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }
