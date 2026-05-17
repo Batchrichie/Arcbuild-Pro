@@ -183,26 +183,45 @@ export default function InvoiceForm({ onSave, initialData = null }) {
       }
 
       try {
-        const { data, error: err } = await supabase
-          .from('exchange_rates')
-          .select('*')
-          .eq('currency_code', formData.currency)
-          .eq('rate_date', new Date().toISOString().split('T')[0])
-          .single();
+        // Call get_fx_rate() RPC function for automatic fallback to recent rates
+        const { data, error: err } = await supabase.rpc('get_fx_rate', {
+          currency_code_param: formData.currency,
+          rate_date_param: new Date().toISOString().split('T')[0],
+        });
 
-        if (err && err.code !== 'PGRST116') throw err;
+        if (err) throw err;
 
         if (data) {
-          setExchangeRate(data);
+          setExchangeRate({ rate_to_ghs: data, currency_code: formData.currency });
           if (!formData.fx_rate_override) {
             setFormData((prev) => ({
               ...prev,
-              fx_rate_to_ghs: data.rate_to_ghs,
+              fx_rate_to_ghs: data,
             }));
           }
         }
       } catch (err) {
         console.error('Error fetching exchange rate:', err);
+        // Fallback: try to fetch from exchange_rates table directly
+        try {
+          const { data: fallbackData } = await supabase
+            .from('exchange_rates')
+            .select('*')
+            .eq('currency_code', formData.currency)
+            .order('rate_date', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (fallbackData && !formData.fx_rate_override) {
+            setExchangeRate(fallbackData);
+            setFormData((prev) => ({
+              ...prev,
+              fx_rate_to_ghs: fallbackData.rate_to_ghs,
+            }));
+          }
+        } catch (fallbackErr) {
+          console.error('Fallback rate fetch also failed:', fallbackErr);
+        }
       }
     };
 
