@@ -72,20 +72,20 @@ export default function GeneralLedger({ readOnly = false }) {
   }
 
   return (
-    <div className="mt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">General Ledger</h2>
-        <div className="flex gap-2">
+    <div className="mt-6 rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <h2 className="text-xl font-semibold text-white">General Ledger</h2>
+        <div className="flex flex-wrap gap-2">
           <button onClick={() => setPage(Math.max(1, page - 1))} className="btn">Prev</button>
           <button onClick={() => setPage(page + 1)} className="btn">Next</button>
           <button onClick={exportCsv} disabled={isReadOnly} className="btn ml-2">Export CSV</button>
         </div>
       </div>
 
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full table-auto text-sm">
+      <div className="mt-4 overflow-x-auto rounded-3xl border border-white/10 bg-slate-950/70">
+        <table className="w-full table-auto text-sm dark-table text-slate-200">
           <thead>
-            <tr className="text-left text-slate-600">
+            <tr className="text-left text-slate-400">
               <th className="p-2">Date</th>
               <th className="p-2">JE</th>
               <th className="p-2">Account</th>
@@ -96,25 +96,25 @@ export default function GeneralLedger({ readOnly = false }) {
             </tr>
           </thead>
           <tbody>
-            {loading && (<tr><td colSpan={7} className="p-4">Loading...</td></tr>)}
+            {loading && (<tr><td colSpan={7} className="p-4 text-slate-400">Loading...</td></tr>)}
             {!loading && rows.map(r => (
-              <tr key={r.ledger_id} className="border-t hover:bg-slate-50">
-                <td className="p-2">{r.entry_date?.split('T')[0]}</td>
+              <tr key={r.ledger_id} className="border-t border-white/10 hover:bg-white/5">
+                <td className="p-2 text-slate-100">{r.entry_date?.split('T')[0]}</td>
                 <td className="p-2">
-                  <button disabled={isReadOnly} onClick={() => expandJournal(r.journal_entry_id)} className="text-indigo-600 underline">
+                  <button disabled={isReadOnly} onClick={() => expandJournal(r.journal_entry_id)} className="text-amber-300 underline disabled:text-slate-500">
                     {r.entry_number}
                   </button>
                 </td>
                 <td className="p-2">
-                  <button onClick={() => setShowAccount(r.account_code)} className="text-slate-700 underline">
+                  <button onClick={() => setShowAccount(r.account_code)} className="text-slate-100 underline">
                     {r.account_code}
                   </button>
-                  <div className="text-slate-500">{r.account_name}</div>
+                  <div className="text-slate-400">{r.account_name}</div>
                 </td>
-                <td className="p-2">{r.description}</td>
-                <td className="p-2 text-right">{r.debit_amount ?? ''}</td>
-                <td className="p-2 text-right">{r.credit_amount ?? ''}</td>
-                <td className="p-2 text-right">{r.amount ?? ''}</td>
+                <td className="p-2 text-slate-100">{r.description}</td>
+                <td className="p-2 text-right text-slate-100">{r.debit_amount ?? ''}</td>
+                <td className="p-2 text-right text-slate-100">{r.credit_amount ?? ''}</td>
+                <td className="p-2 text-right text-slate-100">{r.amount ?? ''}</td>
               </tr>
             ))}
           </tbody>
@@ -122,17 +122,24 @@ export default function GeneralLedger({ readOnly = false }) {
       </div>
 
       {selectedJournal && selectedJournal.lines && (
-        <div className="mt-4 rounded border bg-white p-4 shadow-sm">
-          <h3 className="font-semibold">Journal {selectedJournal.journalId}</h3>
-          <table className="w-full text-sm mt-2">
-            <thead><tr className="text-left text-slate-600"><th>Account</th><th className="text-right">Debit</th><th className="text-right">Credit</th><th>Description</th></tr></thead>
+        <div className="mt-4 rounded-[1.75rem] border border-white/10 bg-[rgba(15,23,42,0.95)] p-4 shadow-sm">
+          <h3 className="font-semibold text-white">Journal {selectedJournal.journalId}</h3>
+          <table className="w-full text-sm mt-2 dark-table text-slate-200">
+            <thead>
+              <tr className="text-left text-slate-400">
+                <th className="p-2">Account</th>
+                <th className="p-2 text-right">Debit</th>
+                <th className="p-2 text-right">Credit</th>
+                <th className="p-2">Description</th>
+              </tr>
+            </thead>
             <tbody>
               {selectedJournal.lines.map(l => (
-                <tr key={l.id} className="border-t">
-                  <td className="p-2">{l.account_code} — {l.account_name}</td>
-                  <td className="p-2 text-right">{l.debit_amount}</td>
-                  <td className="p-2 text-right">{l.credit_amount}</td>
-                  <td className="p-2">{l.description}</td>
+                <tr key={l.id} className="border-t border-white/10">
+                  <td className="p-2 text-slate-100">{l.account_code} — {l.account_name}</td>
+                  <td className="p-2 text-right text-slate-100">{l.debit_amount}</td>
+                  <td className="p-2 text-right text-slate-100">{l.credit_amount}</td>
+                  <td className="p-2 text-slate-100">{l.description}</td>
                 </tr>
               ))}
             </tbody>

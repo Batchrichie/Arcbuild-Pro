@@ -1,18 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-
-const STATUS_BADGES = {
-  pending_approval: 'bg-amber-100 text-amber-800',
-}
-
-function StatusBadge({ status }) {
-  return (
-    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${STATUS_BADGES[status] ?? 'bg-slate-100 text-slate-800'}`}>
-      {status.replace('_', ' ').toUpperCase()}
-    </span>
-  )
-}
+import StatusBadge from './ui/StatusBadge'
 
 export default function ApprovalQueue() {
   const { user, profile } = useAuth()
@@ -24,28 +13,6 @@ export default function ApprovalQueue() {
   const [rejectError, setRejectError] = useState(null)
 
   const pendingCount = invoices.length
-
-  useEffect(() => {
-    fetchPendingInvoices()
-  }, [])
-
-  useEffect(() => {
-    const channel = supabase
-      .channel('pending-approvals')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'invoices',
-        filter: 'status=eq.pending_approval',
-      }, () => {
-        fetchPendingInvoices()
-      })
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [])
 
   const fetchPendingInvoices = async () => {
     setLoading(true)
@@ -92,6 +59,28 @@ export default function ApprovalQueue() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchPendingInvoices()
+  }, [])
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('pending-approvals')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'invoices',
+        filter: 'status=eq.pending_approval',
+      }, () => {
+        fetchPendingInvoices()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   const handleApprove = async (invoice) => {
     if (!user?.id) {
@@ -169,81 +158,87 @@ export default function ApprovalQueue() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-slate-200 bg-white px-6 py-6 shadow-sm">
+      <div className="rounded-3xl border border-white/10 bg-(--color-surface) px-6 py-6 shadow-xl shadow-black/10">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Pending Approvals</h1>
-            <p className="mt-1 text-sm text-slate-600">
-              {profile?.full_name ?? 'CEO'} portal — {pendingCount} invoice(s) pending approval.
+            <h1 className="text-2xl font-semibold text-white">Pending Approvals</h1>
+            <p className="mt-1 text-sm text-slate-400">
+              {profile?.full_name ?? 'CEO'} portal — {pendingCount} invoice(s) waiting review.
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
-            <span className="inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
+          <div className="inline-flex items-center gap-2 rounded-full bg-[rgba(29,158,117,0.12)] px-4 py-2 text-sm font-semibold text-(--color-success)">
+            <span className="inline-flex h-2.5 w-2.5 rounded-full bg-(--color-success)" />
             {pendingCount} pending approval
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-3xl border border-(--color-danger)/20 bg-[rgba(226,75,74,0.08)] px-4 py-3 text-sm text-(--color-danger)">
           {error}
         </div>
       )}
 
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-3xl border border-white/10 bg-(--color-surface-2) shadow-xl shadow-black/10">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
+          <table className="min-w-full dark-table text-sm text-slate-200">
+            <thead>
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Invoice</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Client</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Project</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Division</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Amount (GHS)</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Submitted By</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Submitted Date</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Invoice</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Client</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Project</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Division</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Amount</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Submitted By</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Submitted Date</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-10 text-center text-sm text-slate-500">
+                  <td colSpan="8" className="px-6 py-10 text-center text-sm text-slate-400">
                     Loading pending invoices...
                   </td>
                 </tr>
               ) : invoices.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-10 text-center text-sm text-slate-500">
-                    No invoices pending approval.
+                  <td colSpan="8" className="px-6 py-10">
+                    <div className="mx-auto flex max-w-xl flex-col items-center justify-center gap-4 rounded-3xl border border-(--color-success)/20 bg-[rgba(29,158,117,0.08)] px-6 py-10 text-center text-slate-200">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-(--color-success)/20 text-(--color-success)">
+                        ✓
+                      </div>
+                      <p className="text-lg font-semibold">All approvals are clear</p>
+                      <p className="max-w-sm text-sm text-slate-400">No invoices are waiting for CEO action right now. Great work keeping the pipeline moving.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 invoices.map((invoice) => (
-                  <tr key={invoice.id}>
-                    <td className="px-6 py-4 text-sm text-slate-700">{invoice.invoice_number}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700">{invoice.client?.name || 'Unknown'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700">{invoice.project?.name || 'Unassigned'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700">{invoice.division?.name || 'Unknown'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700">
+                  <tr key={invoice.id} className="border-t border-white/5 hover:bg-[rgba(255,255,255,0.04)]">
+                    <td className="px-6 py-4 text-sm text-slate-200">{invoice.invoice_number}</td>
+                    <td className="px-6 py-4 text-sm text-slate-200">{invoice.client?.name || 'Unknown'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-200">{invoice.project?.name || 'Unassigned'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-200">{invoice.division?.name || 'Unknown'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-200">
                       {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'GHS', minimumFractionDigits: 2 }).format(Number(invoice.gross_total_ghs ?? 0))}
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-700">{invoice.submitted_by}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700">{new Date(invoice.created_at).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700">
+                    <td className="px-6 py-4 text-sm text-slate-200">{invoice.submitted_by}</td>
+                    <td className="px-6 py-4 text-sm text-slate-200">{new Date(invoice.created_at).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 text-sm text-slate-200">
                       <div className="flex flex-wrap gap-2">
                         <StatusBadge status="pending_approval" />
                         <button
                           type="button"
                           onClick={() => handleApprove(invoice)}
-                          className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
+                          className="rounded-full bg-(--color-success) px-3 py-1 text-xs font-semibold text-white hover:bg-[#17915c]"
                         >
                           Approve
                         </button>
                         <button
                           type="button"
                           onClick={() => openRejectModal(invoice)}
-                          className="rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white hover:bg-red-700"
+                          className="rounded-full bg-(--color-danger) px-3 py-1 text-xs font-semibold text-white hover:bg-[#c03e3a]"
                         >
                           Reject
                         </button>
@@ -258,55 +253,55 @@ export default function ApprovalQueue() {
       </div>
 
       {selectedInvoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-slate-950 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
               <div>
-                <h2 className="text-xl font-semibold text-slate-900">Reject Invoice</h2>
-                <p className="text-sm text-slate-500">{selectedInvoice.invoice_number}</p>
+                <h2 className="text-xl font-semibold text-white">Reject Invoice</h2>
+                <p className="text-sm text-slate-400">{selectedInvoice.invoice_number}</p>
               </div>
               <button
                 type="button"
                 onClick={closeRejectModal}
-                className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                className="rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:bg-white/5"
               >
                 Close
               </button>
             </div>
 
             <div className="space-y-5 p-6">
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 text-sm text-amber-300">
                 Rejection reason is required. Minimum 10 characters.
               </div>
 
-              <label className="space-y-2 text-sm text-slate-700">
-                <span>Rejection Reason</span>
+              <label className="space-y-2 text-sm text-slate-300">
+                <span className="block text-xs uppercase tracking-[0.16em] text-slate-400">Rejection Reason</span>
                 <textarea
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
                   rows="5"
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-red-400/50 focus:bg-white/10 outline-none"
                 />
               </label>
 
               {rejectError && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
                   {rejectError}
                 </div>
               )}
 
-              <div className="flex justify-end gap-3">
+              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
                 <button
                   type="button"
                   onClick={closeRejectModal}
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={submitRejection}
-                  className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                  className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-300 transition hover:border-red-500/50 hover:bg-red-500/20"
                 >
                   Reject Invoice
                 </button>

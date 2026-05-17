@@ -31,8 +31,8 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
   )
 
   const varianceStyle = variancePercent > 5
-    ? 'border-red-200 bg-red-50 text-red-700'
-    : 'border-amber-200 bg-amber-50 text-amber-700'
+    ? 'border-red-500/30 bg-red-500/10 text-red-300'
+    : 'border-amber-400/30 bg-amber-500/10 text-amber-300'
 
   const handleSubmit = async () => {
     setError(null)
@@ -85,17 +85,17 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-slate-950 shadow-2xl">
+        <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">Record Payment</h2>
-            <p className="text-sm text-slate-500">Invoice {invoice.invoice_number}</p>
+            <h2 className="text-xl font-semibold text-white">Record Payment</h2>
+            <p className="text-sm text-slate-400">Invoice {invoice.invoice_number}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+            className="rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:bg-white/5"
           >
             Close
           </button>
@@ -103,49 +103,49 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
 
         <div className="space-y-5 p-6">
           {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
               {error}
             </div>
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-2 text-sm text-slate-700">
-              <span>Payment Date</span>
+            <label className="space-y-2 text-sm text-slate-300">
+              <span className="block text-xs uppercase tracking-[0.16em] text-slate-400">Payment Date</span>
               <input
                 type="date"
                 value={paymentDate}
                 onChange={(e) => setPaymentDate(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-slate-500 focus:border-emerald-400/50 focus:bg-white/10 outline-none"
               />
             </label>
 
-            <label className="space-y-2 text-sm text-slate-700">
-              <span>Payment Reference</span>
+            <label className="space-y-2 text-sm text-slate-300">
+              <span className="block text-xs uppercase tracking-[0.16em] text-slate-400">Payment Reference</span>
               <input
                 type="text"
                 value={paymentReference}
                 onChange={(e) => setPaymentReference(e.target.value)}
                 placeholder="Bank transfer reference"
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-slate-500 focus:border-emerald-400/50 focus:bg-white/10 outline-none"
               />
             </label>
           </div>
 
-          <label className="space-y-2 text-sm text-slate-700">
-            <span>Amount Received (GHS)</span>
+          <label className="space-y-2 text-sm text-slate-300">
+            <span className="block text-xs uppercase tracking-[0.16em] text-slate-400">Amount Received (GHS)</span>
             <input
               type="number"
               min="0"
               step="0.01"
               value={amountReceived}
               onChange={(e) => setAmountReceived(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-slate-500 focus:border-emerald-400/50 focus:bg-white/10 outline-none"
             />
           </label>
 
-          <div className="rounded-2xl border p-4">
-            <div className="text-sm text-slate-500">Expected Receipt</div>
-            <div className="mt-1 text-xl font-semibold text-slate-900">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="text-sm text-slate-400">Expected Receipt</div>
+            <div className="mt-2 text-2xl font-semibold text-emerald-300">
               {new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'GHS',
@@ -154,25 +154,25 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
             </div>
           </div>
 
-          <div className={`rounded-2xl border px-4 py-3 ${varianceStyle}`}>
-            <div className="text-sm font-medium">FX variance</div>
-            <div className="mt-1 text-lg">
+          <div className={`rounded-2xl border px-4 py-4 ${varianceStyle}`}>
+            <div className="text-sm font-medium">FX Variance</div>
+            <div className="mt-2 text-lg font-semibold">
               {new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'GHS',
                 minimumFractionDigits: 2,
               }).format(variance)}
             </div>
-            <div className="text-sm text-slate-600">
+            <div className="text-xs text-slate-400 mt-1">
               {variancePercent.toFixed(2)}% difference
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10"
             >
               Cancel
             </button>
@@ -180,7 +180,7 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
               type="button"
               onClick={handleSubmit}
               disabled={loading}
-              className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-300 transition hover:border-emerald-400/50 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? 'Recording...' : 'Record Payment'}
             </button>

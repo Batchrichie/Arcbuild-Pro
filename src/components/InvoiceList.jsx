@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import RecordPaymentModal from './RecordPaymentModal'
+import StatusBadge from './ui/StatusBadge'
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All statuses' },
@@ -20,14 +21,6 @@ const STATUS_BADGES = {
   sent: 'bg-indigo-100 text-indigo-800',
   paid: 'bg-emerald-100 text-emerald-800',
   rejected: 'bg-red-100 text-red-800',
-}
-
-function StatusBadge({ status }) {
-  return (
-    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${STATUS_BADGES[status] ?? 'bg-slate-100 text-slate-800'}`}>
-      {status.replace('_', ' ').toUpperCase()}
-    </span>
-  )
 }
 
 export default function InvoiceList() {
@@ -184,15 +177,15 @@ export default function InvoiceList() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-slate-200 bg-white px-6 py-6 shadow-sm">
+      <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] px-6 py-6 shadow-xl shadow-black/10">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            <label className="space-y-2 text-sm text-slate-700">
-              <span>Status</span>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <label className="space-y-2 text-sm text-slate-300">
+              <span className="block uppercase tracking-[0.2em] text-xs text-slate-500">Status</span>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
               >
                 {STATUS_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -202,12 +195,12 @@ export default function InvoiceList() {
               </select>
             </label>
 
-            <label className="space-y-2 text-sm text-slate-700">
-              <span>Division</span>
+            <label className="space-y-2 text-sm text-slate-300">
+              <span className="block uppercase tracking-[0.2em] text-xs text-slate-500">Division</span>
               <select
                 value={divisionFilter}
                 onChange={(e) => setDivisionFilter(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
               >
                 {divisionOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -217,23 +210,23 @@ export default function InvoiceList() {
               </select>
             </label>
 
-            <label className="space-y-2 text-sm text-slate-700">
-              <span>From</span>
+            <label className="space-y-2 text-sm text-slate-300">
+              <span className="block uppercase tracking-[0.2em] text-xs text-slate-500">From</span>
               <input
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
               />
             </label>
 
-            <label className="space-y-2 text-sm text-slate-700">
-              <span>To</span>
+            <label className="space-y-2 text-sm text-slate-300">
+              <span className="block uppercase tracking-[0.2em] text-xs text-slate-500">To</span>
               <input
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
               />
             </label>
           </div>
@@ -241,27 +234,27 @@ export default function InvoiceList() {
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
           {error}
         </div>
       )}
 
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-xl shadow-black/10">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
+          <table className="min-w-full dark-table text-sm text-slate-200">
+            <thead>
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Invoice</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Client</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Project</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Division</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Amount (GHS)</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Submitted By</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Invoice</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Client</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Project</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Division</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Amount</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Submitted by</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody>
               {loading ? (
                 <tr>
                   <td colSpan="8" className="px-6 py-10 text-center text-sm text-slate-500">
@@ -276,19 +269,19 @@ export default function InvoiceList() {
                 </tr>
               ) : (
                 invoices.map((invoice) => (
-                  <tr key={invoice.id}>
-                    <td className="px-6 py-4 text-sm text-slate-700">{invoice.invoice_number}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700">{invoice.client?.name || 'Unknown'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700">{invoice.project?.name || 'Unassigned'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700">{invoice.division?.name || 'Unknown'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700">
+                  <tr key={invoice.id} className="border-t border-white/10 hover:bg-white/5">
+                    <td className="px-6 py-4 text-sm text-slate-100">{invoice.invoice_number}</td>
+                    <td className="px-6 py-4 text-sm text-slate-100">{invoice.client?.name || 'Unknown'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-100">{invoice.project?.name || 'Unassigned'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-100">{invoice.division?.name || 'Unknown'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-100">
                       {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'GHS', minimumFractionDigits: 2 }).format(Number(invoice.gross_total_ghs ?? 0))}
                     </td>
                     <td className="px-6 py-4">
                       <StatusBadge status={invoice.status} />
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-700">{invoice.submitted_by}</td>
-                    <td className="px-6 py-4 text-sm text-slate-700">
+                    <td className="px-6 py-4 text-sm text-slate-100">{invoice.submitted_by}</td>
+                    <td className="px-6 py-4 text-sm text-slate-100">
                       <div className="flex flex-wrap gap-2">
                         {invoice.status === 'draft' && (
                           <button
@@ -329,7 +322,7 @@ export default function InvoiceList() {
                         <button
                           type="button"
                           onClick={() => handleView(invoice)}
-                          className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                          className="rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1 text-xs font-semibold text-slate-100 hover:bg-slate-800"
                         >
                           View
                         </button>
@@ -345,7 +338,7 @@ export default function InvoiceList() {
 
       {invoices.map((invoice) =>
         invoice.status === 'rejected' ? (
-          <div key={`${invoice.id}-rejected`} className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+          <div key={`${invoice.id}-rejected`} className="rounded-3xl border border-red-500/20 bg-red-950/30 p-5 text-sm text-red-200">
             <div className="font-semibold">Rejection note for {invoice.invoice_number}</div>
             <p className="mt-2">{invoice.rejection_note || 'No rejection note provided.'}</p>
           </div>

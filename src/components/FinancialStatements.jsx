@@ -124,155 +124,261 @@ export default function FinancialStatements() {
   }
 
   return (
-    <div className="mt-8">
-      <h2 className="text-xl font-semibold">Financial Statements</h2>
-      <div className="mt-4">
-        <div className="flex gap-2">
-          <button onClick={()=>setTab('income')} className={`px-3 py-1 ${tab==='income'?'bg-slate-200':'bg-white'}`}>Income Statement</button>
-          <button onClick={()=>setTab('balance')} className={`px-3 py-1 ${tab==='balance'?'bg-slate-200':'bg-white'}`}>Balance Sheet</button>
-          <button onClick={()=>setTab('trial')} className={`px-3 py-1 ${tab==='trial'?'bg-slate-200':'bg-white'}`}>Trial Balance</button>
-          <button onClick={()=>setTab('cash')} className={`px-3 py-1 ${tab==='cash'?'bg-slate-200':'bg-white'}`}>Cash Flow</button>
-        </div>
+    <div className="mt-8 space-y-6">
+      <div className="flex gap-2 border-b border-white/10">
+        <button onClick={()=>setTab('income')} className={`px-4 py-3 text-sm font-semibold transition ${tab==='income'?'border-b-2 border-amber-400 text-amber-300':'text-slate-400 hover:text-slate-300'}`}>Income Statement</button>
+        <button onClick={()=>setTab('balance')} className={`px-4 py-3 text-sm font-semibold transition ${tab==='balance'?'border-b-2 border-blue-400 text-blue-300':'text-slate-400 hover:text-slate-300'}`}>Balance Sheet</button>
+        <button onClick={()=>setTab('trial')} className={`px-4 py-3 text-sm font-semibold transition ${tab==='trial'?'border-b-2 border-teal-400 text-teal-300':'text-slate-400 hover:text-slate-300'}`}>Trial Balance</button>
+        <button onClick={()=>setTab('cash')} className={`px-4 py-3 text-sm font-semibold transition ${tab==='cash'?'border-b-2 border-green-400 text-green-300':'text-slate-400 hover:text-slate-300'}`}>Cash Flow</button>
+      </div>
 
-        <div className="mt-4 p-4 border rounded bg-white">
-          {(tab === 'income') && (
-            <div>
-              <div className="flex gap-4 items-end">
-                <div>
-                  <label className="block text-sm">Start</label>
-                  <input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)} className="border p-1" />
+      <div className="space-y-6">
+        {(tab === 'income') && (
+          <div className="space-y-6">
+            <div className="flex gap-4 items-end flex-wrap">
+              <div>
+                <label className="block text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Start date</label>
+                <input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-amber-400/50 focus:bg-white/10 outline-none" />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">End date</label>
+                <input type="date" value={endDate} onChange={e=>setEndDate(e.target.value)} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-amber-400/50 focus:bg-white/10 outline-none" />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Division</label>
+                <select value={division} onChange={e=>setDivision(e.target.value)} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-amber-400/50 focus:bg-white/10 outline-none">
+                  <option className="bg-slate-950 text-white">All</option>
+                  {divisions.map(d => <option key={d.id} className="bg-slate-950 text-white">{d.name}</option>)}
+                </select>
+              </div>
+              <div className="ml-auto">
+                <button onClick={()=>window.print()} className="rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-300 transition hover:border-amber-400/50 hover:bg-amber-500/20">Export to PDF</button>
+              </div>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Revenue</p>
+                <div className="mt-4 space-y-3">
+                  {Object.keys(incomeAgg).map(divName => (
+                    <div key={divName} className="flex justify-between border-b border-white/10 pb-3">
+                      <div className="text-sm text-slate-300">{divName}</div>
+                      <div className="text-sm font-semibold text-amber-300">GHS {fmt(incomeAgg[divName].revenue)}</div>
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <label className="block text-sm">End</label>
-                  <input type="date" value={endDate} onChange={e=>setEndDate(e.target.value)} className="border p-1" />
-                </div>
-                <div>
-                  <label className="block text-sm">Division</label>
-                  <select value={division} onChange={e=>setDivision(e.target.value)} className="border p-1">
-                    <option>All</option>
-                    {divisions.map(d => <option key={d.id}>{d.name}</option>)}
-                  </select>
-                </div>
-                <div className="ml-auto">
-                  <button onClick={()=>window.print()} className="btn">Export to PDF</button>
+                <div className="mt-4 border-t border-white/10 pt-4 flex justify-between">
+                  <div className="font-semibold text-white">Total Revenue</div>
+                  <div className="font-semibold text-amber-300">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+v.revenue,0))}</div>
                 </div>
               </div>
 
-              <div className="mt-6">
-                <h3 className="font-semibold">REVENUE</h3>
-                {Object.keys(incomeAgg).map(divName => (
-                  <div key={divName} className="flex justify-between border-b py-2">
-                    <div>{divName} Revenue</div>
-                    <div className="text-right">GHS {fmt(incomeAgg[divName].revenue)}</div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Expenses</p>
+                <div className="mt-4 flex justify-between border-b border-white/10 pb-4">
+                  <div className="text-sm text-slate-300">Operating Expenses</div>
+                  <div className="text-sm font-semibold text-red-300">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+v.expense,0))}</div>
+                </div>
+                <div className="mt-6 space-y-4">
+                  <div className="flex justify-between text-sm">
+                    <div className="text-slate-300">Net Profit Before Tax</div>
+                    <div className="font-semibold text-cyan-300">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0))}</div>
                   </div>
-                ))}
-                <div className="flex justify-between font-semibold mt-2"> <div>Total Revenue</div> <div>GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+v.revenue,0))}</div></div>
-
-                <h3 className="font-semibold mt-4">OPERATING EXPENSES</h3>
-                <div className="flex justify-between border-b py-2"><div>Total Operating Expenses</div><div>GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+v.expense,0))}</div></div>
-
-                <div className="mt-4 font-semibold">NET PROFIT BEFORE TAX: GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0))}</div>
-                <div>Tax Provision (25%): GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.25)}</div>
-                <div className="font-bold mt-2">NET PROFIT AFTER TAX: GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.75)}</div>
-              </div>
-            </div>
-          )}
-
-          {(tab === 'balance') && (
-            <div>
-              <div className="flex gap-4 items-end">
-                <div>
-                  <label className="block text-sm">As at</label>
-                  <input type="date" value={asAtDate} onChange={e=>setAsAtDate(e.target.value)} className="border p-1" />
-                </div>
-                <div className="ml-auto">
-                  <button onClick={()=>window.print()} className="btn">Export to PDF</button>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <h3 className="font-semibold">ASSETS</h3>
-                <div className="pl-4">
-                  <div className="flex justify-between"><div>Current Assets</div><div>GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('11')).reduce((s,r)=>s+r.balance,0))}</div></div>
-                  <div className="flex justify-between"><div>Non-Current Assets</div><div>GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('12')).reduce((s,r)=>s+r.balance,0))}</div></div>
-                </div>
-                <div className="font-semibold mt-2">TOTAL ASSETS: GHS {fmt(bsRows.reduce((s,r)=>s+r.balance,0))}</div>
-
-                <h3 className="font-semibold mt-4">LIABILITIES</h3>
-                <div className="pl-4">
-                  <div className="flex justify-between"><div>Current Liabilities</div><div>GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('21')).reduce((s,r)=>s+r.balance,0))}</div></div>
-                </div>
-                <div className="font-semibold mt-2">TOTAL LIABILITIES: GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('21') || r.account_code.startsWith('22')).reduce((s,r)=>s+r.balance,0))}</div>
-
-                <h3 className="font-semibold mt-4">EQUITY</h3>
-                <div className="font-semibold">TOTAL EQUITY: GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('3')).reduce((s,r)=>s+r.balance,0))}</div>
-
-                <div className="mt-4 font-bold">TOTAL LIABILITIES + EQUITY: GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('21') || r.account_code.startsWith('22')).reduce((s,r)=>s+r.balance,0) + bsRows.filter(r=>r.account_code.startsWith('3')).reduce((s,r)=>s+r.balance,0))}</div>
-
-                <div className="mt-4">
-                  {Math.abs(bsRows.reduce((s,r)=>s+r.balance,0) - (bsRows.filter(r=>r.account_code.startsWith('21') || r.account_code.startsWith('22')).reduce((s,r)=>s+r.balance,0) + bsRows.filter(r=>r.account_code.startsWith('3')).reduce((s,r)=>s+r.balance,0))) > 0.5 && (
-                    <div className="text-red-600 font-semibold">Balance sheet does not balance — contact your accountant.</div>
-                  )}
+                  <div className="flex justify-between text-sm border-t border-white/10 pt-4">
+                    <div className="text-slate-300">Tax Provision (25%)</div>
+                    <div className="font-semibold text-orange-300">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.25)}</div>
+                  </div>
+                  <div className="flex justify-between border-t border-white/10 pt-4">
+                    <div className="font-semibold text-white">Net Profit After Tax</div>
+                    <div className="font-bold text-green-300 text-lg">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.75)}</div>
+                  </div>
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {(tab === 'trial') && (
-            <div>
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-slate-600">Date range: {startDate} — {endDate}</div>
-                <div className="flex gap-2">
-                  <button onClick={exportCsvForTrial} className="btn">Export CSV</button>
+        {(tab === 'balance') && (
+          <div className="space-y-6">
+            <div className="flex gap-4 items-end">
+              <div>
+                <label className="block text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">As at date</label>
+                <input type="date" value={asAtDate} onChange={e=>setAsAtDate(e.target.value)} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-400/50 focus:bg-white/10 outline-none" />
+              </div>
+              <div className="ml-auto">
+                <button onClick={()=>window.print()} className="rounded-lg border border-blue-400/30 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-300 transition hover:border-blue-400/50 hover:bg-blue-500/20">Export to PDF</button>
+              </div>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Assets</p>
+                <div className="mt-4 space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <div className="text-slate-300">Current Assets</div>
+                    <div className="text-blue-300">GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('11')).reduce((s,r)=>s+r.balance,0))}</div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <div className="text-slate-300">Non-Current Assets</div>
+                    <div className="text-blue-300">GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('12')).reduce((s,r)=>s+r.balance,0))}</div>
+                  </div>
+                </div>
+                <div className="mt-4 border-t border-white/10 pt-4 flex justify-between">
+                  <div className="font-semibold text-white">Total Assets</div>
+                  <div className="font-semibold text-blue-300">GHS {fmt(bsRows.reduce((s,r)=>s+r.balance,0))}</div>
                 </div>
               </div>
 
-              <div className="mt-4 overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead><tr className="text-left text-slate-600"><th>Account</th><th>Total Debits</th><th>Total Credits</th><th>Net Balance</th></tr></thead>
-                  <tbody>
-                    {trialAgg.map(r => (
-                      <tr key={r.account_code} className="border-t"><td className="p-2">{r.account_code} — {r.account_name}</td><td className="p-2 text-right">{fmt(r.total_debits)}</td><td className="p-2 text-right">{fmt(r.total_credits)}</td><td className="p-2 text-right">{fmt(r.total_debits - r.total_credits)}</td></tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Liabilities</p>
+                <div className="mt-4 space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <div className="text-slate-300">Current Liabilities</div>
+                    <div className="text-red-300">GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('21')).reduce((s,r)=>s+r.balance,0))}</div>
+                  </div>
+                </div>
+                <div className="mt-4 border-t border-white/10 pt-4 flex justify-between">
+                  <div className="font-semibold text-white">Total Liabilities</div>
+                  <div className="font-semibold text-red-300">GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('21') || r.account_code.startsWith('22')).reduce((s,r)=>s+r.balance,0))}</div>
+                </div>
               </div>
 
-              <div className="mt-2 font-semibold flex justify-between"><div>Totals</div><div>{fmt(trialAgg.reduce((s,r)=>s+r.total_debits,0))} / {fmt(trialAgg.reduce((s,r)=>s+r.total_credits,0))}</div></div>
-              {Math.abs(trialAgg.reduce((s,r)=>s+r.total_debits,0) - trialAgg.reduce((s,r)=>s+r.total_credits,0)) > 0.5 && (
-                <div className="text-red-600 font-semibold mt-2">Trial balance is out of balance.</div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Equity</p>
+                <div className="mt-4 border-t border-white/10 pt-4 flex justify-between">
+                  <div className="font-semibold text-white">Total Equity</div>
+                  <div className="font-semibold text-green-300">GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('3')).reduce((s,r)=>s+r.balance,0))}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+              <div className="flex justify-between mb-4 pb-4 border-b border-white/10">
+                <div className="font-semibold text-white">Total Liabilities + Equity</div>
+                <div className="font-semibold text-teal-300">GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('21') || r.account_code.startsWith('22')).reduce((s,r)=>s+r.balance,0) + bsRows.filter(r=>r.account_code.startsWith('3')).reduce((s,r)=>s+r.balance,0))}</div>
+              </div>
+              {Math.abs(bsRows.reduce((s,r)=>s+r.balance,0) - (bsRows.filter(r=>r.account_code.startsWith('21') || r.account_code.startsWith('22')).reduce((s,r)=>s+r.balance,0) + bsRows.filter(r=>r.account_code.startsWith('3')).reduce((s,r)=>s+r.balance,0))) > 0.5 && (
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300 font-semibold">⚠ Balance sheet does not balance — contact your accountant.</div>
               )}
             </div>
-          )}
+          </div>
+        )}
 
-          {(tab === 'cash') && (
-            <div>
-              <div className="flex items-center gap-4">
-                <div>Period: {startDate} — {endDate}</div>
-                <div className="ml-auto"><button onClick={()=>window.print()} className="btn">Export to PDF</button></div>
-              </div>
+        {(tab === 'trial') && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-slate-400">Date range: <span className="text-white font-semibold">{startDate} — {endDate}</span></div>
+              <button onClick={exportCsvForTrial} className="rounded-lg border border-teal-400/30 bg-teal-500/10 px-4 py-2 text-sm font-semibold text-teal-300 transition hover:border-teal-400/50 hover:bg-teal-500/20">Export CSV</button>
+            </div>
 
-              <div className="mt-4">
-                <h4 className="font-semibold">OPERATING ACTIVITIES</h4>
-                <div className="flex justify-between"><div>Net Profit After Tax</div><div className="text-right">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.75)}</div></div>
-                <div className="flex justify-between"><div>Add back: Depreciation (6401)</div><div className="text-right">GHS {fmt(cashFlow.depreciation)}</div></div>
-                <div className="flex justify-between"><div>(Increase)/Decrease in Receivables (1110)</div><div className="text-right">GHS {fmt(-cashFlow.receivables)}</div></div>
-                <div className="flex justify-between"><div>Increase/(Decrease) in Payables (2101)</div><div className="text-right">GHS {fmt(cashFlow.payables)}</div></div>
-                <div className="font-semibold mt-2">Net Cash from Operations: GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.75 + cashFlow.depreciation - cashFlow.receivables + cashFlow.payables)}</div>
-
-                <h4 className="font-semibold mt-4">INVESTING ACTIVITIES</h4>
-                <div className="flex justify-between"><div>Purchase of Assets (1210)</div><div className="text-right">GHS {fmt(-cashFlow.investing)}</div></div>
-                <div className="font-semibold mt-2">Net Cash from Investing: GHS {fmt(-cashFlow.investing)}</div>
-
-                <h4 className="font-semibold mt-4">FINANCING ACTIVITIES</h4>
-                <div className="flex justify-between"><div>Loan drawdowns / repayments (2201)</div><div className="text-right">GHS {fmt(cashFlow.financing)}</div></div>
-                <div className="font-semibold mt-2">Net Cash from Financing: GHS {fmt(cashFlow.financing)}</div>
-
-                <div className="mt-4 font-bold">NET INCREASE/(DECREASE) IN CASH: GHS {fmt((Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.75 + cashFlow.depreciation - cashFlow.receivables + cashFlow.payables) + (-cashFlow.investing) + cashFlow.financing)}</div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10 bg-white/5">
+                      <th className="px-6 py-4 text-left text-xs uppercase tracking-[0.16em] font-semibold text-slate-400">Account Code</th>
+                      <th className="px-6 py-4 text-left text-xs uppercase tracking-[0.16em] font-semibold text-slate-400">Account Name</th>
+                      <th className="px-6 py-4 text-right text-xs uppercase tracking-[0.16em] font-semibold text-slate-400">Total Debits</th>
+                      <th className="px-6 py-4 text-right text-xs uppercase tracking-[0.16em] font-semibold text-slate-400">Total Credits</th>
+                      <th className="px-6 py-4 text-right text-xs uppercase tracking-[0.16em] font-semibold text-slate-400">Net Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trialAgg.map((r, idx) => (
+                      <tr key={r.account_code} className={`border-b border-white/5 ${idx % 2 === 0 ? 'bg-white/2' : ''} hover:bg-white/5`}>
+                        <td className="px-6 py-3 text-slate-300">{r.account_code}</td>
+                        <td className="px-6 py-3 text-slate-300">{r.account_name}</td>
+                        <td className="px-6 py-3 text-right text-teal-300">{fmt(r.total_debits)}</td>
+                        <td className="px-6 py-3 text-right text-orange-300">{fmt(r.total_credits)}</td>
+                        <td className="px-6 py-3 text-right font-semibold text-slate-200">{fmt(r.total_debits - r.total_credits)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-white/10 bg-white/5 font-semibold">
+                      <td colSpan="2" className="px-6 py-4 text-white">Totals</td>
+                      <td className="px-6 py-4 text-right text-teal-300">{fmt(trialAgg.reduce((s,r)=>s+r.total_debits,0))}</td>
+                      <td className="px-6 py-4 text-right text-orange-300">{fmt(trialAgg.reduce((s,r)=>s+r.total_credits,0))}</td>
+                      <td className="px-6 py-4 text-right text-slate-200">{fmt(trialAgg.reduce((s,r)=>s+(r.total_debits - r.total_credits),0))}</td>
+                    </tr>
+                  </tfoot>
+                </table>
               </div>
             </div>
-          )}
-        </div>
+
+            {Math.abs(trialAgg.reduce((s,r)=>s+r.total_debits,0) - trialAgg.reduce((s,r)=>s+r.total_credits,0)) > 0.5 && (
+              <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300 font-semibold">⚠ Trial balance is out of balance.</div>
+            )}
+          </div>
+        )}
+
+        {(tab === 'cash') && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-slate-400">Period: <span className="text-white font-semibold">{startDate} — {endDate}</span></div>
+              <button onClick={()=>window.print()} className="rounded-lg border border-green-400/30 bg-green-500/10 px-4 py-2 text-sm font-semibold text-green-300 transition hover:border-green-400/50 hover:bg-green-500/20">Export to PDF</button>
+            </div>
+
+            <div className="grid gap-6">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-4">Operating Activities</p>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <div className="text-slate-300">Net Profit After Tax</div>
+                    <div className="text-green-300">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.75)}</div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <div className="text-slate-300">Add back: Depreciation</div>
+                    <div className="text-green-300">GHS {fmt(cashFlow.depreciation)}</div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <div className="text-slate-300">(Increase)/Decrease in Receivables</div>
+                    <div className="text-green-300">GHS {fmt(-cashFlow.receivables)}</div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <div className="text-slate-300">Increase/(Decrease) in Payables</div>
+                    <div className="text-green-300">GHS {fmt(cashFlow.payables)}</div>
+                  </div>
+                </div>
+                <div className="mt-4 border-t border-white/10 pt-4 flex justify-between font-semibold">
+                  <div className="text-white">Net Cash from Operations</div>
+                  <div className="text-green-300">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.75 + cashFlow.depreciation - cashFlow.receivables + cashFlow.payables)}</div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-4">Investing Activities</p>
+                <div className="flex justify-between text-sm mb-4">
+                  <div className="text-slate-300">Purchase of Assets</div>
+                  <div className="text-blue-300">GHS {fmt(-cashFlow.investing)}</div>
+                </div>
+                <div className="border-t border-white/10 pt-4 flex justify-between font-semibold">
+                  <div className="text-white">Net Cash from Investing</div>
+                  <div className="text-blue-300">GHS {fmt(-cashFlow.investing)}</div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-4">Financing Activities</p>
+                <div className="flex justify-between text-sm mb-4">
+                  <div className="text-slate-300">Loan drawdowns / repayments</div>
+                  <div className="text-amber-300">GHS {fmt(cashFlow.financing)}</div>
+                </div>
+                <div className="border-t border-white/10 pt-4 flex justify-between font-semibold">
+                  <div className="text-white">Net Cash from Financing</div>
+                  <div className="text-amber-300">GHS {fmt(cashFlow.financing)}</div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-6">
+                <div className="flex justify-between items-center">
+                  <div className="text-white font-bold">Net Increase/(Decrease) in Cash</div>
+                  <div className="text-3xl font-bold text-cyan-300">GHS {fmt((Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.75 + cashFlow.depreciation - cashFlow.receivables + cashFlow.payables) + (-cashFlow.investing) + cashFlow.financing)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
