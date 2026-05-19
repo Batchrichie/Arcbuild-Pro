@@ -12,6 +12,8 @@ import LeaveBalances from '../../components/hr/LeaveBalances'
 import ComplianceTracker from '../../components/hr/ComplianceTracker'
 import EmployeeCostReport from '../../components/hr/EmployeeCostReport'
 import HeadcountReport from '../../components/hr/HeadcountReport'
+import TimesheetApproval from '../../components/TimesheetApproval'
+import ThemeToggle from '../../components/ui/ThemeToggle'
 
 const NAV_SECTIONS = [
   {
@@ -28,6 +30,7 @@ const NAV_SECTIONS = [
     items: [
       { id: 'variable-pay', label: 'Variable Pay Input' },
       { id: 'payroll-review', label: 'Payroll Review' },
+      { id: 'timesheet-approvals', label: 'Timesheet Approvals' },
     ],
   },
   {
@@ -62,6 +65,7 @@ const VIEW_TITLES = {
   compliance: 'Contracts & Compliance',
   'variable-pay': 'Variable Pay Input',
   'payroll-review': 'Payroll Review',
+  'timesheet-approvals': 'Timesheet Approvals',
   'leave-calendar': 'Leave Calendar',
   'leave-approvals': 'Leave Approvals',
   'leave-balances': 'Leave Balances',
@@ -128,6 +132,8 @@ export default function HrPortal() {
         return <VariablePayInput />
       case 'payroll-review':
         return <PayrollReview />
+      case 'timesheet-approvals':
+        return <TimesheetApproval />
       case 'leave-calendar':
         return <LeaveCalendar />
       case 'leave-approvals':
@@ -184,9 +190,12 @@ export default function HrPortal() {
           </aside>
 
           <main className="portal-main portal-main-with-tabs min-w-0 overflow-x-hidden pb-24 lg:pb-8">
-            <div className="mb-4 flex items-center justify-between lg:hidden">
-              <h1 className="text-xl font-semibold text-white">{VIEW_TITLES[activeView]}</h1>
-              <button type="button" onClick={signOut} className="text-sm text-slate-400">Sign out</button>
+            <div className="mb-4 flex flex-col gap-3 lg:hidden">
+              <div className="flex items-center justify-between">
+                <h1 className="text-xl font-semibold text-white">{VIEW_TITLES[activeView]}</h1>
+                <button type="button" onClick={signOut} className="text-sm text-slate-400">Sign out</button>
+              </div>
+              <ThemeToggle className="self-start" />
             </div>
             {activeView !== 'dashboard' && (
               <div className="mb-4 hidden lg:block">

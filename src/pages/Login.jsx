@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { COMPANY } from '../lib/company-config'
 import logo from '../assets/ModuloDevLogo.png'
+import ThemeToggle from '../components/ui/ThemeToggle'
 
 // Role → portal route mapping
 const ROLE_ROUTES = {
@@ -104,9 +105,12 @@ export default function Login() {
             <span className="text-stone-200 font-bold tracking-widest text-xs uppercase">{COMPANY.shortName}</span>
           </div>
 
-          <div className="mb-10">
-            <p className="text-stone-600 text-xs tracking-[0.25em] uppercase mb-2">Portal Access</p>
-            <h2 className="text-stone-100 text-3xl font-black tracking-tight">Sign in</h2>
+          <div className="mb-10 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-stone-600 text-xs tracking-[0.25em] uppercase mb-2">Portal Access</p>
+              <h2 className="text-stone-100 text-3xl font-black tracking-tight">Sign in</h2>
+            </div>
+            <ThemeToggle className="hidden sm:inline-flex" />
           </div>
 
           {error && (

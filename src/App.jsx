@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { ThemeProvider } from './context/ThemeContext'
 import ProtectedRoute from './components/ProtectedRoute'
 
 // Pages
@@ -17,8 +18,9 @@ import ClientPortal     from './pages/portals/ClientPortal'
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <ThemeProvider>
+        <BrowserRouter>
+          <Routes>
 
           {/* Public routes */}
           <Route path="/login"        element={<Login />} />
@@ -71,6 +73,7 @@ export default function App() {
 
         </Routes>
       </BrowserRouter>
-    </AuthProvider>
+    </ThemeProvider>
+  </AuthProvider>
   )
 }

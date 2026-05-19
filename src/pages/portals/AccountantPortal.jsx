@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { COMPANY } from '../../lib/company-config'
-import logo from '../../assets/ModuloDevLogo.png'
 import InvoiceList from '../../components/InvoiceList'
 import InvoiceForm from '../../components/InvoiceForm'
 import GeneralLedger from '../../components/GeneralLedger'
@@ -16,15 +14,17 @@ import AssetRegister from '../../components/AssetRegister'
 import AccountantDashboard from '../../components/accountant/AccountantDashboard'
 import PayeSchedule from '../../components/accountant/PayeSchedule'
 import SsnitSchedule from '../../components/accountant/SsnitSchedule'
+import BankAccountRegistry from '../../components/banking/BankAccountRegistry'
+import BankStatementImport from '../../components/banking/BankStatementImport'
+import ReconciliationWorkspace from '../../components/banking/ReconciliationWorkspace'
 import TaxCentre from '../../components/tax/TaxCentre'
 import JournalDrillDown from '../../components/accountant/JournalDrillDown'
 import ManualJournalForm from '../../components/accounting/ManualJournalForm'
 import ManualJournalList from '../../components/accounting/ManualJournalList'
+import ThemeToggle from '../../components/ui/ThemeToggle'
 import DebtorsLedger from '../../components/accounting/DebtorsLedger'
-import BankAccountRegistry from '../../components/banking/BankAccountRegistry'
-import BankStatementImport from '../../components/banking/BankStatementImport'
-import ReconciliationWorkspace from '../../components/banking/ReconciliationWorkspace'
 import AlertLog from '../../components/alerts/AlertLog'
+import ManagementReports from '../../components/reports/ManagementReports'
 
 const NAV_SECTIONS = [
   {
@@ -46,12 +46,18 @@ const NAV_SECTIONS = [
     title: 'LEDGER & REPORTS',
     items: [
       { id: 'general-ledger', label: 'General Ledger' },
+      { id: 'management-reports', label: 'Management Reports' },
       { id: 'debtors-ledger', label: 'Debtors Ledger' },
       { id: 'financial-statements', label: 'Financial Statements' },
       { id: 'trial-balance', label: 'Trial Balance' },
+    ],
+  },
+  {
+    title: 'BANKING',
+    items: [
       { id: 'bank-accounts', label: 'Bank Accounts' },
       { id: 'import-statement', label: 'Import Statement' },
-      { id: 'bank-reconciliation', label: 'Bank Reconciliation' },
+      { id: 'reconciliation', label: 'Reconciliation' },
     ],
   },
   {
@@ -105,9 +111,9 @@ const MOBILE_SUB_NAV = {
     { id: 'journal-history', label: 'Journals' },
     { id: 'financial-statements', label: 'Statements' },
     { id: 'trial-balance', label: 'Trial' },
-    { id: 'bank-accounts', label: 'Bank accounts' },
+    { id: 'bank-accounts', label: 'Bank Accounts' },
     { id: 'import-statement', label: 'Import' },
-    { id: 'bank-reconciliation', label: 'Bank' },
+    { id: 'reconciliation', label: 'Reconciliation' },
   ],
   payroll: [
     { id: 'payroll-runs', label: 'Runs' },
@@ -139,9 +145,10 @@ const VIEW_TITLES = {
   'general-ledger': 'General Ledger',
   'financial-statements': 'Financial Statements',
   'trial-balance': 'Trial Balance',
+  'management-reports': 'Management Reports',
   'bank-accounts': 'Bank Accounts',
   'import-statement': 'Import Statement',
-  'bank-reconciliation': 'Bank Reconciliation',
+  'reconciliation': 'Reconciliation',
   'payroll-runs': 'Payroll Runs',
   'paye-schedule': 'PAYE Schedule',
   'ssnit-schedule': 'SSNIT Schedule',
@@ -166,7 +173,7 @@ function viewFromMobileTab(tab, currentView) {
 
 function mobileTabForView(view) {
   if (['invoice-list', 'create-invoice', 'milestone-queue'].includes(view)) return 'invoices'
-  if (['general-ledger', 'journal-history', 'new-journal', 'financial-statements', 'trial-balance', 'bank-accounts', 'import-statement', 'bank-reconciliation'].includes(view))
+  if (['general-ledger', 'journal-history', 'new-journal', 'financial-statements', 'trial-balance', 'bank-accounts', 'import-statement', 'reconciliation'].includes(view))
     return 'ledger'
   if (['payroll-runs', 'paye-schedule', 'ssnit-schedule'].includes(view)) return 'payroll'
   if (['project-finance', 'cost-ledger'].includes(view)) return 'projects'
@@ -180,7 +187,6 @@ export default function AccountantPortal() {
   const [mobileTab, setMobileTab] = useState('invoices')
   const [moreOpen, setMoreOpen] = useState(false)
   const [journalDrillId, setJournalDrillId] = useState(null)
-  const [journalDraft, setJournalDraft] = useState(null)
 
   const navigate = (viewId) => {
     setActiveView(viewId)
@@ -217,24 +223,18 @@ export default function AccountantPortal() {
         return <GeneralLedger />
       case 'financial-statements':
         return <FinancialStatements />
+      case 'management-reports':
+        return <ManagementReports />
       case 'trial-balance':
         return <FinancialStatements defaultTab="trial" />
       case 'bank-accounts':
         return <BankAccountRegistry />
       case 'import-statement':
         return <BankStatementImport />
-      case 'bank-reconciliation':
-        return <ReconciliationWorkspace onCreateJournal={(draft) => {
-          setJournalDraft(draft)
-          navigate('new-journal')
-        }} />
+      case 'reconciliation':
+        return <ReconciliationWorkspace onCreateJournal={(j) => navigate('new-journal')} />
       case 'new-journal':
-        return <ManualJournalForm
-          initialDescription={journalDraft?.description}
-          initialReference={journalDraft?.reference}
-          initialJournalDate={journalDraft?.journalDate}
-          initialLines={journalDraft?.lines || []}
-        />
+        return <ManualJournalForm />
       case 'journal-history':
         return <ManualJournalList />
       case 'debtors-ledger':
@@ -285,8 +285,8 @@ export default function AccountantPortal() {
           <aside className="portal-sidebar hidden rounded-4xl border border-white/10 p-5 shadow-2xl shadow-black/20 lg:block">
             <div className="mb-6">
               <div className="inline-flex items-center gap-3 rounded-3xl bg-[rgba(20,184,166,0.12)] px-4 py-3 text-sm font-semibold text-teal-200">
-                <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
-                <span>{COMPANY.shortName}</span>
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-500 text-slate-950">AB</span>
+                <span>ArcBuild Pro</span>
               </div>
             </div>
 
@@ -339,18 +339,21 @@ export default function AccountantPortal() {
           </aside>
 
           <main className="portal-main portal-main-with-tabs min-w-0 overflow-x-hidden">
-            <div className="mb-4 flex items-center justify-between gap-4 lg:hidden">
-              <div>
-                <p className="portal-eyebrow uppercase tracking-[0.2em] text-slate-500">Accountant</p>
-                <h1 className="text-xl font-semibold text-white">{VIEW_TITLES[activeView] || 'Workspace'}</h1>
+            <div className="mb-4 flex flex-col gap-3 lg:hidden">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="portal-eyebrow uppercase tracking-[0.2em] text-slate-500">Accountant</p>
+                  <h1 className="text-xl font-semibold text-white">{VIEW_TITLES[activeView] || 'Workspace'}</h1>
+                </div>
+                <button
+                  type="button"
+                  onClick={signOut}
+                  className="min-touch shrink-0 rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300"
+                >
+                  Sign out
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={signOut}
-                className="min-touch shrink-0 rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300"
-              >
-                Sign out
-              </button>
+              <ThemeToggle className="self-start" />
             </div>
 
             {showMobileSubNav && (
@@ -392,7 +395,7 @@ export default function AccountantPortal() {
               key={tab.id}
               type="button"
               onClick={() => handleMobileTab(tab.id)}
-              className={`flex min-h-11 min-w-12 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium ${
+              className={`flex min-h-[2.75rem] min-w-[3rem] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium ${
                 mobileTab === tab.id || (tab.id === 'more' && moreOpen) ? 'text-teal-300' : 'text-slate-500'
               }`}
             >

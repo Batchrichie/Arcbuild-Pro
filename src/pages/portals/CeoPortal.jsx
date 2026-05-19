@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import logo from '../../assets/ModuloDevLogo.png'
-import { COMPANY } from '../../lib/company-config'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { liabilityBalance } from '../../lib/formatGhs'
+import { liabilityBalance, formatGhs } from '../../lib/formatGhs'
 import ApprovalQueue from '../../components/ApprovalQueue'
 import GeneralLedger from '../../components/GeneralLedger'
 import FinancialStatements from '../../components/FinancialStatements'
+import ManagementReports from '../../components/reports/ManagementReports'
 import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
 import KpiStrip from '../../components/ceo/KpiStrip'
 import DivisionPerformanceCards from '../../components/ceo/DivisionPerformanceCards'
@@ -17,13 +16,13 @@ import IssueLog from '../../components/pm/IssueLog'
 import ManualJournalList from '../../components/accounting/ManualJournalList'
 import DebtorsLedger from '../../components/accounting/DebtorsLedger'
 import AlertLog from '../../components/alerts/AlertLog'
-import CeoBankAccountsView from '../../components/banking/CeoBankAccountsView'
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'approvals', label: 'Approvals', icon: '✓' },
   { id: 'projects', label: 'Projects', icon: '📁' },
   { id: 'financials', label: 'Financials', icon: '💰' },
+  { id: 'banking', label: 'Banking', icon: '🏦' },
   { id: 'journal-history', label: 'Journals', icon: '📒' },
   { id: 'debtors-ledger', label: 'Debtors Ledger', icon: '📋' },
   { id: 'alerts', label: 'Alerts', icon: '🚨' },
@@ -114,6 +113,8 @@ export default function CeoPortal() {
   const [taxBalances, setTaxBalances] = useState({})
   const [slideOverProjectId, setSlideOverProjectId] = useState(null)
   const [projectsSubview, setProjectsSubview] = useState('health')
+  const [bankAccounts, setBankAccounts] = useState([])
+  const [bankBalances, setBankBalances] = useState({})
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true)
@@ -244,6 +245,26 @@ export default function CeoPortal() {
   useEffect(() => {
     const initialize = async () => {
       await loadDashboardData()
+      // load bank accounts for CEO banking read-only view
+      try {
+        const { data: accounts } = await supabase.from('bank_accounts').select('*').order('account_name')
+        setBankAccounts(accounts || [])
+        const codes = (accounts || []).map((a) => a.gl_account_code).filter(Boolean)
+        if (codes.length) {
+          const { data: rows } = await supabase
+            .from('account_running_balance')
+            .select('account_code,running_balance,entry_date')
+            .in('account_code', [...new Set(codes)])
+            .order('entry_date', { ascending: false })
+          const grouped = {}
+          ;(rows || []).forEach((r) => {
+            if (!grouped[r.account_code]) grouped[r.account_code] = r.running_balance
+          })
+          setBankBalances(grouped)
+        }
+      } catch (err) {
+        console.warn('Failed to load bank accounts for CEO view', err)
+      }
     }
     initialize()
   }, [loadDashboardData])
@@ -256,8 +277,8 @@ export default function CeoPortal() {
           <aside className="portal-sidebar hidden rounded-4xl border border-white/10 p-5 shadow-2xl shadow-black/20 lg:block">
             <div className="mb-6">
               <div className="inline-flex items-center gap-3 rounded-3xl bg-[rgba(245,166,35,0.12)] px-4 py-3 text-sm font-semibold text-amber-200">
-                <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
-                <span>{COMPANY.shortName}</span>
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500 text-slate-950">AB</span>
+                <span>ArcBuild Pro</span>
               </div>
             </div>
 
@@ -342,11 +363,6 @@ export default function CeoPortal() {
                   <SectionHeader title="Tax due" subtitle="Ledger balances" />
                   <TaxDueAlerts balances={taxBalances} loading={loading} />
                 </section>
-
-                <section id="bank-overview">
-                  <SectionHeader title="Bank accounts" subtitle="Read-only cash position" />
-                  <CeoBankAccountsView />
-                </section>
               </>
             )}
 
@@ -410,6 +426,42 @@ export default function CeoPortal() {
               </section>
             )}
 
+            {activeTab === 'banking' && (
+              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                <SectionHeader title="Banking" subtitle="Bank accounts (read-only)" />
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-slate-200">
+                    <thead className="text-slate-400">
+                      <tr>
+                        <th className="px-3 py-3 text-left">Account</th>
+                        <th className="px-3 py-3 text-left">Bank</th>
+                        <th className="px-3 py-3 text-left">Account #</th>
+                        <th className="px-3 py-3 text-left">Currency</th>
+                        <th className="px-3 py-3 text-left">GL Code</th>
+                        <th className="px-3 py-3 text-right">GL Balance</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bankAccounts.length === 0 ? (
+                        <tr><td colSpan="6" className="p-4 text-center text-slate-400">No bank accounts registered.</td></tr>
+                      ) : (
+                        bankAccounts.map((a) => (
+                          <tr key={a.id} className="border-t border-white/5">
+                            <td className="px-3 py-3 text-slate-200">{a.account_name}</td>
+                            <td className="px-3 py-3 text-slate-200">{a.bank_name}</td>
+                            <td className="px-3 py-3 text-slate-200">{(a.account_number || '').slice(-4).padStart((a.account_number||'').length, '*')}</td>
+                            <td className="px-3 py-3 text-slate-200">{a.currency}</td>
+                            <td className="px-3 py-3 text-slate-200">{a.gl_account_code || '—'}</td>
+                            <td className="px-3 py-3 text-right text-slate-200">{formatGhs(bankBalances[a.gl_account_code] ?? 0)}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+
             {activeTab === 'journal-history' && (
               <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="Journal history" subtitle="Manual journal postings" />
@@ -439,8 +491,7 @@ export default function CeoPortal() {
 
             {activeTab === 'reports' && (
               <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
-                <SectionHeader title="Financial statements" subtitle="Income, balance sheet, cash flow" />
-                <FinancialStatements />
+                <ManagementReports />
               </section>
             )}
           </main>
@@ -455,7 +506,7 @@ export default function CeoPortal() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex min-h-11 min-w-12 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium transition ${
+              className={`flex min-h-[2.75rem] min-w-[3rem] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium transition ${
                 activeTab === tab.id ? 'text-amber-300' : 'text-slate-500'
               }`}
             >

@@ -12,6 +12,8 @@ import CostEntryForm from '../../components/CostEntryForm'
 import ProjectCostLedger from '../../components/ProjectCostLedger'
 import PaymentCertificateForm from '../../components/PaymentCertificateForm'
 import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
+import TimesheetApproval from '../../components/TimesheetApproval'
+import ThemeToggle from '../../components/ui/ThemeToggle'
 
 const NAV_SECTIONS = [
   {
@@ -44,6 +46,7 @@ const NAV_SECTIONS = [
     items: [
       { id: 'site-photos', label: 'Site Photos' },
       { id: 'reports', label: 'Reports' },
+      { id: 'timesheet-approvals', label: 'Timesheet Approvals' },
       { id: 'issues', label: 'Issues & Risks' },
     ],
   },
@@ -67,6 +70,7 @@ const VIEW_TITLES = {
   'payment-cert': 'Payment Certificates',
   'site-photos': 'Site Photos',
   reports: 'Daily Reports',
+  'timesheet-approvals': 'Timesheet Approvals',
   issues: 'Issues & Risks',
 }
 
@@ -173,6 +177,8 @@ function PmPortalContent() {
         return <PaymentCertificateForm userRole="project_manager" userId={profile?.id} />
       case 'site-photos':
         return <SitePhotoUpload />
+      case 'timesheet-approvals':
+        return <TimesheetApproval />
       case 'reports':
         return <DailyProgressReport />
       case 'issues':
@@ -223,11 +229,14 @@ function PmPortalContent() {
           </aside>
 
           <main className="portal-main portal-main-with-tabs min-w-0 overflow-x-hidden pb-32 lg:pb-8">
-            <div className="mb-4 flex items-center justify-between lg:hidden">
-              <h1 className="text-xl font-semibold text-white">{VIEW_TITLES[activeView]}</h1>
-              <button type="button" onClick={signOut} className="text-sm text-slate-400">
-                Sign out
-              </button>
+            <div className="mb-4 flex flex-col gap-3 lg:hidden">
+              <div className="flex items-center justify-between">
+                <h1 className="text-xl font-semibold text-white">{VIEW_TITLES[activeView]}</h1>
+                <button type="button" onClick={signOut} className="text-sm text-slate-400">
+                  Sign out
+                </button>
+              </div>
+              <ThemeToggle className="self-start" />
             </div>
 
             <div className="mb-4 hidden lg:block">

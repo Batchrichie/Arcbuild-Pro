@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { formatGhs } from '../../lib/formatGhs'
+import Modal from '../ui/Modal'
 
 const EMPTY = {
   full_name: '', email: '', phone: '', employee_number: '', job_title: '', department: '',
@@ -189,33 +190,62 @@ export default function EmployeeRegistry() {
           </table>
         </div>
       )}
-      {wizard && (<>
-        <button type="button" className="portal-slide-over-backdrop" onClick={() => setWizard(false)} aria-label="Close" />
-        <aside className="portal-slide-over-panel p-4 sm:p-6">
-          <h3 className="text-lg font-semibold text-white">Add employee ({step + 1}/4)</h3>
-          <div className="mt-4">{stepBody[step]}</div>
-          <div className="mt-6 flex gap-2">
-            {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className="rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300">Back</button>}
-            {step < 3 ? <button type="button" onClick={() => setStep(step + 1)} className="rounded-full bg-violet-500 px-4 py-2 text-sm text-white">Next</button>
-              : <button type="button" disabled={saving} onClick={finishWizard} className="rounded-full bg-violet-500 px-4 py-2 text-sm text-white">{saving ? '…' : 'Complete'}</button>}
-          </div>
-        </aside>
-      </>)}
-      {selected && edit && (<>
-        <button type="button" className="portal-slide-over-backdrop" onClick={() => setSelected(null)} aria-label="Close" />
-        <aside className="portal-slide-over-panel overflow-y-auto p-4 sm:p-6">
-          <h3 className="text-lg font-semibold text-white">{selected.profiles?.full_name}</h3>
-          <div className="mt-4 space-y-3">
-            <input className={cls} value={edit.full_name} onChange={(e) => setEdit({ ...edit, full_name: e.target.value })} />
-            <input className={cls} value={edit.phone} onChange={(e) => setEdit({ ...edit, phone: e.target.value })} />
-            <input className={cls} value={edit.job_title} onChange={(e) => setEdit({ ...edit, job_title: e.target.value })} />
-            <input className={cls} value={edit.department} onChange={(e) => setEdit({ ...edit, department: e.target.value })} />
-            <input type="number" className={cls} value={edit.basic_salary} onChange={(e) => setEdit({ ...edit, basic_salary: e.target.value })} />
-            <label className="flex gap-2 text-sm text-slate-300"><input type="checkbox" checked={edit.is_active} onChange={(e) => setEdit({ ...edit, is_active: e.target.checked })} />Active</label>
-          </div>
-          <button type="button" disabled={saving} onClick={saveDetail} className="mt-4 w-full rounded-full bg-violet-500 py-3 text-sm font-semibold text-white">Save</button>
-        </aside>
-      </>)}
+      <Modal open={wizard} onClose={() => setWizard(false)} title={`Add employee (${step + 1}/4)`} size="lg" footer={
+        <div className="flex flex-wrap gap-2">
+          {step > 0 && (
+            <button
+              type="button"
+              onClick={() => setStep(step - 1)}
+              className="rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300"
+            >
+              Back
+            </button>
+          )}
+          {step < 3 ? (
+            <button
+              type="button"
+              onClick={() => setStep(step + 1)}
+              className="rounded-full bg-violet-500 px-4 py-2 text-sm text-white"
+            >
+              Next
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={finishWizard}
+              className="rounded-full bg-violet-500 px-4 py-2 text-sm text-white"
+            >
+              {saving ? '…' : 'Complete'}
+            </button>
+          )}
+        </div>
+      }>
+        <div className="mt-4">{stepBody[step]}</div>
+      </Modal>
+
+      <Modal open={Boolean(selected && edit)} onClose={() => setSelected(null)} title={selected?.profiles?.full_name || 'Employee details'} size="lg" footer={
+        <button
+          type="button"
+          disabled={saving}
+          onClick={saveDetail}
+          className="rounded-full bg-violet-500 px-4 py-2 text-sm font-semibold text-white"
+        >
+          Save
+        </button>
+      }>
+        <div className="space-y-3">
+          <input className={cls} value={edit?.full_name || ''} onChange={(e) => setEdit({ ...edit, full_name: e.target.value })} />
+          <input className={cls} value={edit?.phone || ''} onChange={(e) => setEdit({ ...edit, phone: e.target.value })} />
+          <input className={cls} value={edit?.job_title || ''} onChange={(e) => setEdit({ ...edit, job_title: e.target.value })} />
+          <input className={cls} value={edit?.department || ''} onChange={(e) => setEdit({ ...edit, department: e.target.value })} />
+          <input type="number" className={cls} value={edit?.basic_salary || ''} onChange={(e) => setEdit({ ...edit, basic_salary: e.target.value })} />
+          <label className="flex gap-2 text-sm text-slate-300">
+            <input type="checkbox" checked={edit?.is_active || false} onChange={(e) => setEdit({ ...edit, is_active: e.target.checked })} />
+            Active
+          </label>
+        </div>
+      </Modal>
     </div>
   )
 }
