@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import InvoiceList from '../../components/InvoiceList'
 import InvoiceForm from '../../components/InvoiceForm'
+import Modal from '../../components/ui/Modal'
 import GeneralLedger from '../../components/GeneralLedger'
 import FinancialStatements from '../../components/FinancialStatements'
 import FxRateManager from '../../components/FxRateManager'
@@ -22,6 +23,7 @@ import JournalDrillDown from '../../components/accountant/JournalDrillDown'
 import ManualJournalForm from '../../components/accounting/ManualJournalForm'
 import ManualJournalList from '../../components/accounting/ManualJournalList'
 import ThemeToggle from '../../components/ui/ThemeToggle'
+import { COMPANY } from '../../lib/company-config'
 import DebtorsLedger from '../../components/accounting/DebtorsLedger'
 import AlertLog from '../../components/alerts/AlertLog'
 import ManagementReports from '../../components/reports/ManagementReports'
@@ -187,6 +189,14 @@ export default function AccountantPortal() {
   const [mobileTab, setMobileTab] = useState('invoices')
   const [moreOpen, setMoreOpen] = useState(false)
   const [journalDrillId, setJournalDrillId] = useState(null)
+  const [createInvoiceOpen, setCreateInvoiceOpen] = useState(false)
+  const [createJournalOpen, setCreateJournalOpen] = useState(false)
+
+  useEffect(() => {
+    try {
+      document.title = `${COMPANY.appName} — Accountant`
+    } catch {}
+  }, [])
 
   const navigate = (viewId) => {
     setActiveView(viewId)
@@ -216,7 +226,14 @@ export default function AccountantPortal() {
       case 'invoice-list':
         return <InvoiceList />
       case 'create-invoice':
-        return <InvoiceForm onSave={() => navigate('invoice-list')} />
+        return (
+          <div>
+            <button type="button" onClick={() => setCreateInvoiceOpen(true)} className="rounded-lg bg-emerald-500 px-4 py-2 text-white">Create invoice</button>
+            <Modal open={createInvoiceOpen} onClose={() => setCreateInvoiceOpen(false)} title="Create invoice" size="xl">
+              <InvoiceForm onSave={() => { setCreateInvoiceOpen(false); navigate('invoice-list') }} />
+            </Modal>
+          </div>
+        )
       case 'milestone-queue':
         return <MilestoneInvoiceQueue userRole="accountant" userId={profile?.id} />
       case 'general-ledger':
@@ -234,7 +251,14 @@ export default function AccountantPortal() {
       case 'reconciliation':
         return <ReconciliationWorkspace onCreateJournal={(j) => navigate('new-journal')} />
       case 'new-journal':
-        return <ManualJournalForm />
+        return (
+          <div>
+            <button type="button" onClick={() => setCreateJournalOpen(true)} className="rounded-lg bg-sky-500 px-4 py-2 text-white">New journal</button>
+            <Modal open={createJournalOpen} onClose={() => setCreateJournalOpen(false)} title="New manual journal" size="xl">
+              <ManualJournalForm />
+            </Modal>
+          </div>
+        )
       case 'journal-history':
         return <ManualJournalList />
       case 'debtors-ledger':
@@ -282,11 +306,11 @@ export default function AccountantPortal() {
     <div className="portal-shell overflow-x-hidden">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-8 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside className="portal-sidebar hidden rounded-4xl border border-white/10 p-5 shadow-2xl shadow-black/20 lg:block">
+          <aside className="portal-sidebar hidden rounded-4xl border border-white/10 p-5 shadow-2xl shadow-black/20 lg:block hover-animate panel-surface soft-gradient-overlay">
             <div className="mb-6">
               <div className="inline-flex items-center gap-3 rounded-3xl bg-[rgba(20,184,166,0.12)] px-4 py-3 text-sm font-semibold text-teal-200">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-500 text-slate-950">AB</span>
-                <span>ArcBuild Pro</span>
+                <span>{COMPANY.name}</span>
               </div>
             </div>
 
@@ -332,7 +356,7 @@ export default function AccountantPortal() {
             <button
               type="button"
               onClick={signOut}
-              className="min-touch mt-6 w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white hover:border-teal-400/40"
+              className="min-touch mt-6 w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white hover:border-teal-400/40 hover-animate"
             >
               Sign Out
             </button>
@@ -395,7 +419,7 @@ export default function AccountantPortal() {
               key={tab.id}
               type="button"
               onClick={() => handleMobileTab(tab.id)}
-              className={`flex min-h-[2.75rem] min-w-[3rem] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium ${
+              className={`flex min-h-[2.75rem] min-w-[3rem] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium hover-animate ${
                 mobileTab === tab.id || (tab.id === 'more' && moreOpen) ? 'text-teal-300' : 'text-slate-500'
               }`}
             >

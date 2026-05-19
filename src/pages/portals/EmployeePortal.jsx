@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { COMPANY } from '../../lib/company-config'
 import { useAuth } from '../../context/AuthContext'
 import { EmployeeProvider } from '../../context/EmployeeContext'
 import EmployeeHome from '../../components/employee/EmployeeHome'
@@ -7,6 +8,7 @@ import EmployeeLeave from '../../components/employee/EmployeeLeave'
 import EmployeeLoans from '../../components/employee/EmployeeLoans'
 import EmployeeProfile from '../../components/employee/EmployeeProfile'
 import TimesheetEntry from '../../components/TimesheetEntry'
+import Modal from '../../components/ui/Modal'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 
 const TABS = [
@@ -31,6 +33,11 @@ function EmployeePortalContent() {
   const { profile, signOut } = useAuth()
   const [tab, setTab] = useState('home')
   const [payslipLineId, setPayslipLineId] = useState(null)
+  const [leaveOpen, setLeaveOpen] = useState(false)
+  const [timesheetOpen, setTimesheetOpen] = useState(false)
+  useEffect(() => {
+    try { document.title = `${COMPANY.appName} — Employee` } catch {}
+  }, [])
 
   const goPayslip = (line) => {
     setPayslipLineId(line?.id ?? null)
@@ -44,11 +51,27 @@ function EmployeePortalContent() {
       case 'payslips':
         return <EmployeePayslips initialLineId={payslipLineId} onClearInitial={() => setPayslipLineId(null)} />
       case 'leave':
-        return <EmployeeLeave />
+        return (
+          <div>
+            <button type="button" onClick={() => setLeaveOpen(true)} className="rounded-lg bg-cyan-500 px-4 py-2 text-white">Apply for leave</button>
+            <Modal open={leaveOpen} onClose={() => setLeaveOpen(false)} title="Leave application" size="md">
+              <EmployeeLeave />
+            </Modal>
+          </div>
+        )
       case 'loans':
         return <EmployeeLoans />
       case 'profile':
         return <EmployeeProfile />
+      case 'timesheets':
+        return (
+          <div>
+            <button type="button" onClick={() => setTimesheetOpen(true)} className="rounded-lg bg-amber-500 px-4 py-2 text-white">New timesheet</button>
+            <Modal open={timesheetOpen} onClose={() => setTimesheetOpen(false)} title="Timesheet entry" size="xl">
+              <TimesheetEntry />
+            </Modal>
+          </div>
+        )
       default:
         return <EmployeeHome onViewPayslip={goPayslip} />
     }

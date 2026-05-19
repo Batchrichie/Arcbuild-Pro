@@ -14,6 +14,7 @@ import PaymentCertificateForm from '../../components/PaymentCertificateForm'
 import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
 import TimesheetApproval from '../../components/TimesheetApproval'
 import ThemeToggle from '../../components/ui/ThemeToggle'
+import Modal from '../../components/ui/Modal'
 
 const NAV_SECTIONS = [
   {
@@ -101,6 +102,11 @@ function PmPortalContent() {
   const [moreOpen, setMoreOpen] = useState(false)
   const [sheet, setSheet] = useState(null)
   const [ledgerCategory, setLedgerCategory] = useState('')
+  const [logCostOpen, setLogCostOpen] = useState(false)
+  const [paymentCertOpen, setPaymentCertOpen] = useState(false)
+  useEffect(() => {
+    try { document.title = `${COMPANY.appName} — Project Manager` } catch {}
+  }, [])
 
   const navigate = (view) => {
     setActiveView(view)
@@ -162,7 +168,14 @@ function PmPortalContent() {
           />
         )
       case 'log-cost':
-        return <CostEntryForm userRole="project_manager" userId={profile?.id} defaultProjectId={selectedProjectId} />
+        return (
+          <div>
+            <button type="button" onClick={() => setLogCostOpen(true)} className="rounded-lg bg-amber-500 px-4 py-2 text-white">Log cost</button>
+            <Modal open={logCostOpen} onClose={() => setLogCostOpen(false)} title="Log cost" size="lg">
+              <CostEntryForm userRole="project_manager" userId={profile?.id} defaultProjectId={selectedProjectId} />
+            </Modal>
+          </div>
+        )
       case 'cost-ledger':
         return (
           <ProjectCostLedger
@@ -174,7 +187,14 @@ function PmPortalContent() {
           />
         )
       case 'payment-cert':
-        return <PaymentCertificateForm userRole="project_manager" userId={profile?.id} />
+        return (
+          <div>
+            <button type="button" onClick={() => setPaymentCertOpen(true)} className="rounded-lg bg-rose-500 px-4 py-2 text-white">Create certificate</button>
+            <Modal open={paymentCertOpen} onClose={() => setPaymentCertOpen(false)} title="Payment certificate" size="lg">
+              <PaymentCertificateForm userRole="project_manager" userId={profile?.id} />
+            </Modal>
+          </div>
+        )
       case 'site-photos':
         return <SitePhotoUpload />
       case 'timesheet-approvals':

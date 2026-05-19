@@ -1,23 +1,22 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useLayoutEffect, useMemo, useState } from 'react'
 
 const ThemeContext = createContext(null)
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('dark')
-
-  useEffect(() => {
+  // Initialize from localStorage synchronously to avoid flicker on refresh.
+  const [theme, setTheme] = useState(() => {
     try {
       const stored = window.localStorage.getItem('arcbuild_theme')
-      if (stored === 'light' || stored === 'dark') {
-        setTheme(stored)
-        return
-      }
+      if (stored === 'light' || stored === 'dark') return stored
     } catch {
-      // ignore localStorage access failures
+      // ignore
     }
-  }, [])
+    return 'dark'
+  })
 
-  useEffect(() => {
+  // Use layout effect so the body class update runs before paint,
+  // preventing a flash between themes on reload.
+  useLayoutEffect(() => {
     document.body.classList.toggle('theme-light', theme === 'light')
     document.body.classList.toggle('theme-dark', theme === 'dark')
     try {

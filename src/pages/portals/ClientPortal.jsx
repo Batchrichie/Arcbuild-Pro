@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { ClientProvider, useClient } from '../../context/ClientContext'
 import { COMPANY } from '../../lib/company-config'
 import logo from '../../assets/ModuloDevLogo.png'
+import ThemeToggle from '../../components/ui/ThemeToggle'
+import { useTheme } from '../../context/ThemeContext'
 import ClientProjects from '../../components/client/ClientProjects'
 import ClientInvoices from '../../components/client/ClientInvoices'
 import ClientDocuments from '../../components/client/ClientDocuments'
@@ -23,6 +25,7 @@ function ClientPortalContent() {
   const [projectId, setProjectId] = useState(null)
 
   const displayName = client?.name || profile?.full_name || 'Client'
+  const { setTheme } = useTheme()
 
   const render = () => {
     switch (tab) {
@@ -38,6 +41,18 @@ function ClientPortalContent() {
         return null
     }
   }
+
+  useEffect(() => {
+    try {
+      // Client portal defaults to light theme
+      setTheme('light')
+      return () => { setTheme('dark') }
+    } catch {}
+  }, [setTheme])
+
+  useEffect(() => {
+    try { document.title = `${COMPANY.appName} — Client` } catch {}
+  }, [])
 
   return (
     <div className="client-portal min-h-screen bg-slate-50 text-slate-900">
@@ -71,6 +86,7 @@ function ClientPortalContent() {
               <p className="text-sm font-medium text-slate-900">{displayName}</p>
               <p className="text-xs text-slate-500">{email}</p>
             </div>
+            <ThemeToggle className="hidden md:inline-flex" />
             <button type="button" onClick={signOut} className="hidden rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 sm:block">
               Sign out
             </button>
@@ -139,3 +155,4 @@ export default function ClientPortal() {
     </ClientProvider>
   )
 }
+

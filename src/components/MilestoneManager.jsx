@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Modal from './ui/Modal'
 import { supabase } from '../lib/supabase';
 
 const STATUS_COLORS = {
@@ -249,9 +250,8 @@ export default function MilestoneManager({
       </div>
 
       {/* Add Milestone Form */}
-      {showAddForm && !readOnly && !inProgressOnly && (
-        <div className="rounded-4xl border border-white/10 bg-slate-950 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Add New Milestone</h3>
+      {!readOnly && !inProgressOnly && (
+        <Modal open={showAddForm} onClose={() => setShowAddForm(false)} title="Add New Milestone" size="md">
           <form onSubmit={handleAddMilestone} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -274,7 +274,7 @@ export default function MilestoneManager({
                   onChange={(e) =>
                     setAddFormData((prev) => ({ ...prev, dueDate: e.target.value }))
                   }
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 />
               </div>
             </div>
@@ -343,7 +343,7 @@ export default function MilestoneManager({
               </button>
             </div>
           </form>
-        </div>
+        </Modal>
       )}
 
       {/* Milestones Timeline */}

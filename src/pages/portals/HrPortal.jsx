@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { COMPANY } from '../../lib/company-config'
 import logo from '../../assets/ModuloDevLogo.png'
@@ -95,6 +95,10 @@ export default function HrPortal() {
   const [activeView, setActiveView] = useState('dashboard')
   const [mobileTab, setMobileTab] = useState('employees')
   const [moreOpen, setMoreOpen] = useState(false)
+
+  useEffect(() => {
+    try { document.title = `${COMPANY.appName} — HR` } catch {}
+  }, [])
 
   const navigate = (view) => {
     setActiveView(view)

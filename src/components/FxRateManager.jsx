@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import Modal from './ui/Modal'
 
 const CURRENCIES = ['USD', 'GBP', 'EUR']
 
@@ -9,6 +10,8 @@ export default function FxRateManager() {
   const [error, setError] = useState(null)
   const [editingId, setEditingId] = useState(null)
   const [editValue, setEditValue] = useState('')
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editCurrency, setEditCurrency] = useState(null)
   const [expandedCurrency, setExpandedCurrency] = useState(null)
   const [historicalRates, setHistoricalRates] = useState({})
   const [missingRates, setMissingRates] = useState([])
@@ -82,6 +85,8 @@ export default function FxRateManager() {
   const handleUpdateRate = (rate, currency) => {
     setEditingId(rate?.id || `new-${currency}`)
     setEditValue(rate?.rate_to_ghs || '')
+    setEditCurrency(currency)
+    setEditModalOpen(true)
   }
 
   const saveRate = async (currency) => {
@@ -152,6 +157,22 @@ export default function FxRateManager() {
 
   return (
     <div className="space-y-6">
+      <Modal open={editModalOpen} onClose={() => { setEditModalOpen(false); setEditingId(null); setEditCurrency(null); }} title={editCurrency ? `Update ${editCurrency} rate` : 'Update rate'} size="sm">
+        <div className="space-y-4">
+          <input
+            type="number"
+            step="0.0001"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            placeholder="0.0000"
+            className="w-full px-3 py-2 rounded-xl border border-white/20 bg-white/5 text-white placeholder-slate-400 focus:outline-none"
+          />
+          <div className="flex gap-2">
+            <button onClick={() => { saveRate(editCurrency); setEditModalOpen(false) }} className="flex-1 rounded-2xl border border-emerald-400/40 bg-[rgba(16,185,129,0.15)] px-4 py-2 text-sm font-medium text-emerald-200">Save</button>
+            <button onClick={() => { setEditModalOpen(false); setEditValue(''); setEditingId(null) }} className="flex-1 rounded-2xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300">Cancel</button>
+          </div>
+        </div>
+      </Modal>
       {/* Success Alert */}
       {successMessage && (
         <div className="rounded-2xl border border-emerald-400/30 bg-[rgba(16,185,129,0.1)] p-4 backdrop-blur-sm animate-in fade-in duration-300">
@@ -204,7 +225,7 @@ export default function FxRateManager() {
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-1">{currency}</p>
                   <p className="text-2xl font-semibold text-white">
-                    {isEditing ? (
+                    {isEditing && editModalOpen ? (
                       <input
                         type="number"
                         step="0.01"

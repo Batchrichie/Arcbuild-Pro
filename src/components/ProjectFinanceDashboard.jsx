@@ -300,7 +300,8 @@ export default function ProjectFinanceDashboard({
           </div>
 
           {/* Budget vs Actual Table */}
-          <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm overflow-x-auto">
+          <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+            <div className="portal-table-scroll overflow-x-auto">
             <h3 className="text-lg font-semibold text-white mb-4">Budget vs Actual</h3>
             <table className="w-full text-sm">
               <thead>
@@ -351,6 +352,7 @@ export default function ProjectFinanceDashboard({
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* Budget vs Actual Chart */}

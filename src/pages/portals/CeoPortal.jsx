@@ -4,7 +4,6 @@ import { useAuth } from '../../context/AuthContext'
 import { liabilityBalance, formatGhs } from '../../lib/formatGhs'
 import ApprovalQueue from '../../components/ApprovalQueue'
 import GeneralLedger from '../../components/GeneralLedger'
-import FinancialStatements from '../../components/FinancialStatements'
 import ManagementReports from '../../components/reports/ManagementReports'
 import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
 import KpiStrip from '../../components/ceo/KpiStrip'
@@ -16,6 +15,8 @@ import IssueLog from '../../components/pm/IssueLog'
 import ManualJournalList from '../../components/accounting/ManualJournalList'
 import DebtorsLedger from '../../components/accounting/DebtorsLedger'
 import AlertLog from '../../components/alerts/AlertLog'
+import { COMPANY } from '../../lib/company-config'
+import ThemeToggle from '../../components/ui/ThemeToggle'
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -115,6 +116,28 @@ export default function CeoPortal() {
   const [projectsSubview, setProjectsSubview] = useState('health')
   const [bankAccounts, setBankAccounts] = useState([])
   const [bankBalances, setBankBalances] = useState({})
+  const [moreOpen, setMoreOpen] = useState(false)
+
+  useEffect(() => {
+    try {
+      document.title = `${COMPANY.appName} — CEO`
+    } catch (err) {
+      console.error(err)
+    }
+  }, [])
+
+  const visibleTabs = TABS.slice(0, 4)
+  const overflowTabs = TABS.slice(4)
+
+  const handleMobileTab = (tabId) => {
+    if (tabId === 'more') {
+      setMoreOpen(true)
+      return
+    }
+
+    setActiveTab(tabId)
+    setMoreOpen(false)
+  }
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true)
@@ -278,7 +301,7 @@ export default function CeoPortal() {
             <div className="mb-6">
               <div className="inline-flex items-center gap-3 rounded-3xl bg-[rgba(245,166,35,0.12)] px-4 py-3 text-sm font-semibold text-amber-200">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500 text-slate-950">AB</span>
-                <span>ArcBuild Pro</span>
+                <span>{COMPANY.name}</span>
               </div>
             </div>
 
@@ -324,13 +347,16 @@ export default function CeoPortal() {
                   {TABS.find((t) => t.id === activeTab)?.label ?? 'Dashboard'}
                 </h1>
               </div>
-              <button
+              <div className="flex items-center gap-3">
+                <ThemeToggle className="self-start" />
+                <button
                 type="button"
                 onClick={signOut}
                 className="min-touch shrink-0 rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300"
               >
                 Sign out
               </button>
+              </div>
             </div>
 
             {activeTab === 'dashboard' && (
@@ -501,11 +527,11 @@ export default function CeoPortal() {
       {/* Mobile bottom tab bar */}
       <nav className="portal-mobile-nav lg:hidden" aria-label="CEO navigation">
         <div className="mx-auto flex max-w-lg justify-around px-1">
-          {TABS.map((tab) => (
+          {visibleTabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleMobileTab(tab.id)}
               className={`flex min-h-[2.75rem] min-w-[3rem] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium transition ${
                 activeTab === tab.id ? 'text-amber-300' : 'text-slate-500'
               }`}
@@ -516,8 +542,59 @@ export default function CeoPortal() {
               <span>{tab.label}</span>
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => handleMobileTab('more')}
+            className={`flex min-h-[2.75rem] min-w-[3rem] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium transition ${
+              moreOpen ? 'text-amber-300' : 'text-slate-500'
+            }`}
+          >
+            <span className="text-base leading-none" aria-hidden>
+              ⋯
+            </span>
+            <span>More</span>
+          </button>
         </div>
       </nav>
+
+      {moreOpen && (
+        <>
+          <button
+            type="button"
+            className="portal-drawer-backdrop"
+            aria-label="Close menu"
+            onClick={() => setMoreOpen(false)}
+          />
+          <div className="portal-drawer-sheet lg:hidden">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white">More</h3>
+              <button
+                type="button"
+                onClick={() => setMoreOpen(false)}
+                className="text-sm text-slate-400"
+              >
+                Close
+              </button>
+            </div>
+            <div className="grid gap-2">
+              {overflowTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(tab.id)
+                    setMoreOpen(false)
+                  }}
+                  className="min-touch flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-slate-200"
+                >
+                  <span aria-hidden>{tab.icon}</span>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Project finance slide-over */}
       {slideOverProjectId && (
