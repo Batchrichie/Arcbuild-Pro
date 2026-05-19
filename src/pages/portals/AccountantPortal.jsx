@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import InvoiceList from '../../components/InvoiceList'
+import SupplierRegistry from '../../pages/suppliers/SupplierRegistry'
 import InvoiceForm from '../../components/InvoiceForm'
 import Modal from '../../components/ui/Modal'
 import GeneralLedger from '../../components/GeneralLedger'
@@ -90,6 +91,7 @@ const NAV_SECTIONS = [
     items: [
       { id: 'asset-register', label: 'Asset Register' },
       { id: 'subcontractors', label: 'Subcontractors' },
+      { id: 'suppliers', label: 'Suppliers' },
     ],
   },
 ]
@@ -134,6 +136,7 @@ const MORE_DRAWER_ITEMS = [
   { id: 'alert-log', label: 'Alerts', icon: '🚨' },
   { id: 'asset-register', label: 'Asset Register', icon: '🏗️' },
   { id: 'subcontractors', label: 'Subcontractors', icon: '👷' },
+  { id: 'suppliers', label: 'Suppliers', icon: '🏢' },
   { id: 'fx-rates', label: 'FX Rates', icon: '💱' },
 ]
 
@@ -161,6 +164,7 @@ const VIEW_TITLES = {
   'alert-log': 'Alerts',
   'fx-rates': 'FX Rates',
   'asset-register': 'Asset Register',
+  'suppliers': 'Suppliers',
   subcontractors: 'Subcontractors',
 }
 
@@ -202,6 +206,13 @@ export default function AccountantPortal() {
   }, [])
 
   const navigate = (viewId) => {
+    if (viewId === 'suppliers') {
+      setActiveView('suppliers')
+      setMoreOpen(false)
+      setMobileTab('more')
+      return
+    }
+
     setActiveView(viewId)
     setMoreOpen(false)
     setMobileTab(mobileTabForView(viewId))
@@ -290,6 +301,8 @@ export default function AccountantPortal() {
         return <ProjectFinanceDashboard userRole="accountant" currentUserProfileId={profile?.id} />
       case 'cost-ledger':
         return <ProjectCostLedger userRole="accountant" userId={profile?.id} />
+      case 'suppliers':
+        return <SupplierRegistry />
       case 'tax-centre':
         return <TaxCentre />
       case 'fx-rates':

@@ -6,6 +6,10 @@ import ProtectedRoute from './components/ProtectedRoute'
 // Pages
 import Login        from './pages/Login'
 import Unauthorized from './pages/Unauthorized'
+import ClientRegistry   from './pages/clients/ClientRegistry'
+import ClientDetail     from './pages/clients/ClientDetail'
+import SupplierRegistry from './pages/suppliers/SupplierRegistry'
+import SupplierDetail   from './pages/suppliers/SupplierDetail'
 
 // Portal placeholders (Phase 4 will replace these)
 import CeoPortal        from './pages/portals/CeoPortal'
@@ -65,6 +69,30 @@ export default function App() {
           <Route path="/client" element={
             <ProtectedRoute allowedRoles={['client']}>
               <ClientPortal />
+            </ProtectedRoute>
+          } />
+
+          {/* Client management */}
+          <Route path="/clients" element={
+            <ProtectedRoute allowedRoles={['accountant', 'project_manager', 'ceo']}>
+              <ClientRegistry />
+            </ProtectedRoute>
+          } />
+          <Route path="/clients/:id" element={
+            <ProtectedRoute allowedRoles={['accountant', 'project_manager', 'ceo']}>
+              <ClientDetail />
+            </ProtectedRoute>
+          } />
+
+          {/* Supplier management */}
+          <Route path="/suppliers" element={
+            <ProtectedRoute allowedRoles={['accountant', 'project_manager', 'ceo']}>
+              <SupplierRegistry />
+            </ProtectedRoute>
+          } />
+          <Route path="/suppliers/:id" element={
+            <ProtectedRoute allowedRoles={['accountant', 'project_manager', 'ceo']}>
+              <SupplierDetail />
             </ProtectedRoute>
           } />
 

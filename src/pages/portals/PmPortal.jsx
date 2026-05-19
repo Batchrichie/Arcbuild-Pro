@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { COMPANY } from '../../lib/company-config'
 import logo from '../../assets/ModuloDevLogo.png'
