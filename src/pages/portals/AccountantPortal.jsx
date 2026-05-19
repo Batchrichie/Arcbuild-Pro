@@ -95,6 +95,7 @@ const NAV_SECTIONS = [
 ]
 
 const MOBILE_TABS = [
+  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'invoices', label: 'Invoices', icon: '📄' },
   { id: 'ledger', label: 'Ledger', icon: '📒' },
   { id: 'payroll', label: 'Payroll', icon: '💼' },
@@ -166,6 +167,7 @@ const VIEW_TITLES = {
 function viewFromMobileTab(tab, currentView) {
   const subs = MOBILE_SUB_NAV[tab]
   if (subs?.some((s) => s.id === currentView)) return currentView
+  if (tab === 'dashboard') return 'dashboard'
   if (tab === 'invoices') return 'invoice-list'
   if (tab === 'ledger') return 'general-ledger'
   if (tab === 'payroll') return 'payroll-runs'
@@ -174,6 +176,7 @@ function viewFromMobileTab(tab, currentView) {
 }
 
 function mobileTabForView(view) {
+  if (view === 'dashboard') return 'dashboard'
   if (['invoice-list', 'create-invoice', 'milestone-queue'].includes(view)) return 'invoices'
   if (['general-ledger', 'journal-history', 'new-journal', 'financial-statements', 'trial-balance', 'bank-accounts', 'import-statement', 'reconciliation'].includes(view))
     return 'ledger'
@@ -419,7 +422,7 @@ export default function AccountantPortal() {
               key={tab.id}
               type="button"
               onClick={() => handleMobileTab(tab.id)}
-              className={`flex min-h-[2.75rem] min-w-[3rem] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium hover-animate ${
+              className={`flex min-h-11 min-w-12 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium hover-animate ${
                 mobileTab === tab.id || (tab.id === 'more' && moreOpen) ? 'text-teal-300' : 'text-slate-500'
               }`}
             >

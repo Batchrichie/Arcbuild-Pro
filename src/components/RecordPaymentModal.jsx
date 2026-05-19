@@ -72,6 +72,7 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
         throw new Error(data?.error || 'Failed to record payment')
       }
 
+      window.alert('Payment recorded and posted to the general ledger.')
       onSuccess?.(invoice.id)
       onClose()
     } catch (err) {

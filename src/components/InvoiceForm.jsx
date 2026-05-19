@@ -469,44 +469,39 @@ export default function InvoiceForm({ onSave, initialData = null }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="py-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-lg">
-          {/* Header */}
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-900">Create Invoice</h1>
+        <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950/95 shadow-2xl shadow-black/30">
+          <div className="bg-slate-900/80 px-6 py-5 border-b border-white/10">
+            <h1 className="text-3xl font-semibold text-white">Create invoice</h1>
+            <p className="mt-2 text-sm text-slate-400">
+              Build an invoice with client, project, line items, and tax calculation in one flow.
+            </p>
           </div>
 
-          {/* Error Message */}
           {error && (
-            <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-700">
+            <div className="mx-6 mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
               {error}
             </div>
           )}
 
-          {/* Approval Threshold Banner */}
           {requiresApproval && (
-            <div className="mx-6 mt-4 p-4 bg-amber-50 border border-amber-200 rounded">
-              <p className="text-amber-800 font-medium">
-                ⚠️ This invoice exceeds {formatGHS(approvalThreshold)} and will require director
-                approval before dispatch.
+            <div className="mx-6 mt-4 rounded-3xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+              <p className="font-medium">
+                ⚠️ This invoice exceeds {formatGHS(approvalThreshold)} and will require director approval before dispatch.
               </p>
             </div>
           )}
 
           <div className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column: Form Fields */}
               <div className="lg:col-span-2 space-y-6">
-                {/* Client Selection */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Client
-                  </label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Client</label>
                   <select
                     value={formData.client_id}
                     onChange={(e) => handleFormChange('client_id', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-2 text-sm text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   >
                     <option value="">Select a client...</option>
                     {clients.map((client) => (
@@ -517,16 +512,13 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                   </select>
                 </div>
 
-                {/* Project Selection */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Project
-                  </label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Project</label>
                   <select
                     value={formData.project_id}
                     onChange={(e) => handleFormChange('project_id', e.target.value)}
                     disabled={!formData.client_id}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-2 text-sm text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:bg-slate-800 disabled:text-slate-500"
                   >
                     <option value="">Select a project...</option>
                     {projects.map((project) => (
@@ -536,29 +528,24 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     ))}
                   </select>
                 </div>
-                {/* Division (Auto-filled, Read-Only) */}
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Division
-                  </label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Division</label>
                   <input
                     type="text"
                     value={formData.division_name}
                     readOnly
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-600"
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-2 text-sm text-slate-300"
                   />
                 </div>
 
-                {/* Currency and FX Rate */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Currency
-                    </label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Currency</label>
                     <select
                       value={formData.currency}
                       onChange={(e) => handleFormChange('currency', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-2 text-sm text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                     >
                       {Object.values(Currency).map((curr) => (
                         <option key={curr} value={curr}>
@@ -569,9 +556,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      FX Rate to GHS
-                    </label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">FX Rate to GHS</label>
                     <div className="flex gap-2">
                       <input
                         type="number"
@@ -579,7 +564,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                         value={formData.fx_rate_to_ghs}
                         onChange={handleOverrideFxRate}
                         disabled={formData.currency === Currency.GHS}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50"
+                        className="flex-1 rounded-2xl border border-white/10 bg-slate-900 px-4 py-2 text-sm text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:bg-slate-800"
                       />
                       <button
                         onClick={() =>
@@ -589,32 +574,29 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           }))
                         }
                         disabled={formData.currency === Currency.GHS}
-                        className="px-3 py-2 text-xs font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50"
+                        className="rounded-2xl bg-white/5 px-3 py-2 text-xs font-medium text-slate-200 transition hover:bg-white/10 disabled:opacity-50"
                       >
                         {formData.fx_rate_override ? 'Using Override' : 'Using Current'}
                       </button>
                     </div>
                     {exchangeRate && !formData.fx_rate_override && (
-                      <p className="mt-1 text-xs text-gray-500">
-                        Current rate: {exchangeRate.rate_to_ghs}
-                      </p>
+                      <p className="mt-1 text-xs text-slate-500">Current rate: {exchangeRate.rate_to_ghs}</p>
                     )}
                   </div>
                 </div>
 
-                {/* Line Items */}
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <label className="block text-sm font-medium text-gray-700">Line Items</label>
+                    <label className="block text-sm font-medium text-slate-300">Line Items</label>
                     <button
                       onClick={addLineItem}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                      className="text-sm font-semibold text-cyan-300 transition hover:text-cyan-200"
                     >
                       + Add Line Item
                     </button>
                   </div>
 
-                  <div className="space-y-3 border border-gray-200 rounded-md p-4 bg-gray-50">
+                  <div className="space-y-3 rounded-3xl border border-white/10 bg-slate-950/80 p-4">
                     {lineItems.map((item, index) => (
                       <div key={index} className="grid grid-cols-12 gap-2 items-end">
                         <input
@@ -624,7 +606,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           onChange={(e) =>
                             handleLineItemChange(index, 'description', e.target.value)
                           }
-                          className="col-span-5 px-2 py-2 border border-gray-300 rounded text-sm"
+                          className="col-span-5 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="number"
@@ -634,7 +616,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           onChange={(e) =>
                             handleLineItemChange(index, 'quantity', parseFloat(e.target.value))
                           }
-                          className="col-span-2 px-2 py-2 border border-gray-300 rounded text-sm"
+                          className="col-span-2 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="number"
@@ -644,17 +626,17 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           onChange={(e) =>
                             handleLineItemChange(index, 'unit_price', parseFloat(e.target.value))
                           }
-                          className="col-span-2 px-2 py-2 border border-gray-300 rounded text-sm"
+                          className="col-span-2 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="text"
                           readOnly
                           value={formatCurrency(item.quantity * item.unit_price)}
-                          className="col-span-2 px-2 py-2 border border-gray-300 rounded text-sm bg-gray-100 text-gray-600"
+                          className="col-span-2 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-300"
                         />
                         <button
                           onClick={() => removeLineItem(index)}
-                          className="col-span-1 text-red-600 hover:text-red-700 font-medium"
+                          className="col-span-1 rounded-full text-sm font-semibold text-rose-300 transition hover:text-rose-100"
                         >
                           ✕
                         </button>
@@ -663,104 +645,106 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                   </div>
                 </div>
 
-                {/* Notes */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Notes</label>
                   <textarea
                     value={formData.notes}
                     onChange={(e) => handleFormChange('notes', e.target.value)}
                     rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   />
                 </div>
               </div>
 
-              {/* Right Column: Tax Breakdown Panel */}
               <div className="lg:col-span-1">
-                <div className="sticky top-6 bg-linear-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Tax Breakdown</h3>
+                <div className="sticky top-6 rounded-3xl border border-white/10 bg-slate-900/90 p-6 shadow-lg shadow-black/20">
+                  <h3 className="text-lg font-semibold text-white mb-4">Tax Breakdown</h3>
 
-                  <div className="space-y-3 text-sm">
-                    {/* Subtotal */}
+                  <div className="space-y-3 text-sm text-slate-200">
                     <div className="flex justify-between">
                       <span>Subtotal:</span>
-                      <span className="font-medium">
-                        {formData.currency === Currency.GHS ? formatCurrency(taxes.subtotal) : formatGHS(taxes.subtotal * formData.fx_rate_to_ghs)}
+                      <span className="font-medium text-white">
+                        {formData.currency === Currency.GHS
+                          ? formatCurrency(taxes.subtotal)
+                          : formatGHS(taxes.subtotal * formData.fx_rate_to_ghs)}
                       </span>
                     </div>
 
-                    {/* VAT */}
                     {clientTaxProfile?.applies_vat && (
                       <div className="flex justify-between">
                         <span>VAT (15%):</span>
-                        <span className="font-medium">
-                          {formData.currency === Currency.GHS ? formatCurrency(taxes.vat) : formatGHS(taxes.vat * formData.fx_rate_to_ghs)}
+                        <span className="font-medium text-white">
+                          {formData.currency === Currency.GHS
+                            ? formatCurrency(taxes.vat)
+                            : formatGHS(taxes.vat * formData.fx_rate_to_ghs)}
                         </span>
                       </div>
                     )}
 
-                    {/* NHIL */}
                     {clientTaxProfile?.applies_nhil && (
                       <div className="flex justify-between">
                         <span>NHIL (2.5%):</span>
-                        <span className="font-medium">
-                          {formData.currency === Currency.GHS ? formatCurrency(taxes.nhil) : formatGHS(taxes.nhil * formData.fx_rate_to_ghs)}
+                        <span className="font-medium text-white">
+                          {formData.currency === Currency.GHS
+                            ? formatCurrency(taxes.nhil)
+                            : formatGHS(taxes.nhil * formData.fx_rate_to_ghs)}
                         </span>
                       </div>
                     )}
 
-                    {/* GetFUND */}
                     {clientTaxProfile?.applies_getfund && (
                       <div className="flex justify-between">
                         <span>GetFUND (2.5%):</span>
-                        <span className="font-medium">
-                          {formData.currency === Currency.GHS ? formatCurrency(taxes.getfund) : formatGHS(taxes.getfund * formData.fx_rate_to_ghs)}
+                        <span className="font-medium text-white">
+                          {formData.currency === Currency.GHS
+                            ? formatCurrency(taxes.getfund)
+                            : formatGHS(taxes.getfund * formData.fx_rate_to_ghs)}
                         </span>
                       </div>
                     )}
 
-                    {/* Divider */}
-                    <div className="border-t border-blue-200 my-2"></div>
+                    <div className="border-t border-white/10 my-2"></div>
 
-                    {/* Gross Total */}
-                    <div className="flex justify-between font-bold text-base">
+                    <div className="flex justify-between font-bold text-base text-white">
                       <span>Gross Total:</span>
                       <span>
-                        {formData.currency === Currency.GHS ? formatCurrency(taxes.gross_total) : formatGHS(taxes.gross_total_ghs)}
+                        {formData.currency === Currency.GHS
+                          ? formatCurrency(taxes.gross_total)
+                          : formatGHS(taxes.gross_total_ghs)}
                       </span>
                     </div>
 
-                    {/* WHT */}
                     {clientTaxProfile?.applies_wht && (
-                      <div className="flex justify-between text-orange-600 font-medium">
+                      <div className="flex justify-between text-orange-300 font-medium">
                         <span>WHT Deduction ({(clientTaxProfile.wht_rate * 100).toFixed(1)}%):</span>
                         <span>
-                          - {formData.currency === Currency.GHS ? formatCurrency(taxes.wht) : formatGHS(taxes.wht * formData.fx_rate_to_ghs)}
+                          - {formData.currency === Currency.GHS
+                            ? formatCurrency(taxes.wht)
+                            : formatGHS(taxes.wht * formData.fx_rate_to_ghs)}
                         </span>
                       </div>
                     )}
 
-                    {/* Divider */}
-                    <div className="border-t border-blue-200 my-2"></div>
+                    <div className="border-t border-white/10 my-2"></div>
 
-                    {/* Expected Receipt */}
-                    <div className="flex justify-between font-bold text-base text-green-700">
+                    <div className="flex justify-between font-bold text-base text-emerald-300">
                       <span>Expected Receipt:</span>
                       <span>
-                        {formData.currency === Currency.GHS ? formatCurrency(taxes.expected_receipt) : formatGHS(taxes.expected_receipt_ghs)}
+                        {formData.currency === Currency.GHS
+                          ? formatCurrency(taxes.expected_receipt)
+                          : formatGHS(taxes.expected_receipt_ghs)}
                       </span>
                     </div>
 
-                    {/* GHS Equivalent (if foreign currency) */}
                     {formData.currency !== Currency.GHS && (
-                      <div className="mt-4 pt-4 border-t border-blue-200 text-xs text-gray-600">
+                      <div className="mt-4 pt-4 border-t border-white/10 text-xs text-slate-400">
                         <div className="flex justify-between mb-2">
                           <span>Gross (GHS):</span>
-                          <span className="font-medium">{formatGHS(taxes.gross_total_ghs)}</span>
+                          <span className="font-medium text-white">{formatGHS(taxes.gross_total_ghs)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Expected (GHS):</span>
-                          <span className="font-medium">{formatGHS(taxes.expected_receipt_ghs)}</span>
+                          <span className="font-medium text-white">{formatGHS(taxes.expected_receipt_ghs)}</span>
                         </div>
                       </div>
                     )}
@@ -769,19 +753,18 @@ export default function InvoiceForm({ onSave, initialData = null }) {
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="mt-8 flex gap-3 justify-end border-t border-gray-200 pt-6">
+            <div className="mt-8 flex flex-col gap-3 justify-end border-t border-white/10 pt-6 sm:flex-row">
               <button
                 onClick={handleSaveAsDraft}
                 disabled={loading}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/10 disabled:opacity-50"
               >
                 {loading ? 'Saving...' : 'Save as Draft'}
               </button>
               <button
                 onClick={handleSubmitForApproval}
                 disabled={loading}
-                className="px-4 py-2 bg-blue-600 rounded-md text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-medium text-white transition hover:bg-cyan-400 disabled:opacity-50"
               >
                 {loading ? 'Submitting...' : 'Submit for Approval'}
               </button>
