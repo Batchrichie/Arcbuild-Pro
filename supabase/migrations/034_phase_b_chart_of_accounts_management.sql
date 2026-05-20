@@ -1,0 +1,5 @@
+-- Phase B: Chart of Accounts Management
+-- Migration already applied directly in Supabase on 19 May 2026
+-- Columns added: is_system, status, description, parent_code, created_by, created_at, updated_at
+-- RLS policies applied: coa_accountant (full), coa_ceo_read (select only)
+-- All seeded accounts marked is_system = TRUE

@@ -1,0 +1,15 @@
+name: Fetch Bank of Ghana FX rates
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # every day at 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  fetch-fx:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch daily FX rates
+        run: |
+          curl -sSf -X GET "https://prpvozkyiybcffuccdoe.functions.supabase.co/fetch-bog-fx" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}"

@@ -92,13 +92,23 @@ export default function FinancialStatements({ defaultTab = 'income' }) {
   useEffect(() => {
     if (tab !== 'balance') return
     fetchGL(null, asAtDate, true).then(()=>{
-      // compute balance by account_type
-      const byAcc = {}
+      const glBalance = {}
       glRows.forEach(r => {
-        byAcc[r.account_code] = byAcc[r.account_code] || { account_name: r.account_name, balance: 0 }
-        byAcc[r.account_code].balance += Number(r.debit_amount || 0) - Number(r.credit_amount || 0)
+        glBalance[r.account_code] = glBalance[r.account_code] || { account_name: r.account_name, balance: 0 }
+        glBalance[r.account_code].balance += Number(r.debit_amount || 0) - Number(r.credit_amount || 0)
       })
-      const list = Object.keys(byAcc).map(k => ({ account_code: k, account_name: byAcc[k].account_name, balance: byAcc[k].balance, account_type: coaMap[k]?.account_type }))
+
+      const list = Object.keys(coaMap).map((code) => {
+        const coa = coaMap[code]
+        const ledger = glBalance[code]?.balance || 0
+        return {
+          account_code: code,
+          account_name: coa.account_name,
+          account_type: coa.account_type,
+          balance: ledger,
+        }
+      })
+
       setBsRows(list.filter(x => ['asset','liability','equity'].includes(x.account_type)))
     })
   }, [tab, asAtDate, coaMap])

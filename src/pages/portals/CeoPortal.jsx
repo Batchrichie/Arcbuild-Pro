@@ -21,6 +21,7 @@ import ClientDetail from '../../pages/clients/ClientDetail'
 import SupplierRegistry from '../../pages/suppliers/SupplierRegistry'
 import SupplierDetail from '../../pages/suppliers/SupplierDetail'
 import ProjectRegistry from '../../pages/projects/ProjectRegistry'
+import ChartOfAccounts from '../accounts/ChartOfAccounts'
 import { COMPANY } from '../../lib/company-config'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 
@@ -31,6 +32,7 @@ const TABS = [
   { id: 'clients', label: 'Clients', icon: '👥' },
   { id: 'suppliers', label: 'Suppliers', icon: '🏢' },
   { id: 'financials', label: 'Financials', icon: '💰' },
+  { id: 'chart-of-accounts', label: 'Chart of Accounts', icon: '🧾' },
   { id: 'revenue', label: 'Revenue', icon: '📑' },
   { id: 'banking', label: 'Banking', icon: '🏦' },
   { id: 'journal-history', label: 'Journals', icon: '📒' },
@@ -434,6 +436,12 @@ export default function CeoPortal() {
               <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="General ledger" subtitle="Read-only view" />
                 <GeneralLedger readOnly />
+              </section>
+            )}
+
+            {activeTab === 'chart-of-accounts' && (
+              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                <ChartOfAccounts />
               </section>
             )}
 

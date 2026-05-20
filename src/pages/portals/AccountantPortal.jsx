@@ -33,6 +33,7 @@ import DebtorsLedger from '../../components/accounting/DebtorsLedger'
 import AlertLog from '../../components/alerts/AlertLog'
 import ManagementReports from '../../components/reports/ManagementReports'
 import ProjectRegistry from '../../pages/projects/ProjectRegistry'
+import ChartOfAccounts from '../accounts/ChartOfAccounts'
 
 const NAV_SECTIONS = [
   {
@@ -53,6 +54,7 @@ const NAV_SECTIONS = [
   {
     title: 'LEDGER & REPORTS',
     items: [
+      { id: 'chart-of-accounts', label: 'Chart of Accounts' },
       { id: 'general-ledger', label: 'General Ledger' },
       { id: 'management-reports', label: 'Management Reports' },
       { id: 'debtors-ledger', label: 'Debtors Ledger' },
@@ -288,6 +290,8 @@ export default function AccountantPortal() {
         return <MilestoneInvoiceQueue userRole="accountant" userId={profile?.id} />
       case 'general-ledger':
         return <GeneralLedger />
+      case 'chart-of-accounts':
+        return <ChartOfAccounts />
       case 'financial-statements':
         return <FinancialStatements />
       case 'management-reports':

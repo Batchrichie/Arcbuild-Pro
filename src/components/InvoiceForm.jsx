@@ -497,6 +497,12 @@ export default function InvoiceForm({ onSave, initialData = null }) {
           contractId = contractData?.id ?? null
         }
 
+        if (!contractId) {
+          throw new Error(
+            'Retention cannot be recorded because the selected project has no contract attached. Please attach a contract or set retention rate to 0 before approving.'
+          )
+        }
+
         await recordRetentionWithheld({
           invoiceId,
           projectId: formData.project_id,
@@ -703,7 +709,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           onChange={(e) =>
                             handleLineItemChange(index, 'description', e.target.value)
                           }
-                          className="col-span-5 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                          className="col-span-4 lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="number"
@@ -713,7 +719,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           onChange={(e) =>
                             handleLineItemChange(index, 'quantity', parseFloat(e.target.value))
                           }
-                          className="col-span-2 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                          className="col-span-2 lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="number"
@@ -723,7 +729,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           onChange={(e) =>
                             handleLineItemChange(index, 'unit_price', parseFloat(e.target.value))
                           }
-                          className="col-span-2 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                          className="col-span-2 lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="text"
@@ -733,7 +739,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                         />
                         <button
                           onClick={() => removeLineItem(index)}
-                          className="col-span-1 rounded-full text-sm font-semibold text-rose-300 transition hover:text-rose-100"
+                          className="col-span-2 lg:col-span-1 rounded-full text-sm font-semibold text-rose-300 transition hover:text-rose-100"
                         >
                           ✕
                         </button>
