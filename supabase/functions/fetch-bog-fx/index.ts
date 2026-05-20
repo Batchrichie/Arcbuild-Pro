@@ -1,5 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { DOMParser } from 'npm:linkedom@0.18.5'
+import { parseHTML } from 'npm:linkedom@0.18.5'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -13,10 +13,10 @@ async function fetchBoGPage() {
 }
 
 export function parseRates(html: string) {
-  const doc = new DOMParser().parseFromString(html, 'text/html')
-  if (!doc) throw new Error('Failed to parse HTML')
+  const { document } = parseHTML(html)
+  if (!document) throw new Error('Failed to parse HTML')
 
-  const rows = Array.from(doc.querySelectorAll('table tbody tr'))
+  const rows = Array.from(document.querySelectorAll('table tbody tr'))
   const results: any[] = []
 
   for (const row of rows) {
