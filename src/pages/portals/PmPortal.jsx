@@ -8,6 +8,7 @@ import SitePhotoUpload from '../../components/pm/SitePhotoUpload'
 import IssueLog from '../../components/pm/IssueLog'
 import DailyProgressReport from '../../components/pm/DailyProgressReport'
 import ClientRegistry from '../../pages/clients/ClientRegistry'
+import ProjectRegistry from '../../pages/projects/ProjectRegistry'
 import MilestoneManager from '../../components/MilestoneManager'
 import CostEntryForm from '../../components/CostEntryForm'
 import ProjectCostLedger from '../../components/ProjectCostLedger'
@@ -23,6 +24,7 @@ const NAV_SECTIONS = [
     items: [
       { id: 'dashboard', label: 'Project Overview' },
       { id: 'budget', label: 'Budget vs Actual' },
+      { id: 'project-list', label: 'All Projects' },
     ],
   },
   {
@@ -69,6 +71,7 @@ const MOBILE_TABS = [
 const VIEW_TITLES = {
   dashboard: 'Project Overview',
   budget: 'Budget vs Actual',
+  'project-list': 'All Projects',
   milestones: 'Milestone Tracker',
   clients: 'Clients',
   'mark-complete': 'Mark Complete',
@@ -192,6 +195,8 @@ function PmPortalContent() {
             hideProjectSelector
           />
         )
+      case 'project-list':
+        return <ProjectRegistry />
       case 'payment-cert':
         return (
           <div>

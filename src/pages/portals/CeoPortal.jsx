@@ -20,6 +20,7 @@ import ClientRegistry from '../../pages/clients/ClientRegistry'
 import ClientDetail from '../../pages/clients/ClientDetail'
 import SupplierRegistry from '../../pages/suppliers/SupplierRegistry'
 import SupplierDetail from '../../pages/suppliers/SupplierDetail'
+import ProjectRegistry from '../../pages/projects/ProjectRegistry'
 import { COMPANY } from '../../lib/company-config'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 
@@ -425,45 +426,7 @@ export default function CeoPortal() {
 
             {activeTab === 'projects' && (
               <section className="space-y-6">
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setProjectsSubview('health')}
-                    className={`min-touch rounded-full border px-4 py-2 text-sm font-medium ${
-                      projectsSubview === 'health'
-                        ? 'border-amber-400/40 bg-amber-500/15 text-amber-100'
-                        : 'border-white/10 text-slate-400'
-                    }`}
-                  >
-                    Project health
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setProjectsSubview('issues')}
-                    className={`min-touch rounded-full border px-4 py-2 text-sm font-medium ${
-                      projectsSubview === 'issues'
-                        ? 'border-amber-400/40 bg-amber-500/15 text-amber-100'
-                        : 'border-white/10 text-slate-400'
-                    }`}
-                  >
-                    Issue log
-                  </button>
-                </div>
-                {projectsSubview === 'health' ? (
-                  <>
-                    <SectionHeader title="Project health" subtitle="Tap a row for full finance detail" />
-                    <ProjectHealthTable
-                      projects={projectHealth}
-                      loading={loading}
-                      onSelectProject={setSlideOverProjectId}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <SectionHeader title="Issue log" subtitle="Read-only — all projects" />
-                    <IssueLog readOnly allProjects />
-                  </>
-                )}
+                <ProjectRegistry />
               </section>
             )}
 

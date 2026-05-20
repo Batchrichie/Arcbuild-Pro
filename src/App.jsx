@@ -12,6 +12,7 @@ import SupplierRegistry from './pages/suppliers/SupplierRegistry'
 import SupplierDetail   from './pages/suppliers/SupplierDetail'
 import RetentionDashboard from './pages/retention/RetentionDashboard'
 import RevenueRecognitionDashboard from './pages/revenue/RevenueRecognitionDashboard'
+import ProjectRegistry from './pages/projects/ProjectRegistry'
 
 // Portal placeholders (Phase 4 will replace these)
 import CeoPortal        from './pages/portals/CeoPortal'
@@ -95,6 +96,12 @@ export default function App() {
           <Route path="/revenue-recognition" element={
             <ProtectedRoute allowedRoles={['ceo', 'accountant']}>
               <RevenueRecognitionDashboard />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/projects" element={
+            <ProtectedRoute allowedRoles={['ceo', 'accountant', 'project_manager']}>
+              <ProjectRegistry />
             </ProtectedRoute>
           } />
 

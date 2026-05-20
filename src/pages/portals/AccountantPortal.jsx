@@ -32,6 +32,7 @@ import { COMPANY } from '../../lib/company-config'
 import DebtorsLedger from '../../components/accounting/DebtorsLedger'
 import AlertLog from '../../components/alerts/AlertLog'
 import ManagementReports from '../../components/reports/ManagementReports'
+import ProjectRegistry from '../../pages/projects/ProjectRegistry'
 
 const NAV_SECTIONS = [
   {
@@ -79,6 +80,7 @@ const NAV_SECTIONS = [
   {
     title: 'PROJECTS',
     items: [
+      { id: 'projects', label: 'Projects' },
       { id: 'project-finance', label: 'Project Finance' },
       { id: 'cost-ledger', label: 'Cost Ledger' },
     ],
@@ -165,6 +167,7 @@ const VIEW_TITLES = {
   'payroll-runs': 'Payroll Runs',
   'paye-schedule': 'PAYE Schedule',
   'ssnit-schedule': 'SSNIT Schedule',
+  'projects': 'Projects',
   'project-finance': 'Project Finance',
   'cost-ledger': 'Cost Ledger',
   'tax-centre': 'Tax Centre',
@@ -330,6 +333,8 @@ export default function AccountantPortal() {
         return <PayeSchedule />
       case 'ssnit-schedule':
         return <SsnitSchedule />
+      case 'projects':
+        return <ProjectRegistry />
       case 'project-finance':
         return <ProjectFinanceDashboard userRole="accountant" currentUserProfileId={profile?.id} />
       case 'revenue-recognition':
