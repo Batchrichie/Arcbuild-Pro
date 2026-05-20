@@ -19,6 +19,8 @@ export function ThemeProvider({ children }) {
   useLayoutEffect(() => {
     document.body.classList.toggle('theme-light', theme === 'light')
     document.body.classList.toggle('theme-dark', theme === 'dark')
+    document.body.classList.toggle('dark', theme === 'dark')
+    document.documentElement.classList.toggle('dark', theme === 'dark')
     try {
       window.localStorage.setItem('arcbuild_theme', theme)
     } catch {

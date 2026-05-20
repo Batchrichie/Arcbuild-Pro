@@ -16,6 +16,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { TAX_RATES, Currency } from '../lib/tax-constants';
 import { recordRetentionWithheld } from '../services/retentionService';
+import { getLatestRates } from '../services/fxRatesService';
 
 export default function InvoiceForm({ onSave, initialData = null }) {
   // ===== State Management =====
@@ -40,6 +41,9 @@ export default function InvoiceForm({ onSave, initialData = null }) {
   const [projects, setProjects] = useState([]);
   const [clientTaxProfile, setClientTaxProfile] = useState(null);
   const [exchangeRate, setExchangeRate] = useState(null);
+  const [latestFxRates, setLatestFxRates] = useState([]);
+  const [fxRateDate, setFxRateDate] = useState('');
+  const [rateLookupNotice, setRateLookupNotice] = useState('');
   const [taxes, setTaxes] = useState({
     subtotal: 0,
     vat: 0,
@@ -209,60 +213,87 @@ export default function InvoiceForm({ onSave, initialData = null }) {
     }
   }, [formData.project_id, projects]);
 
-  // Fetch exchange rate when currency changes
+  // Load latest FX rates for invoice currency lookups
   useEffect(() => {
-    const fetchExchangeRate = async () => {
-      if (formData.currency === Currency.GHS) {
-        setFormData((prev) => ({ ...prev, fx_rate_to_ghs: 1.0 }));
-        setExchangeRate(null);
-        return;
-      }
-
+    const loadLatestFxRates = async () => {
       try {
-        // Call get_fx_rate() RPC function for automatic fallback to recent rates
-        const { data, error: err } = await supabase.rpc('get_fx_rate', {
-          currency_code_param: formData.currency,
-          rate_date_param: new Date().toISOString().split('T')[0],
-        });
+        const data = await getLatestRates();
+        setLatestFxRates(data || []);
 
-        if (err) throw err;
+        if (data?.length) {
+          const latestDate = data.reduce((latest, item) => {
+            const dateValue = item.rate_date || item.updated_at || item.created_at;
+            const itemDate = dateValue ? new Date(dateValue) : null;
+            if (!itemDate || Number.isNaN(itemDate.getTime())) return latest;
+            return !latest || itemDate > latest ? itemDate : latest;
+          }, null);
 
-        if (data) {
-          setExchangeRate({ rate_to_ghs: data, currency_code: formData.currency });
-          if (!formData.fx_rate_override) {
-            setFormData((prev) => ({
-              ...prev,
-              fx_rate_to_ghs: data,
+          if (latestDate) {
+            setFxRateDate(latestDate.toLocaleDateString(undefined, {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
             }));
           }
         }
       } catch (err) {
-        console.error('Error fetching exchange rate:', err);
-        // Fallback: try to fetch from exchange_rates table directly
-        try {
-          const { data: fallbackData } = await supabase
-            .from('exchange_rates')
-            .select('*')
-            .eq('currency_code', formData.currency)
-            .order('rate_date', { ascending: false })
-            .limit(1)
-            .single();
-
-          if (fallbackData && !formData.fx_rate_override) {
-            setExchangeRate(fallbackData);
-            setFormData((prev) => ({
-              ...prev,
-              fx_rate_to_ghs: fallbackData.rate_to_ghs,
-            }));
-          }
-        } catch (fallbackErr) {
-          console.error('Fallback rate fetch also failed:', fallbackErr);
-        }
+        console.error('Error loading latest FX rates:', err);
       }
     };
 
-    fetchExchangeRate();
-  }, [formData.currency]);
+    loadLatestFxRates();
+  }, []);
+
+  // Resolve FX rate automatically when currency changes
+  useEffect(() => {
+    const normalizeCode = (code) => code?.toString().toUpperCase().trim();
+
+    const findFxRate = (currencyCode) => {
+      const normalizedCurrency = normalizeCode(currencyCode);
+      return latestFxRates.find((rate) => {
+        const rateCode = normalizeCode(rate.code || rate.currency_code || rate.currency);
+        return (
+          rateCode === normalizedCurrency ||
+          rateCode === `${normalizedCurrency}GHS` ||
+          rateCode === `GHS${normalizedCurrency}`
+        );
+      });
+    };
+
+    if (formData.currency === Currency.GHS) {
+      setFormData((prev) => ({
+        ...prev,
+        fx_rate_to_ghs: 1.0,
+        fx_rate_override: false,
+      }));
+      setExchangeRate(null);
+      setRateLookupNotice('');
+      return;
+    }
+
+    if (!latestFxRates.length) {
+      return;
+    }
+
+    const matchedRate = findFxRate(formData.currency);
+
+    if (matchedRate) {
+      const rateValue = Number(matchedRate.median ?? matchedRate.rate_to_ghs ?? matchedRate.rate ?? 0) || 0;
+      setExchangeRate(matchedRate);
+      setRateLookupNotice('');
+      if (!formData.fx_rate_override) {
+        setFormData((prev) => ({
+          ...prev,
+          fx_rate_to_ghs: rateValue,
+        }));
+      }
+    } else {
+      setExchangeRate(null);
+      setRateLookupNotice(
+        'No current FX rate found for this currency. Please enter the rate manually or choose another currency.'
+      );
+    }
+  }, [formData.currency, latestFxRates, formData.fx_rate_override]);
 
   // Compute taxes when line items, retention or exchange rate changes
   useEffect(() => {
@@ -344,6 +375,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
     setFormData((prev) => ({
       ...prev,
       fx_rate_to_ghs: newRate,
+      fx_rate_override: true,
     }));
   };
 
@@ -578,7 +610,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                   <select
                     value={formData.client_id}
                     onChange={(e) => handleFormChange('client_id', e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-2 text-sm text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   >
                     <option value="">Select a client...</option>
                     {clients.map((client) => (
@@ -595,7 +627,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     value={formData.project_id}
                     onChange={(e) => handleFormChange('project_id', e.target.value)}
                     disabled={!formData.client_id}
-                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-2 text-sm text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:bg-slate-800 disabled:text-slate-500"
+                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:bg-slate-800 disabled:text-slate-500"
                   >
                     <option value="">Select a project...</option>
                     {projects.map((project) => (
@@ -612,7 +644,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     type="text"
                     value={formData.division_name}
                     readOnly
-                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-2 text-sm text-slate-300"
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-base text-slate-300"
                   />
                 </div>
 
@@ -622,7 +654,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     <select
                       value={formData.currency}
                       onChange={(e) => handleFormChange('currency', e.target.value)}
-                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-2 text-sm text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                     >
                       {Object.values(Currency).map((curr) => (
                         <option key={curr} value={curr}>
@@ -641,7 +673,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                       step="0.01"
                       value={formData.retention_rate}
                       onChange={(e) => handleFormChange('retention_rate', Number(e.target.value))}
-                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-2 text-sm text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                     />
                   </div>
                 </div>
@@ -656,7 +688,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                         value={formData.fx_rate_to_ghs}
                         onChange={handleOverrideFxRate}
                         disabled={formData.currency === Currency.GHS}
-                        className="flex-1 rounded-2xl border border-white/10 bg-slate-900 px-4 py-2 text-sm text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:bg-slate-800"
+                        className="flex-1 rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:bg-slate-800"
                       />
                       <button
                         onClick={() =>
@@ -668,11 +700,24 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                         disabled={formData.currency === Currency.GHS}
                         className="rounded-2xl bg-white/5 px-3 py-2 text-xs font-medium text-slate-200 transition hover:bg-white/10 disabled:opacity-50"
                       >
-                        {formData.fx_rate_override ? 'Using Override' : 'Using Current'}
+                        {formData.currency === Currency.GHS
+                          ? 'Local currency'
+                          : formData.fx_rate_override
+                          ? fxRateDate
+                            ? `Override rate from ${fxRateDate}`
+                            : 'Using override'
+                          : exchangeRate
+                          ? `Using rate from ${fxRateDate || 'current data'}`
+                          : 'Enter rate manually'}
                       </button>
                     </div>
                     {exchangeRate && !formData.fx_rate_override && (
-                      <p className="mt-1 text-xs text-slate-500">Current rate: {exchangeRate.rate_to_ghs}</p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Current rate: {Number(exchangeRate.median ?? exchangeRate.rate_to_ghs ?? exchangeRate.rate ?? 0).toFixed(4)}
+                      </p>
+                    )}
+                    {rateLookupNotice && (
+                      <p className="mt-2 text-sm text-amber-200">{rateLookupNotice}</p>
                     )}
                   </div>
                 </div>
@@ -709,7 +754,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           onChange={(e) =>
                             handleLineItemChange(index, 'description', e.target.value)
                           }
-                          className="col-span-4 lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                          className="col-span-4 lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900 px-3 py-3 text-base text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="number"
@@ -719,7 +764,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           onChange={(e) =>
                             handleLineItemChange(index, 'quantity', parseFloat(e.target.value))
                           }
-                          className="col-span-2 lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                          className="col-span-2 lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900 px-3 py-3 text-base text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="number"
@@ -729,13 +774,13 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           onChange={(e) =>
                             handleLineItemChange(index, 'unit_price', parseFloat(e.target.value))
                           }
-                          className="col-span-2 lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                          className="col-span-2 lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900 px-3 py-3 text-base text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="text"
                           readOnly
                           value={formatCurrency(item.quantity * item.unit_price)}
-                          className="col-span-2 rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-300"
+                          className="col-span-2 rounded-2xl border border-white/10 bg-slate-900 px-3 py-3 text-base text-slate-300"
                         />
                         <button
                           onClick={() => removeLineItem(index)}
@@ -754,7 +799,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     value={formData.notes}
                     onChange={(e) => handleFormChange('notes', e.target.value)}
                     rows="3"
-                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   />
                 </div>
               </div>
