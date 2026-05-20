@@ -1,4 +1,5 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'npm:@supabase/supabase-js@2'
+import { DOMParser } from 'npm:linkedom@0.18.5'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -11,25 +12,27 @@ async function fetchBoGPage() {
   return await res.text()
 }
 
-function parseRates(html: string) {
+export function parseRates(html: string) {
   const doc = new DOMParser().parseFromString(html, 'text/html')
   if (!doc) throw new Error('Failed to parse HTML')
 
   const rows = Array.from(doc.querySelectorAll('table tbody tr'))
   const results: any[] = []
 
-  for (const r of rows) {
-    const tds = Array.from(r.querySelectorAll('td')).map(td => td.textContent?.trim() ?? '')
-    if (tds.length < 6) continue
+  for (const row of rows) {
+    const cells = Array.from(row.querySelectorAll('td')).map(td => td.textContent?.trim() ?? '')
+    if (cells.length < 6) continue
 
-    // Expected columns: date | currency | code | buy | sell | median
-    const [dateStr, currency, code, buyStr, sellStr, medianStr] = tds
-    const rate_date = new Date(dateStr).toISOString().slice(0, 10)
+    const [dateStr, currency, code, buyStr, sellStr, medianStr] = cells
+    if (!code || !code.toUpperCase().endsWith('GHS')) continue
+
+    const dateValue = new Date(dateStr)
+    if (Number.isNaN(dateValue.getTime())) continue
+
+    const rate_date = dateValue.toISOString().slice(0, 10)
     const buy = buyStr ? Number(buyStr.replace(/,/g, '')) : null
     const sell = sellStr ? Number(sellStr.replace(/,/g, '')) : null
     const median = medianStr ? Number(medianStr.replace(/,/g, '')) : null
-
-    if (!code) continue
 
     results.push({ rate_date, currency, code, buy, sell, median })
   }
