@@ -24,7 +24,7 @@ export function parseRates(html: string) {
     if (cells.length < 6) continue
 
     const [dateStr, currency, code, buyStr, sellStr, medianStr] = cells
-    if (!code || !code.toUpperCase().endsWith('GHS')) continue
+    if (!code) continue
 
     const dateValue = new Date(dateStr)
     if (Number.isNaN(dateValue.getTime())) continue
@@ -33,8 +33,19 @@ export function parseRates(html: string) {
     const buy = buyStr ? Number(buyStr.replace(/,/g, '')) : null
     const sell = sellStr ? Number(sellStr.replace(/,/g, '')) : null
     const median = medianStr ? Number(medianStr.replace(/,/g, '')) : null
+    const currencyCode = code.split('/')[0].trim().toUpperCase()
 
-    results.push({ rate_date, currency, code, buy, sell, median })
+    if (!currencyCode || currencyCode === 'GHS') continue
+
+    results.push({
+      rate_date,
+      currency,
+      currency_code: currencyCode,
+      code: currencyCode,
+      buy,
+      sell,
+      median,
+    })
   }
 
   return results
@@ -43,17 +54,16 @@ export function parseRates(html: string) {
 async function upsertRates(rates: any[]) {
   if (!rates.length) return { inserted: 0 }
 
+  const mapped = rates.map(r => ({
+    currency_code: r.currency_code,
+    rate_to_ghs: r.median ?? r.buy ?? r.sell,
+    rate_date: r.rate_date,
+    source: 'bank_of_ghana',
+  }))
+
   const { data, error } = await supabase
-    .from('fx_rates')
-    .upsert(rates.map(r => ({
-      rate_date: r.rate_date,
-      currency: r.currency,
-      code: r.code,
-      buy: r.buy,
-      sell: r.sell,
-      median: r.median,
-      source: 'BOG',
-    })), { onConflict: ['rate_date', 'code'] })
+    .from('exchange_rates')
+    .upsert(mapped, { onConflict: ['currency_code', 'rate_date'] })
 
   if (error) throw error
   return { inserted: (data ?? []).length }

@@ -1,139 +1,43 @@
-import { useCallback, useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
-import Modal from './ui/Modal'
-
-const CURRENCIES = ['USD', 'GBP', 'EUR']
+import { useEffect, useState } from 'react'
+import { getLatestRates } from '../services/fxRatesService'
 
 export default function FxRateManager() {
   const [rates, setRates] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [editingId, setEditingId] = useState(null)
-  const [editValue, setEditValue] = useState('')
-  const [editModalOpen, setEditModalOpen] = useState(false)
-  const [editCurrency, setEditCurrency] = useState(null)
-  const [expandedCurrency, setExpandedCurrency] = useState(null)
-  const [historicalRates, setHistoricalRates] = useState({})
-  const [missingRates, setMissingRates] = useState([])
-  const [successMessage, setSuccessMessage] = useState(null)
+  const [lastUpdated, setLastUpdated] = useState('')
 
-  const fetchRates = useCallback(async () => {
+  const loadRates = async () => {
     try {
       setLoading(true)
       setError(null)
-      const todayDate = new Date().toISOString().split('T')[0]
+      const data = await getLatestRates()
+      setRates(data || [])
 
-      // Fetch latest rates for today
-      const { data, error: fetchError } = await supabase
-        .from('exchange_rates')
-        .select('*')
-        .in('currency_code', CURRENCIES)
-        .gte('rate_date', todayDate)
-        .order('rate_date', { ascending: false })
-
-      if (fetchError) throw fetchError
-
-      // Group by currency and get latest rate
-      const latestRates = {}
-      const missing = []
-      CURRENCIES.forEach(currency => {
-        const currencyRates = (data || []).filter(r => r.currency_code === currency)
-        if (currencyRates.length > 0) {
-          latestRates[currency] = currencyRates[0]
-        } else {
-          missing.push(currency)
-        }
-      })
-
-      setRates(Object.values(latestRates))
-      if (missing.length > 0) {
-        setMissingRates(missing)
+      if (data && data.length > 0) {
+        const latestDate = data.reduce((max, item) => {
+          const d = new Date(item.rate_date)
+          return d > max ? d : max
+        }, new Date(0))
+        setLastUpdated(latestDate.toLocaleDateString('en-GB', {
+          weekday: 'short',
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        }))
+      } else {
+        setLastUpdated('No rates loaded yet')
       }
-
-      // Fetch historical rates (last 30 days) for each currency
-      const thirtyDaysAgo = new Date()
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-      const histStart = thirtyDaysAgo.toISOString().split('T')[0]
-
-      const { data: histData, error: histError } = await supabase
-        .from('exchange_rates')
-        .select('*')
-        .in('currency_code', CURRENCIES)
-        .gte('rate_date', histStart)
-        .order('rate_date', { ascending: true })
-
-      if (histError) throw histError
-
-      const grouped = {}
-      CURRENCIES.forEach(curr => {
-        grouped[curr] = (histData || []).filter(r => r.currency_code === curr)
-      })
-      setHistoricalRates(grouped)
-
     } catch (err) {
-      setError(err.message)
-      console.error('Error fetching rates:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load FX rates')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }
 
   useEffect(() => {
-    fetchRates()
-  }, [fetchRates])
-
-  const handleUpdateRate = (rate, currency) => {
-    setEditingId(rate?.id || `new-${currency}`)
-    setEditValue(rate?.rate_to_ghs || '')
-    setEditCurrency(currency)
-    setEditModalOpen(true)
-  }
-
-  const saveRate = async (currency) => {
-    try {
-      if (!editValue || isNaN(editValue)) {
-        setError('Please enter a valid rate')
-        return
-      }
-
-      const todayDate = new Date().toISOString().split('T')[0]
-
-      const { error: saveError } = await supabase
-        .from('exchange_rates')
-        .insert({
-          currency_code: currency,
-          rate_to_ghs: parseFloat(editValue),
-          rate_date: todayDate,
-          source: 'bank_of_ghana'
-        })
-
-      if (saveError) {
-        if (saveError.code === '23505') { // Unique constraint violation
-          // Update instead
-          const { error: updateError } = await supabase
-            .from('exchange_rates')
-            .update({ rate_to_ghs: parseFloat(editValue) })
-            .eq('currency_code', currency)
-            .eq('rate_date', todayDate)
-
-          if (updateError) throw updateError
-        } else {
-          throw saveError
-        }
-      }
-
-      setSuccessMessage(`${currency} rate updated successfully`)
-      setTimeout(() => setSuccessMessage(null), 3000)
-      setMissingRates(prev => prev.filter(c => c !== currency))
-      setEditingId(null)
-      setEditValue('')
-      fetchRates()
-
-    } catch (err) {
-      setError(err.message)
-      console.error('Error saving rate:', err)
-    }
-  }
+    loadRates()
+  }, [])
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('en-GB', {
@@ -144,12 +48,18 @@ export default function FxRateManager() {
     })
   }
 
+  const sortedRates = [...rates].sort((a, b) => {
+    const aCode = (a.currency_code || a.code || '').toString()
+    const bCode = (b.currency_code || b.code || '').toString()
+    return aCode.localeCompare(bCode)
+  })
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border border-teal-500 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading exchange rates...</p>
+          <p className="text-slate-400">Loading FX rates...</p>
         </div>
       </div>
     )
@@ -157,50 +67,16 @@ export default function FxRateManager() {
 
   return (
     <div className="space-y-6">
-      <Modal open={editModalOpen} onClose={() => { setEditModalOpen(false); setEditingId(null); setEditCurrency(null); }} title={editCurrency ? `Update ${editCurrency} rate` : 'Update rate'} size="sm">
-        <div className="space-y-4">
-          <input
-            type="number"
-            step="0.0001"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            placeholder="0.0000"
-            className="w-full px-3 py-2 rounded-xl border border-white/20 bg-white/5 text-white placeholder-slate-400 focus:outline-none"
-          />
-          <div className="flex gap-2">
-            <button onClick={() => { saveRate(editCurrency); setEditModalOpen(false) }} className="flex-1 rounded-2xl border border-emerald-400/40 bg-[rgba(16,185,129,0.15)] px-4 py-2 text-sm font-medium text-emerald-200">Save</button>
-            <button onClick={() => { setEditModalOpen(false); setEditValue(''); setEditingId(null) }} className="flex-1 rounded-2xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300">Cancel</button>
-          </div>
+      <div className="flex flex-col gap-3 rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-white">Latest FX rates for invoices</h2>
+          <p className="text-sm text-slate-400">Live rates read from the canonical exchange_rates source used by invoice creation.</p>
         </div>
-      </Modal>
-      {/* Success Alert */}
-      {successMessage && (
-        <div className="rounded-2xl border border-emerald-400/30 bg-[rgba(16,185,129,0.1)] p-4 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="flex items-center gap-3">
-            <div className="h-2 w-2 rounded-full bg-emerald-400"></div>
-            <p className="text-sm font-medium text-emerald-200">{successMessage}</p>
-          </div>
+        <div className="rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-300">
+          Last updated: <span className="font-semibold text-white">{lastUpdated}</span>
         </div>
-      )}
+      </div>
 
-      {/* Missing Rates Warning */}
-      {missingRates.length > 0 && (
-        <div className="rounded-2xl border border-amber-400/30 bg-[rgba(251,146,60,0.1)] p-4 backdrop-blur-sm">
-          <div className="flex items-start gap-3">
-            <span className="text-xl">⚠️</span>
-            <div>
-              <p className="text-sm font-medium text-amber-200 mb-1">
-                Exchange rates not set for today
-              </p>
-              <p className="text-xs text-amber-300">
-                {missingRates.join(', ')} rate{missingRates.length > 1 ? 's' : ''} missing. Foreign currency invoices may use yesterday's rate.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Error Alert */}
       {error && (
         <div className="rounded-2xl border border-red-400/30 bg-[rgba(239,68,68,0.1)] p-4 backdrop-blur-sm">
           <div className="flex items-start gap-3">
@@ -210,110 +86,40 @@ export default function FxRateManager() {
         </div>
       )}
 
-      {/* Rates Grid */}
-      <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
-        {CURRENCIES.map(currency => {
-          const rate = rates.find(r => r.currency_code === currency)
-          const isEditing = editingId === (rate?.id || `new-${currency}`)
-
-          return (
-            <div
-              key={currency}
-              className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm hover:border-white/20 hover:bg-[rgba(255,255,255,0.06)] transition-all duration-300"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-1">{currency}</p>
-                  <p className="text-2xl font-semibold text-white">
-                    {isEditing && editModalOpen ? (
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        placeholder="0.00"
-                        autoFocus
-                        className="w-32 px-3 py-2 rounded-xl border border-white/20 bg-white/5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-400 text-lg"
-                      />
-                    ) : (
-                      `GHS ${rate?.rate_to_ghs.toFixed(4) || '—'}`
-                    )}
-                  </p>
-                </div>
-                <div className="text-right">
-                  {rate?.rate_date && (
-                    <p className="text-xs text-slate-400">{formatDate(rate.rate_date)}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-2">
-                {isEditing ? (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => saveRate(currency)}
-                      className="flex-1 rounded-2xl border border-emerald-400/40 bg-[rgba(16,185,129,0.15)] px-4 py-2 text-sm font-medium text-emerald-200 transition hover:border-emerald-400/60 hover:bg-[rgba(16,185,129,0.25)]"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => {
-                        setEditingId(null)
-                        setEditValue('')
-                        setError(null)
-                      }}
-                      className="flex-1 rounded-2xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-white/40 hover:bg-white/10"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleUpdateRate(rate, currency)}
-                      className="flex-1 rounded-2xl border border-teal-400/40 bg-[rgba(20,184,166,0.15)] px-4 py-2 text-sm font-medium text-teal-200 transition hover:border-teal-400/60 hover:bg-[rgba(20,184,166,0.25)]"
-                    >
-                      Update
-                    </button>
-                    <button
-                      onClick={() => setExpandedCurrency(expandedCurrency === currency ? null : currency)}
-                      className="flex-1 rounded-2xl border border-blue-400/40 bg-[rgba(56,138,221,0.15)] px-4 py-2 text-sm font-medium text-blue-200 transition hover:border-blue-400/60 hover:bg-[rgba(56,138,221,0.25)]"
-                    >
-                      {expandedCurrency === currency ? 'Hide' : 'Show'} Trend
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Historical Rates */}
-      {expandedCurrency && historicalRates[expandedCurrency]?.length > 0 && (
-        <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
-          <h3 className="text-lg font-semibold text-white mb-4">
-            {expandedCurrency} Rate Trend — Last 30 Days
-          </h3>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {historicalRates[expandedCurrency].map((rate, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3 transition hover:bg-white/10"
-              >
-                <span className="text-sm text-slate-300">{formatDate(rate.rate_date)}</span>
-                <span className="font-semibold text-white">GHS {rate.rate_to_ghs.toFixed(4)}</span>
-              </div>
-            ))}
-          </div>
+      {sortedRates.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-white/10 bg-[rgba(255,255,255,0.03)] p-8 text-center text-slate-400">
+          No FX rates available yet. Please run the Bank of Ghana sync function or check back after the next scheduled update.
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 shadow-lg shadow-black/20 backdrop-blur-sm">
+          <table className="min-w-full text-left text-sm text-slate-200">
+            <thead>
+              <tr className="border-b border-white/10 text-slate-400">
+                <th className="px-4 py-3">Currency</th>
+                <th className="px-4 py-3">Code</th>
+                <th className="px-4 py-3">Buy</th>
+                <th className="px-4 py-3">Sell</th>
+                <th className="px-4 py-3">Median</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedRates.map((rate) => (
+                <tr key={`${rate.code}-${rate.rate_date}`} className="border-b border-white/5 hover:bg-white/5">
+                  <td className="px-4 py-3 font-medium text-white">{rate.currency_code || rate.currency || rate.code}</td>
+                  <td className="px-4 py-3 text-slate-300">{rate.currency_code || rate.code}</td>
+                  <td className="px-4 py-3 text-slate-200">{rate.buy != null ? rate.buy.toFixed(4) : '—'}</td>
+                  <td className="px-4 py-3 text-slate-200">{rate.sell != null ? rate.sell.toFixed(4) : '—'}</td>
+                  <td className="px-4 py-3 text-slate-200">{rate.median != null ? rate.median.toFixed(4) : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {/* Info Note */}
       <div className="rounded-2xl border border-blue-400/30 bg-[rgba(56,138,221,0.1)] p-4 backdrop-blur-sm">
         <p className="text-sm text-blue-200">
-          <span className="font-semibold">📌 Update daily rates:</span> Exchange rates are sourced from the Bank of Ghana. Update all rates before processing foreign currency invoices to ensure accurate conversions.
+          Exchange rates are sourced from the Bank of Ghana daily interbank feed and reflected here for the most recent available date.
         </p>
       </div>
     </div>
