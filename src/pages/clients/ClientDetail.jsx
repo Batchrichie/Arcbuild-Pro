@@ -16,8 +16,9 @@ const INVOICE_STATUS_STYLE = {
   voided:   'bg-red-500/10 text-red-300',
 }
 
-export default function ClientDetail() {
-  const { id } = useParams()
+export default function ClientDetail({ clientId: clientIdProp, onBack }) {
+  const { id: routeId } = useParams()
+  const id = clientIdProp || routeId
   const [client, setClient]   = useState(null)
   const [ageing, setAgeing]   = useState(null)
   const [loading, setLoading] = useState(true)
@@ -53,11 +54,22 @@ export default function ClientDetail() {
     .reduce((s, i) => s + Number(i.expected_receipt_ghs ?? 0), 0)
 
   const fmt = (n) => new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(n ?? 0)
+  const displayClientType = (type) => {
+    if (!type) return 'individual'
+    const normalized = String(type).toLowerCase()
+    if (normalized === 'company' || normalized === 'corporate') return 'corporate'
+    if (normalized === 'government') return 'government'
+    return normalized === 'individual' ? 'individual' : normalized
+  }
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-3">
-        <Link to="/clients" className="text-slate-400 hover:text-white text-sm transition">← Clients</Link>
+        {onBack ? (
+          <button type="button" onClick={onBack} className="text-slate-400 hover:text-white text-sm transition">← Clients</button>
+        ) : (
+          <Link to="/clients" className="text-slate-400 hover:text-white text-sm transition">← Clients</Link>
+        )}
         <h1 className="text-2xl font-semibold text-white">{client.name}</h1>
         <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_STYLE[client.status] ?? ''}`}>
           {client.status}
@@ -66,7 +78,7 @@ export default function ClientDetail() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
-          ['Type',            client.client_type],
+          ['Type',            displayClientType(client.client_type)],
           ['TIN',             client.tin || '—'],
           ['VAT Registered',  client.vat_registered ? 'Yes' : 'No'],
           ['VAT Number',      client.vat_number || '—'],
@@ -132,7 +144,7 @@ export default function ClientDetail() {
                   </td>
                   <td className="px-4 py-3">{fmt(inv.expected_receipt_ghs)}</td>
                   <td className="px-4 py-3">{inv.currency}</td>
-                  <td className="px-4 py-3">{inv.issue_date ?? '—'}</td>
+                  <td className="px-4 py-3">{inv.created_at ?? '—'}</td>
                   <td className="px-4 py-3">{inv.due_date ?? '—'}</td>
                   <td className="px-4 py-3">{inv.payment_date ?? '—'}</td>
                 </tr>

@@ -56,6 +56,7 @@ export default function PaymentCertificateForm({ userRole, userId }) {
   };
 
   const loadProjects = async () => {
+    if (hideProjectSelector) return;
     try {
       setLoading(true);
       let query = supabase

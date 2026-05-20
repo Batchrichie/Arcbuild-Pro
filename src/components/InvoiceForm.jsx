@@ -15,12 +15,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { TAX_RATES, Currency } from '../lib/tax-constants';
+import { recordRetentionWithheld } from '../services/retentionService';
 
 export default function InvoiceForm({ onSave, initialData = null }) {
   // ===== State Management =====
   const [formData, setFormData] = useState({
     client_id: initialData?.client_id || '',
     project_id: initialData?.project_id || '',
+    contract_id: initialData?.contract_id || null,
+    retention_rate: initialData?.retention_rate || 0,
     division_id: initialData?.division_id || '',
     division_name: initialData?.division_name || '', // Display name for UI
     currency: initialData?.currency || Currency.GHS,
@@ -101,7 +104,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
     const fetchProjects = async () => {
       if (!formData.client_id) {
         setProjects([]);
-        setFormData((prev) => ({ ...prev, project_id: '', division_id: '', division_name: '' }));
+        setFormData((prev) => ({ ...prev, project_id: '', contract_id: null, retention_rate: 0, division_id: '', division_name: '' }));
         return;
       }
 
@@ -126,6 +129,39 @@ export default function InvoiceForm({ onSave, initialData = null }) {
 
     fetchProjects();
   }, [formData.client_id]);
+
+  // Set default retention rate when project changes
+  useEffect(() => {
+    const fetchContractRetention = async () => {
+      if (!formData.project_id) {
+        return;
+      }
+
+      try {
+        const { data, error: contractError } = await supabase
+          .from('contracts')
+          .select('id, retention_percentage')
+          .eq('project_id', formData.project_id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (contractError && contractError.code !== 'PGRST116') throw contractError;
+
+        if (data && !initialData) {
+          setFormData((prev) => ({
+            ...prev,
+            contract_id: data.id,
+            retention_rate: prev.retention_rate || data.retention_percentage || 0,
+          }));
+        }
+      } catch (err) {
+        console.error('Error fetching contract retention rate:', err);
+      }
+    };
+
+    fetchContractRetention();
+  }, [formData.project_id, initialData]);
 
   // Fetch client tax profile when client changes
   useEffect(() => {
@@ -228,10 +264,10 @@ export default function InvoiceForm({ onSave, initialData = null }) {
     fetchExchangeRate();
   }, [formData.currency]);
 
-  // Compute taxes when line items or exchange rate changes
+  // Compute taxes when line items, retention or exchange rate changes
   useEffect(() => {
     computeTaxes();
-  }, [lineItems, formData.fx_rate_to_ghs, clientTaxProfile]);
+  }, [lineItems, formData.fx_rate_to_ghs, formData.retention_rate, clientTaxProfile]);
 
   // ===== Functions =====
 
@@ -249,6 +285,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
     const nhil = clientTaxProfile.applies_nhil ? subtotal * TAX_RATES.NHIL : 0;
     const getfund = clientTaxProfile.applies_getfund ? subtotal * TAX_RATES.GETFUND : 0;
     const gross_total = subtotal + vat + nhil + getfund;
+    const retentionWithheld = gross_total * (Number(formData.retention_rate || 0) / 100);
     const wht = clientTaxProfile.applies_wht
       ? subtotal * clientTaxProfile.wht_rate
       : 0;
@@ -265,6 +302,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
       nhil,
       getfund,
       gross_total,
+      retention_withheld: retentionWithheld,
       wht,
       expected_receipt,
       gross_total_ghs,
@@ -336,9 +374,15 @@ export default function InvoiceForm({ onSave, initialData = null }) {
       if (!user) throw new Error('Not authenticated');
 
       // Prepare invoice data for the base invoice record.
+      const retentionWithheld = taxes.gross_total * (Number(formData.retention_rate || 0) / 100);
+      const netPayable = taxes.gross_total - retentionWithheld;
+
       const invoiceData = {
         client_id: formData.client_id,
         project_id: formData.project_id || null,
+        retention_rate: formData.retention_rate,
+        retention_withheld: retentionWithheld,
+        net_payable: netPayable,
         division_id: formData.division_id,
         currency: formData.currency,
         fx_rate_to_ghs: formData.fx_rate_to_ghs,
@@ -434,6 +478,33 @@ export default function InvoiceForm({ onSave, initialData = null }) {
         }
 
         finalStatus = transitionStatus;
+      }
+
+      if (finalStatus === 'approved' && Number(formData.retention_rate || 0) > 0) {
+        let contractId = formData.contract_id
+        if (!contractId && formData.project_id) {
+          const { data: contractData, error: contractError } = await supabase
+            .from('contracts')
+            .select('id')
+            .eq('project_id', formData.project_id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single()
+
+          if (contractError && contractError.code !== 'PGRST116') {
+            throw contractError
+          }
+          contractId = contractData?.id ?? null
+        }
+
+        await recordRetentionWithheld({
+          invoiceId,
+          projectId: formData.project_id,
+          contractId,
+          retentionRate: formData.retention_rate,
+          grossAmount: taxes.gross_total,
+          postedBy: user.data.user.id,
+        })
       }
 
       if (onSave) {
@@ -556,6 +627,21 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                   </div>
 
                   <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Retention Rate (%)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      value={formData.retention_rate}
+                      onChange={(e) => handleFormChange('retention_rate', Number(e.target.value))}
+                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-2 text-sm text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">FX Rate to GHS</label>
                     <div className="flex gap-2">
                       <input
@@ -582,6 +668,17 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     {exchangeRate && !formData.fx_rate_override && (
                       <p className="mt-1 text-xs text-slate-500">Current rate: {exchangeRate.rate_to_ghs}</p>
                     )}
+                  </div>
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-slate-900/90 p-4">
+                  <div className="flex justify-between text-sm text-slate-400 mb-3">
+                    <span>Retention withheld</span>
+                    <span>{formatCurrency(taxes.gross_total * (Number(formData.retention_rate || 0) / 100))}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-white font-semibold">
+                    <span>Net Payable</span>
+                    <span>{formatCurrency(taxes.gross_total - taxes.gross_total * (Number(formData.retention_rate || 0) / 100))}</span>
                   </div>
                 </div>
 

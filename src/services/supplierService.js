@@ -20,7 +20,7 @@ export async function getSupplierById(id) {
     .select(`
       *,
       project_costs (
-        id, description, amount, cost_date, cost_type, status
+        id, project_id, cost_type, description, amount, amount_ghs, currency, date_incurred, created_at
       )
     `)
     .eq('id', id)
@@ -90,16 +90,15 @@ export async function getSupplierAgeing(id) {
 
   const { data, error } = await supabase
     .from('project_costs')
-    .select('id, description, amount, cost_date, status')
+    .select('id, description, amount, date_incurred')
     .eq('supplier_id', id)
-    .eq('status', 'pending')
 
   if (error) throw error
 
   const buckets = { current: 0, days_1_30: 0, days_31_60: 0, days_61_90: 0, days_90_plus: 0 }
 
   for (const cost of data ?? []) {
-    const due = new Date(cost.cost_date)
+    const due = new Date(cost.date_incurred)
     const days = Math.floor((now - due) / (1000 * 60 * 60 * 24))
     const amount = Number(cost.amount ?? 0)
 
@@ -116,15 +115,15 @@ export async function getSupplierAgeing(id) {
 export async function getSupplierWHTSummary(id, year) {
   const { data, error } = await supabase
     .from('project_costs')
-    .select('id, description, amount, wht_amount, cost_date')
+    .select('id, description, amount, date_incurred')
     .eq('supplier_id', id)
-    .gte('cost_date', `${year}-01-01`)
-    .lte('cost_date', `${year}-12-31`)
+    .gte('date_incurred', `${year}-01-01`)
+    .lte('date_incurred', `${year}-12-31`)
 
   if (error) throw error
 
   const totalPayments = (data ?? []).reduce((sum, r) => sum + Number(r.amount ?? 0), 0)
-  const totalWHT      = (data ?? []).reduce((sum, r) => sum + Number(r.wht_amount ?? 0), 0)
+  const totalWHT      = 0
 
   return { year, totalPayments, totalWHT, transactions: data ?? [] }
 }

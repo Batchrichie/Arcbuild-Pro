@@ -2,10 +2,14 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import InvoiceList from '../../components/InvoiceList'
 import SupplierRegistry from '../../pages/suppliers/SupplierRegistry'
+import SupplierDetail from '../../pages/suppliers/SupplierDetail'
+import ClientRegistry from '../../pages/clients/ClientRegistry'
+import ClientDetail from '../../pages/clients/ClientDetail'
 import InvoiceForm from '../../components/InvoiceForm'
 import Modal from '../../components/ui/Modal'
 import GeneralLedger from '../../components/GeneralLedger'
 import FinancialStatements from '../../components/FinancialStatements'
+import RevenueRecognitionDashboard from '../../pages/revenue/RevenueRecognitionDashboard'
 import FxRateManager from '../../components/FxRateManager'
 import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
 import ProjectCostLedger from '../../components/ProjectCostLedger'
@@ -51,7 +55,8 @@ const NAV_SECTIONS = [
       { id: 'general-ledger', label: 'General Ledger' },
       { id: 'management-reports', label: 'Management Reports' },
       { id: 'debtors-ledger', label: 'Debtors Ledger' },
-      { id: 'financial-statements', label: 'Financial Statements' },
+          { id: 'financial-statements', label: 'Financial Statements' },
+          { id: 'revenue-recognition', label: 'Revenue Recognition' },
       { id: 'trial-balance', label: 'Trial Balance' },
     ],
   },
@@ -91,6 +96,7 @@ const NAV_SECTIONS = [
     items: [
       { id: 'asset-register', label: 'Asset Register' },
       { id: 'subcontractors', label: 'Subcontractors' },
+      { id: 'clients', label: 'Clients' },
       { id: 'suppliers', label: 'Suppliers' },
     ],
   },
@@ -136,6 +142,7 @@ const MORE_DRAWER_ITEMS = [
   { id: 'alert-log', label: 'Alerts', icon: '🚨' },
   { id: 'asset-register', label: 'Asset Register', icon: '🏗️' },
   { id: 'subcontractors', label: 'Subcontractors', icon: '👷' },
+  { id: 'clients', label: 'Clients', icon: '👥' },
   { id: 'suppliers', label: 'Suppliers', icon: '🏢' },
   { id: 'fx-rates', label: 'FX Rates', icon: '💱' },
 ]
@@ -164,6 +171,7 @@ const VIEW_TITLES = {
   'alert-log': 'Alerts',
   'fx-rates': 'FX Rates',
   'asset-register': 'Asset Register',
+  'clients': 'Clients',
   'suppliers': 'Suppliers',
   subcontractors: 'Subcontractors',
 }
@@ -195,6 +203,8 @@ export default function AccountantPortal() {
   const [activeView, setActiveView] = useState('dashboard')
   const [mobileTab, setMobileTab] = useState('invoices')
   const [moreOpen, setMoreOpen] = useState(false)
+  const [selectedClientId, setSelectedClientId] = useState(null)
+  const [selectedSupplierId, setSelectedSupplierId] = useState(null)
   const [journalDrillId, setJournalDrillId] = useState(null)
   const [createInvoiceOpen, setCreateInvoiceOpen] = useState(false)
   const [createJournalOpen, setCreateJournalOpen] = useState(false)
@@ -207,7 +217,16 @@ export default function AccountantPortal() {
 
   const navigate = (viewId) => {
     if (viewId === 'suppliers') {
-      setActiveView('suppliers')
+      setSelectedSupplierId(null)
+      setActiveView(viewId)
+      setMoreOpen(false)
+      setMobileTab('more')
+      return
+    }
+
+    if (viewId === 'clients') {
+      setSelectedClientId(null)
+      setActiveView(viewId)
       setMoreOpen(false)
       setMobileTab('more')
       return
@@ -216,6 +235,20 @@ export default function AccountantPortal() {
     setActiveView(viewId)
     setMoreOpen(false)
     setMobileTab(mobileTabForView(viewId))
+  }
+
+  const openSupplierDetail = (supplierId) => {
+    setSelectedSupplierId(supplierId)
+    setActiveView('supplier-detail')
+    setMoreOpen(false)
+    setMobileTab('more')
+  }
+
+  const openClientDetail = (clientId) => {
+    setSelectedClientId(clientId)
+    setActiveView('client-detail')
+    setMoreOpen(false)
+    setMobileTab('more')
   }
 
   const handleMobileTab = (tabId) => {
@@ -299,10 +332,38 @@ export default function AccountantPortal() {
         return <SsnitSchedule />
       case 'project-finance':
         return <ProjectFinanceDashboard userRole="accountant" currentUserProfileId={profile?.id} />
+      case 'revenue-recognition':
+        return <RevenueRecognitionDashboard />
       case 'cost-ledger':
         return <ProjectCostLedger userRole="accountant" userId={profile?.id} />
+      case 'clients':
+        return <ClientRegistry onViewClient={openClientDetail} />
+      case 'client-detail':
+        return (
+          <ClientDetail
+            clientId={selectedClientId}
+            onBack={() => {
+              setSelectedClientId(null)
+              setActiveView('clients')
+              setMoreOpen(false)
+              setMobileTab('more')
+            }}
+          />
+        )
       case 'suppliers':
-        return <SupplierRegistry />
+        return <SupplierRegistry onViewSupplier={openSupplierDetail} />
+      case 'supplier-detail':
+        return (
+          <SupplierDetail
+            supplierId={selectedSupplierId}
+            onBack={() => {
+              setSelectedSupplierId(null)
+              setActiveView('suppliers')
+              setMoreOpen(false)
+              setMobileTab('more')
+            }}
+          />
+        )
       case 'tax-centre':
         return <TaxCentre />
       case 'fx-rates':

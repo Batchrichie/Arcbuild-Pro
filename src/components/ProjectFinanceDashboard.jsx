@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { getRetentionSummary } from '../services/retentionService'
+import { getRecognitionHistory } from '../services/revenueRecognitionService'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 const COST_CATEGORIES = ['Materials', 'Labour', 'Subcontractors', 'Equipment Hire', 'Other']
@@ -13,7 +15,12 @@ export default function ProjectFinanceDashboard({
   const [projects, setProjects] = useState([])
   const [selectedProject, setSelectedProject] = useState(null)
   const [finance, setFinance] = useState(null)
+  const [retentionSummary, setRetentionSummary] = useState({
+    clientBalance: 0,
+    subcontractorBalance: 0,
+  })
   const [milestones, setMilestones] = useState([])
+  const [recognitionHistory, setRecognitionHistory] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [releaseLoading, setReleaseLoading] = useState(false)
@@ -92,6 +99,28 @@ export default function ProjectFinanceDashboard({
     fetchFinanceData()
   }, [selectedProject])
 
+  useEffect(() => {
+    if (!selectedProject) {
+      setRetentionSummary({ clientBalance: 0, subcontractorBalance: 0 })
+      return
+    }
+
+    const fetchRetentionSummary = async () => {
+      try {
+        const summary = await getRetentionSummary(selectedProject)
+        setRetentionSummary({
+          clientBalance: summary.clientBalance || 0,
+          subcontractorBalance: summary.subcontractorBalance || 0,
+        })
+      } catch (err) {
+        console.error('Error fetching retention summary:', err)
+        setRetentionSummary({ clientBalance: 0, subcontractorBalance: 0 })
+      }
+    }
+
+    fetchRetentionSummary()
+  }, [selectedProject])
+
   // Fetch milestones when project changes
   useEffect(() => {
     if (!selectedProject) return
@@ -112,6 +141,20 @@ export default function ProjectFinanceDashboard({
     }
 
     fetchMilestones()
+  }, [selectedProject])
+
+  useEffect(() => {
+    if (!selectedProject) return
+    const loadHistory = async () => {
+      try {
+        const rows = await getRecognitionHistory(selectedProject)
+        setRecognitionHistory(rows || [])
+      } catch (err) {
+        console.error('Failed to load recognition history', err)
+        setRecognitionHistory([])
+      }
+    }
+    loadHistory()
   }, [selectedProject])
 
   // Handle retention release
@@ -292,7 +335,7 @@ export default function ProjectFinanceDashboard({
               <p className="text-xl font-bold text-purple-300 mb-3">{formatPct(finance.financial_completion_pct)}</p>
               <div className="w-full h-3 rounded-full bg-white/10 overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-teal-400 to-purple-400 rounded-full"
+                  className="h-full bg-linear-to-r from-teal-400 to-purple-400 rounded-full"
                   style={{ width: `${Math.min(finance.financial_completion_pct, 100)}%` }}
                 ></div>
               </div>
@@ -414,6 +457,32 @@ export default function ProjectFinanceDashboard({
                 </div>
               </div>
 
+              <div className="mt-6 rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+                <h3 className="text-lg font-semibold text-white mb-4">Retention Summary</h3>
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Client Retention Balance</p>
+                    <p className="text-2xl font-bold text-white">{formatCurrency(retentionSummary.clientBalance)}</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Subcontractor Retention Balance</p>
+                    <p className="text-2xl font-bold text-white">{formatCurrency(retentionSummary.subcontractorBalance)}</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Details</p>
+                      <p className="text-sm text-slate-300">View the full retention ledger and release history.</p>
+                    </div>
+                    <a
+                      href={`/retention?project=${selectedProject}`}
+                      className="rounded-2xl bg-cyan-500/15 px-4 py-3 text-sm font-medium text-cyan-200 transition hover:bg-cyan-500/25"
+                    >
+                      View details
+                    </a>
+                  </div>
+                </div>
+              </div>
+
               {canReleaseRetention && !finance.retention_released && (
                 <button
                   onClick={handleReleaseRetention}
@@ -427,6 +496,59 @@ export default function ProjectFinanceDashboard({
           )}
 
           {/* Milestone Timeline */}
+          {/* Revenue Recognition Section */}
+          <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-white">Revenue Recognition</h3>
+                <p className="text-xs text-slate-400 mt-1">Completion method & recent recognitions</p>
+              </div>
+              <div>
+                {(['accountant','ceo'].includes(userRole)) && (
+                  <a href="/revenue-recognition" className="rounded-2xl bg-emerald-500/15 px-4 py-2 text-sm font-medium text-emerald-200">Run Recognition</a>
+                )}
+              </div>
+            </div>
+
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Completion Method</p>
+                <p className="text-sm text-white">{currentProject?.completion_method || 'cost'}</p>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">% Complete</p>
+                <p className="text-2xl font-bold text-white">{(currentProject?.pct_complete ?? finance?.pct_complete ?? 0).toFixed(2)}%</p>
+                <div className="w-full h-2 rounded-full bg-white/10 mt-2 overflow-hidden">
+                  <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${Math.min(currentProject?.pct_complete ?? finance?.pct_complete ?? 0, 100)}%` }}></div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Latest Recognition</p>
+                <p className="text-sm text-white">{recognitionHistory?.[0]?.period_label || '—'}</p>
+                <p className="text-sm text-slate-300 mt-1">Period Revenue: {recognitionHistory?.[0]?.period_revenue ?? '—'}</p>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <h4 className="text-sm text-slate-400 mb-2">Recognition History</h4>
+              {recognitionHistory.length === 0 ? (
+                <div className="text-slate-500">No recognitions recorded.</div>
+              ) : (
+                <div className="space-y-2">
+                  {recognitionHistory.map((r) => (
+                    <div key={r.id} className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-slate-300">
+                      <div className="flex items-center justify-between">
+                        <div>{r.recognition_date} — {r.period_label}</div>
+                        <div>{new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(r.period_revenue || 0)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
           {milestones.length > 0 && (
             <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
               <h3 className="text-lg font-semibold text-white mb-4">Project Milestones</h3>

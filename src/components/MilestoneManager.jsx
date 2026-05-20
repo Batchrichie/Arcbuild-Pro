@@ -54,6 +54,7 @@ export default function MilestoneManager({
   }, [selectedProjectId]);
 
   const loadProjects = async () => {
+    if (hideProjectSelector) return;
     try {
       setLoading(true);
       let query = supabase

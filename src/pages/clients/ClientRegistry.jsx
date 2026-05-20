@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { exportToExcel } from '../../utils/exportToExcel'
 import { getClients, createClient, updateClient } from '../../services/clientService'
 
 const STATUS_STYLE = {
@@ -9,18 +10,22 @@ const STATUS_STYLE = {
   Blacklisted: 'bg-red-500/10 text-red-300 border-red-500/30',
 }
 
-const CLIENT_TYPE_OPTIONS = ['Company', 'Individual', 'Government']
+const CLIENT_TYPE_OPTIONS = [
+  { label: 'Individual', value: 'individual' },
+  { label: 'Corporate', value: 'corporate' },
+  { label: 'Government', value: 'government' },
+]
 const STATUS_OPTIONS      = ['Active', 'Inactive', 'Blacklisted']
 const CURRENCY_OPTIONS    = ['GHS', 'USD', 'GBP', 'EUR']
 
 const EMPTY_FORM = {
-  name: '', client_type: 'Company', tin: '', vat_registered: false, vat_number: '',
+  name: '', client_type: 'individual', tin: '', vat_registered: false, vat_number: '',
   credit_limit: 0, payment_terms: 30, currency: 'GHS', contact_person: '',
   contact_phone: '', contact_email: '', address: '', region: '', country: 'Ghana',
   status: 'Active', notes: '',
 }
 
-export default function ClientRegistry() {
+export default function ClientRegistry({ onViewClient }) {
   const { profile } = useAuth()
   const canEdit = ['ceo', 'accountant'].includes(profile?.role)
 
@@ -63,11 +68,19 @@ export default function ClientRegistry() {
     setModalOpen(true)
   }
 
+  function normalizeClientType(value) {
+    if (!value) return 'individual'
+    const normalized = String(value).toLowerCase()
+    if (normalized === 'company' || normalized === 'corporate') return 'corporate'
+    if (normalized === 'government') return 'government'
+    return normalized === 'individual' ? 'individual' : normalized
+  }
+
   function openEdit(client) {
     setEditing(client)
     setForm({
       name: client.name ?? '',
-      client_type: client.client_type ?? 'Company',
+      client_type: normalizeClientType(client.client_type),
       tin: client.tin ?? '',
       vat_registered: client.vat_registered ?? false,
       vat_number: client.vat_number ?? '',
@@ -113,12 +126,38 @@ export default function ClientRegistry() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-white">Client Registry</h1>
-        {canEdit && (
-          <button onClick={openCreate}
-            className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-500/20 transition">
-            + Add New Client
+        <div className="flex gap-3">
+          <button
+            onClick={() => exportToExcel(
+              clients,
+              [
+                { header: 'Name',           key: 'name' },
+                { header: 'Type',           key: 'client_type' },
+                { header: 'TIN',            key: 'tin' },
+                { header: 'Contact Person', key: 'contact_person' },
+                { header: 'Phone',          key: 'contact_phone' },
+                { header: 'Email',          key: 'contact_email' },
+                { header: 'Address',        key: 'address' },
+                { header: 'Region',         key: 'region' },
+                { header: 'Country',        key: 'country' },
+                { header: 'Currency',       key: 'currency' },
+                { header: 'Credit Limit',   key: 'credit_limit' },
+                { header: 'Payment Terms',  key: 'payment_terms' },
+                { header: 'VAT Registered', key: 'vat_registered' },
+                { header: 'Status',         key: 'status' },
+              ],
+              'Clients.xlsx'
+            )}
+            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-white/10 transition">
+            Export Excel
           </button>
-        )}
+          {canEdit && (
+            <button onClick={openCreate}
+              className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-500/20 transition">
+              + Add New Client
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex gap-3 flex-wrap">
@@ -153,7 +192,7 @@ export default function ClientRegistry() {
             ) : paginated.map(c => (
               <tr key={c.id} className="border-b border-white/5 hover:bg-white/5 transition">
                 <td className="px-4 py-3 font-medium text-white">{c.name}</td>
-                <td className="px-4 py-3">{c.client_type}</td>
+                <td className="px-4 py-3">{normalizeClientType(c.client_type)}</td>
                 <td className="px-4 py-3">{c.tin ?? '—'}</td>
                 <td className="px-4 py-3">{c.contact_person ?? '—'}</td>
                 <td className="px-4 py-3">{c.contact_phone ?? '—'}</td>
@@ -166,10 +205,17 @@ export default function ClientRegistry() {
                   {new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(c.credit_limit ?? 0)}
                 </td>
                 <td className="px-4 py-3 flex gap-2">
-                  <Link to={`/clients/${c.id}`}
-                    className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">
-                    View
-                  </Link>
+                  {onViewClient ? (
+                    <button type="button" onClick={() => onViewClient(c.id)}
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">
+                      View
+                    </button>
+                  ) : (
+                    <Link to={`/clients/${c.id}`}
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">
+                      View
+                    </Link>
+                  )}
                   {canEdit && (
                     <button onClick={() => openEdit(c)}
                       className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">
@@ -226,7 +272,9 @@ export default function ClientRegistry() {
                 <span className="uppercase tracking-widest">Client Type</span>
                 <select value={form.client_type} onChange={e => setForm(f => ({ ...f, client_type: e.target.value }))}
                   className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50">
-                  {CLIENT_TYPE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                  {CLIENT_TYPE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
                 </select>
               </label>
 

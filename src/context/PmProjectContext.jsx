@@ -28,18 +28,18 @@ export function PmProjectProvider({ children }) {
         .eq('profile_id', profile.id)
 
       if (error) throw error
-      const list = (data ?? []).map((row) => row.projects).filter(Boolean)
-      setProjects(list)
+      const rows = data ?? []
+      const projectList = rows.map((row) => row.projects).filter(Boolean)
+      setProjects(projectList)
 
       setSelectedProjectId((prev) => {
-        if (prev && list.some((p) => p.id === prev)) return prev
-        const next = list[0]?.id || ''
-        if (next) {
-          try {
-            sessionStorage.setItem(STORAGE_KEY, next)
-          } catch {
-            /* ignore */
-          }
+        if (prev && projectList.some((p) => p.id === prev)) return prev
+        if (projectList.length === 0) return null
+        const next = projectList[0].id
+        try {
+          sessionStorage.setItem(STORAGE_KEY, next)
+        } catch {
+          /* ignore */
         }
         return next
       })

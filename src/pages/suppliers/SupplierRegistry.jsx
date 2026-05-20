@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { exportToExcel } from '../../utils/exportToExcel'
 import { getSuppliers, createSupplier, updateSupplier } from '../../services/supplierService'
 
 const STATUS_STYLE = {
@@ -28,7 +29,7 @@ const EMPTY_FORM = {
   credit_limit: 0, status: 'Active', notes: '',
 }
 
-export default function SupplierRegistry() {
+export default function SupplierRegistry({ onViewSupplier }) {
   const { profile } = useAuth()
   const canEdit = ['ceo', 'accountant'].includes(profile?.role)
 
@@ -128,12 +129,41 @@ export default function SupplierRegistry() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-white">Supplier Registry</h1>
-        {canEdit && (
-          <button onClick={openCreate}
-            className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-500/20 transition">
-            + Add New Supplier
+        <div className="flex gap-3">
+          <button
+            onClick={() => exportToExcel(
+              suppliers,
+              [
+                { header: 'Name',            key: 'name' },
+                { header: 'Type',            key: 'supplier_type' },
+                { header: 'TIN',             key: 'tin' },
+                { header: 'Contact Person',  key: 'contact_person' },
+                { header: 'Phone',           key: 'contact_phone' },
+                { header: 'Email',           key: 'contact_email' },
+                { header: 'Address',         key: 'address' },
+                { header: 'Region',          key: 'region' },
+                { header: 'Country',         key: 'country' },
+                { header: 'Currency',        key: 'currency' },
+                { header: 'WHT Applicable',  key: 'wht_applicable' },
+                { header: 'WHT Rate (%)',    key: 'wht_rate' },
+                { header: 'Bank Name',       key: 'bank_name' },
+                { header: 'Bank Account',    key: 'bank_account_no' },
+                { header: 'Credit Limit',    key: 'credit_limit' },
+                { header: 'Payment Terms',   key: 'payment_terms' },
+                { header: 'Status',          key: 'status' },
+              ],
+              'Suppliers.xlsx'
+            )}
+            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-white/10 transition">
+            Export Excel
           </button>
-        )}
+          {canEdit && (
+            <button onClick={openCreate}
+              className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-500/20 transition">
+              + Add New Supplier
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex gap-3 flex-wrap">
@@ -177,10 +207,17 @@ export default function SupplierRegistry() {
                   </span>
                 </td>
                 <td className="px-4 py-3 flex gap-2">
-                  <Link to={`/suppliers/${s.id}`}
-                    className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">
-                    View
-                  </Link>
+                  {onViewSupplier ? (
+                    <button type="button" onClick={() => onViewSupplier(s.id)}
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">
+                      View
+                    </button>
+                  ) : (
+                    <Link to={`/suppliers/${s.id}`}
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">
+                      View
+                    </Link>
+                  )}
                   {canEdit && (
                     <button onClick={() => openEdit(s)}
                       className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">

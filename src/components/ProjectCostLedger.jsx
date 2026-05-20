@@ -34,6 +34,7 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
   }, [selectedProjectId, filters]);
 
   const loadProjects = async () => {
+    if (hideProjectSelector) return;
     try {
       setLoading(true);
       let query = supabase

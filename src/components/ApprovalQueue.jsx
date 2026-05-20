@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import StatusBadge from './ui/StatusBadge'
+import { recordRetentionWithheld } from '../services/retentionService'
 
 export default function ApprovalQueue() {
   const { user, profile } = useAuth()
@@ -21,7 +22,7 @@ export default function ApprovalQueue() {
     try {
       const { data, error } = await supabase
         .from('invoices')
-        .select('id,invoice_number,gross_total_ghs,currency,project:projects(name),division:divisions(name),client:clients(name),created_by,created_at')
+        .select('id,invoice_number,gross_total,gross_total_ghs,currency,project_id,retention_rate,project:projects(name),division:divisions(name),client:clients(name),created_by,created_at')
         .eq('status', 'pending_approval')
         .order('created_at', { ascending: false })
 
@@ -82,6 +83,23 @@ export default function ApprovalQueue() {
     }
   }, [])
 
+  const getContractIdForProject = async (projectId) => {
+    if (!projectId) return null
+
+    const { data, error } = await supabase
+      .from('contracts')
+      .select('id')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (error && error.code !== 'PGRST116') {
+      throw error
+    }
+    return data?.id ?? null
+  }
+
   const handleApprove = async (invoice) => {
     if (!user?.id) {
       setError('Authentication required to approve invoices.')
@@ -101,6 +119,18 @@ export default function ApprovalQueue() {
       if (error) throw error
       if (!data?.success) {
         throw new Error(data?.error || 'Approval failed')
+      }
+
+      if (invoice.retention_rate > 0) {
+        const contractId = await getContractIdForProject(invoice.project_id)
+        await recordRetentionWithheld({
+          invoiceId: invoice.id,
+          projectId: invoice.project_id,
+          contractId,
+          retentionRate: invoice.retention_rate,
+          grossAmount: invoice.gross_total,
+          postedBy: user.id,
+        })
       }
 
       setInvoices((current) => current.filter((item) => item.id !== invoice.id))

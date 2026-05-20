@@ -6,6 +6,7 @@ import ApprovalQueue from '../../components/ApprovalQueue'
 import GeneralLedger from '../../components/GeneralLedger'
 import ManagementReports from '../../components/reports/ManagementReports'
 import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
+import RevenueRecognitionDashboard from '../../pages/revenue/RevenueRecognitionDashboard'
 import KpiStrip from '../../components/ceo/KpiStrip'
 import DivisionPerformanceCards from '../../components/ceo/DivisionPerformanceCards'
 import ProjectHealthTable from '../../components/ceo/ProjectHealthTable'
@@ -15,6 +16,10 @@ import IssueLog from '../../components/pm/IssueLog'
 import ManualJournalList from '../../components/accounting/ManualJournalList'
 import DebtorsLedger from '../../components/accounting/DebtorsLedger'
 import AlertLog from '../../components/alerts/AlertLog'
+import ClientRegistry from '../../pages/clients/ClientRegistry'
+import ClientDetail from '../../pages/clients/ClientDetail'
+import SupplierRegistry from '../../pages/suppliers/SupplierRegistry'
+import SupplierDetail from '../../pages/suppliers/SupplierDetail'
 import { COMPANY } from '../../lib/company-config'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 
@@ -22,7 +27,10 @@ const TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'approvals', label: 'Approvals', icon: '✓' },
   { id: 'projects', label: 'Projects', icon: '📁' },
+  { id: 'clients', label: 'Clients', icon: '👥' },
+  { id: 'suppliers', label: 'Suppliers', icon: '🏢' },
   { id: 'financials', label: 'Financials', icon: '💰' },
+  { id: 'revenue', label: 'Revenue', icon: '📑' },
   { id: 'banking', label: 'Banking', icon: '🏦' },
   { id: 'journal-history', label: 'Journals', icon: '📒' },
   { id: 'debtors-ledger', label: 'Debtors Ledger', icon: '📋' },
@@ -114,6 +122,8 @@ export default function CeoPortal() {
   const [taxBalances, setTaxBalances] = useState({})
   const [slideOverProjectId, setSlideOverProjectId] = useState(null)
   const [projectsSubview, setProjectsSubview] = useState('health')
+  const [selectedClientId, setSelectedClientId] = useState(null)
+  const [selectedSupplierId, setSelectedSupplierId] = useState(null)
   const [bankAccounts, setBankAccounts] = useState([])
   const [bankBalances, setBankBalances] = useState({})
   const [moreOpen, setMoreOpen] = useState(false)
@@ -128,6 +138,18 @@ export default function CeoPortal() {
 
   const visibleTabs = TABS.slice(0, 4)
   const overflowTabs = TABS.slice(4)
+
+  const openClientDetail = (clientId) => {
+    setSelectedClientId(clientId)
+    setActiveTab('client-detail')
+    setMoreOpen(false)
+  }
+
+  const openSupplierDetail = (supplierId) => {
+    setSelectedSupplierId(supplierId)
+    setActiveTab('supplier-detail')
+    setMoreOpen(false)
+  }
 
   const handleMobileTab = (tabId) => {
     if (tabId === 'more') {
@@ -452,6 +474,12 @@ export default function CeoPortal() {
               </section>
             )}
 
+            {activeTab === 'revenue' && (
+              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                <RevenueRecognitionDashboard />
+              </section>
+            )}
+
             {activeTab === 'banking' && (
               <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="Banking" subtitle="Bank accounts (read-only)" />
@@ -515,6 +543,46 @@ export default function CeoPortal() {
               </section>
             )}
 
+            {activeTab === 'clients' && (
+              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                <SectionHeader title="Clients" subtitle="Client registry" />
+                <ClientRegistry onViewClient={openClientDetail} />
+              </section>
+            )}
+
+            {activeTab === 'client-detail' && (
+              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                <ClientDetail
+                  clientId={selectedClientId}
+                  onBack={() => {
+                    setSelectedClientId(null)
+                    setActiveTab('clients')
+                    setMoreOpen(false)
+                  }}
+                />
+              </section>
+            )}
+
+            {activeTab === 'suppliers' && (
+              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                <SectionHeader title="Suppliers" subtitle="Supplier registry" />
+                <SupplierRegistry onViewSupplier={openSupplierDetail} />
+              </section>
+            )}
+
+            {activeTab === 'supplier-detail' && (
+              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                <SupplierDetail
+                  supplierId={selectedSupplierId}
+                  onBack={() => {
+                    setSelectedSupplierId(null)
+                    setActiveTab('suppliers')
+                    setMoreOpen(false)
+                  }}
+                />
+              </section>
+            )}
+
             {activeTab === 'reports' && (
               <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <ManagementReports />
@@ -532,7 +600,7 @@ export default function CeoPortal() {
               key={tab.id}
               type="button"
               onClick={() => handleMobileTab(tab.id)}
-              className={`flex min-h-[2.75rem] min-w-[3rem] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium transition ${
+              className={`flex min-h-11 min-w-12 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium transition ${
                 activeTab === tab.id ? 'text-amber-300' : 'text-slate-500'
               }`}
             >
@@ -545,7 +613,7 @@ export default function CeoPortal() {
           <button
             type="button"
             onClick={() => handleMobileTab('more')}
-            className={`flex min-h-[2.75rem] min-w-[3rem] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium transition ${
+            className={`flex min-h-11 min-w-12 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium transition ${
               moreOpen ? 'text-amber-300' : 'text-slate-500'
             }`}
           >

@@ -1,5 +1,38 @@
 import { supabase } from '../lib/supabase'
 
+const CLIENT_FIELDS = [
+  'name',
+  'client_type',
+  'tin',
+  'contact_person',
+  'contact_phone',
+  'contact_email',
+  'credit_limit',
+  'payment_terms',
+  'currency',
+  'vat_registered',
+  'vat_number',
+  'address',
+  'region',
+  'country',
+  'status',
+  'notes',
+  'applies_vat',
+  'applies_nhil',
+  'applies_getfund',
+  'applies_wht',
+  'wht_rate',
+]
+
+const sanitizeClientPayload = (payload) => {
+  return Object.keys(payload).reduce((result, key) => {
+    if (CLIENT_FIELDS.includes(key)) {
+      result[key] = payload[key]
+    }
+    return result
+  }, {})
+}
+
 export async function getClients(filters = {}) {
   let query = supabase
     .from('clients')
@@ -20,8 +53,8 @@ export async function getClientById(id) {
     .select(`
       *,
       invoices (
-        id, invoice_number, status, total_amount, expected_receipt_ghs,
-        currency, issue_date, due_date, payment_date
+        id, invoice_number, status, gross_total, expected_receipt_ghs,
+        currency, created_at, due_date, payment_date
       )
     `)
     .eq('id', id)
@@ -32,7 +65,10 @@ export async function getClientById(id) {
 }
 
 export async function createClient(clientData, currentUserId) {
-  const insertPayload = { ...clientData, created_by: currentUserId }
+  const insertPayload = {
+    ...sanitizeClientPayload(clientData),
+    created_by: currentUserId,
+  }
 
   const { data, error } = await supabase
     .from('clients')
@@ -63,7 +99,10 @@ export async function updateClient(id, clientData, currentUserId) {
 
   if (fetchError) throw fetchError
 
-  const updatePayload = { ...clientData, updated_at: new Date().toISOString() }
+  const updatePayload = {
+    ...sanitizeClientPayload(clientData),
+    updated_at: new Date().toISOString(),
+  }
 
   const { data, error } = await supabase
     .from('clients')

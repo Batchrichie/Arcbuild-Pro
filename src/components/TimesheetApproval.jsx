@@ -18,7 +18,7 @@ export default function TimesheetApproval() {
       .from('timesheet_summary')
       .select('*')
       .eq('status', 'submitted')
-      .order('work_date', { ascending: false })
+      .order('date', { ascending: false })
       .limit(200)
 
     setLoading(false)

@@ -10,9 +10,10 @@ const STATUS_STYLE = {
   Blacklisted: 'bg-red-500/10 text-red-300 border-red-500/30',
 }
 
-export default function SupplierDetail() {
+export default function SupplierDetail({ supplierId: supplierIdProp, onBack }) {
   const { profile } = useAuth()
-  const { id } = useParams()
+  const { id: routeId } = useParams()
+  const id = supplierIdProp || routeId
   const [supplier, setSupplier] = useState(null)
   const [ageing, setAgeing]     = useState(null)
   const [loading, setLoading]   = useState(true)
@@ -49,7 +50,11 @@ export default function SupplierDetail() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-3 flex-wrap">
-        <Link to="/suppliers" className="text-slate-400 hover:text-white text-sm transition">← Suppliers</Link>
+        {onBack ? (
+          <button type="button" onClick={onBack} className="text-slate-400 hover:text-white text-sm transition">← Suppliers</button>
+        ) : (
+          <Link to="/suppliers" className="text-slate-400 hover:text-white text-sm transition">← Suppliers</Link>
+        )}
         <h1 className="text-2xl font-semibold text-white">{supplier.name}</h1>
         <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_STYLE[supplier.status] ?? ''}`}>
           {supplier.status}
