@@ -169,7 +169,7 @@ export default function InvoiceList() {
     setViewLoading(true)
 
     try {
-      const { data: invoice, error: invoiceError } = await supabase
+      const { data: invoiceDetail, error: invoiceError } = await supabase
         .from('invoices')
         .select(`
           id,
@@ -188,7 +188,6 @@ export default function InvoiceList() {
           notes,
           client_id,
           project_id,
-          contract_id,
           retention_rate,
           retention_withheld,
           net_payable,
@@ -200,14 +199,14 @@ export default function InvoiceList() {
         .single()
 
       if (invoiceError) throw invoiceError
-      if (!invoice) {
+      if (!invoiceDetail) {
         throw new Error('Invoice detail not found.')
       }
 
       const { data: lineItemsData, error: lineItemsError } = await supabase
         .from('invoice_line_items')
         .select('id,description,quantity,unit_price')
-        .eq('invoice_id', invoice.id)
+        .eq('invoice_id', invoiceDetail.id)
 
       let lineItems = []
       if (lineItemsError) {
@@ -470,14 +469,20 @@ export default function InvoiceList() {
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-slate-950/80 overflow-hidden">
-              <div className="border-b border-white/10 bg-slate-900/80 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-500">Line items</div>
+              <div className="border-b border-white/10 bg-slate-900/80 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-200">Line items</div>
               <div className="divide-y divide-white/10">
+                <div className="grid gap-4 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-400 sm:grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr]">
+                  <div>Description</div>
+                  <div className="text-right">Qty</div>
+                  <div className="text-right">Unit price</div>
+                  <div className="text-right">Amount</div>
+                </div>
                 {(selectedInvoice.lineItems || []).map((item) => (
                   <div key={item.id || `${item.description}-${Math.random()}`} className="grid gap-4 px-4 py-4 text-sm text-slate-200 sm:grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr]">
                     <div>{item.description || '—'}</div>
-                    <div>{item.quantity}</div>
-                    <div>{new Intl.NumberFormat('en-US', { style: 'currency', currency: selectedInvoice.currency || 'GHS', minimumFractionDigits: 2 }).format(Number(item.unit_price || 0))}</div>
-                    <div>{new Intl.NumberFormat('en-US', { style: 'currency', currency: selectedInvoice.currency || 'GHS', minimumFractionDigits: 2 }).format(Number((item.quantity || 0) * (item.unit_price || 0)))}</div>
+                    <div className="text-right">{item.quantity}</div>
+                    <div className="text-right">{new Intl.NumberFormat('en-US', { style: 'currency', currency: selectedInvoice.currency || 'GHS', minimumFractionDigits: 2 }).format(Number(item.unit_price || 0))}</div>
+                    <div className="text-right">{new Intl.NumberFormat('en-US', { style: 'currency', currency: selectedInvoice.currency || 'GHS', minimumFractionDigits: 2 }).format(Number((item.quantity || 0) * (item.unit_price || 0)))}</div>
                   </div>
                 ))}
                 {(!selectedInvoice.lineItems || selectedInvoice.lineItems.length === 0) && (
