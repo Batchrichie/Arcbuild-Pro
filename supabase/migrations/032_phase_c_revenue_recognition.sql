@@ -35,9 +35,9 @@ CREATE INDEX IF NOT EXISTS idx_revrec_date    ON revenue_recognition (recognitio
 
 -- Section C1.3 — Insert GL account codes
 INSERT INTO chart_of_accounts (account_code, account_name, account_type) VALUES
-  ('1400', 'Contract Asset (WIP)',          'asset'),
-  ('2300', 'Advance Billings / Overbilling','liability'),
-  ('4600', 'Contract Revenue Recognised',   'revenue')
+  ('1400', 'Contract Asset (WIP)',                 'asset'),
+  ('2300', 'Advance Billings / Contract Liabilities','liability'),
+  ('4600', 'Contract Revenue Recognised',          'revenue')
 ON CONFLICT (account_code) DO NOTHING;
 
 -- Section C1.4 — RLS for revenue_recognition

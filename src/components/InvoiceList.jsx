@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import StatusBadge from './ui/StatusBadge'
+import Modal from './ui/Modal'
 import InvoicePdfLink from './pdf/InvoicePdfLink'
 
 const STATUS_OPTIONS = [
@@ -32,6 +33,10 @@ export default function InvoiceList() {
   const [divisionFilter, setDivisionFilter] = useState('all')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [viewInvoiceOpen, setViewInvoiceOpen] = useState(false)
+  const [selectedInvoice, setSelectedInvoice] = useState(null)
+  const [viewLoading, setViewLoading] = useState(false)
+  const [invoiceViewError, setInvoiceViewError] = useState(null)
 
   const divisionOptions = useMemo(() => {
     const unique = new Map()
@@ -157,8 +162,66 @@ export default function InvoiceList() {
     updateInvoiceStatus(invoice, 'draft')
   }
 
-  const handleView = (invoice) => {
-    window.alert(`Invoice ${invoice.invoice_number} details are not yet implemented.`)
+  const handleView = async (invoice) => {
+    setInvoiceViewError(null)
+    setSelectedInvoice(null)
+    setViewInvoiceOpen(true)
+    setViewLoading(true)
+
+    try {
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('invoices')
+        .select(`
+          id,
+          invoice_number,
+          currency,
+          gross_total_ghs,
+          expected_receipt_ghs,
+          fx_rate_to_ghs,
+          status,
+          requires_approval,
+          rejected_at,
+          rejection_note,
+          created_at,
+          due_date,
+          created_by,
+          notes,
+          client_id,
+          project_id,
+          contract_id,
+          retention_rate,
+          retention_withheld,
+          net_payable,
+          client:clients(name, client_type, address, contact_person, contact_phone, contact_email, tin, region, country),
+          project:projects(name),
+          division:divisions(id,name)
+        `)
+        .eq('id', invoice.id)
+        .single()
+
+      if (invoiceError) throw invoiceError
+      if (!invoice) {
+        throw new Error('Invoice detail not found.')
+      }
+
+      const { data: lineItemsData, error: lineItemsError } = await supabase
+        .from('invoice_line_items')
+        .select('id,description,quantity,unit_price')
+        .eq('invoice_id', invoice.id)
+
+      let lineItems = []
+      if (lineItemsError) {
+        console.warn('Unable to load invoice line items', lineItemsError)
+      } else {
+        lineItems = lineItemsData || []
+      }
+
+      setSelectedInvoice({ ...invoice, lineItems })
+    } catch (err) {
+      setInvoiceViewError(err.message || 'Unable to load invoice details.')
+    } finally {
+      setViewLoading(false)
+    }
   }
 
   const overdueCount = useMemo(() => {
@@ -355,6 +418,76 @@ export default function InvoiceList() {
           </div>
         ) : null
       )}
+
+      <Modal
+        open={viewInvoiceOpen}
+        onClose={() => setViewInvoiceOpen(false)}
+        title={selectedInvoice ? `Invoice ${selectedInvoice.invoice_number}` : 'Invoice details'}
+        size="xl"
+      >
+        {viewLoading ? (
+          <div className="py-10 text-center text-slate-400">Loading invoice details...</div>
+        ) : invoiceViewError ? (
+          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-4 text-sm text-red-200">
+            {invoiceViewError}
+          </div>
+        ) : selectedInvoice ? (
+          <div className="space-y-6">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Invoice</div>
+                <div className="mt-2 text-sm text-slate-100">{selectedInvoice.invoice_number}</div>
+              </div>
+              <div>
+                <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Status</div>
+                <div className="mt-2 text-sm text-slate-100">{selectedInvoice.status}</div>
+              </div>
+              <div>
+                <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Client</div>
+                <div className="mt-2 text-sm text-slate-100">{selectedInvoice.client?.name || 'Unknown'}</div>
+              </div>
+              <div>
+                <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Project</div>
+                <div className="mt-2 text-sm text-slate-100">{selectedInvoice.project?.name || 'Unassigned'}</div>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4">
+              <div className="grid gap-4 sm:grid-cols-3 text-sm text-slate-300">
+                <div>
+                  <div className="uppercase tracking-[0.2em]">Amount</div>
+                  <div className="mt-2 text-slate-100">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'GHS', minimumFractionDigits: 2 }).format(Number(selectedInvoice.gross_total_ghs || 0))}</div>
+                </div>
+                <div>
+                  <div className="uppercase tracking-[0.2em]">Due date</div>
+                  <div className="mt-2 text-slate-100">{selectedInvoice.due_date || '—'}</div>
+                </div>
+                <div>
+                  <div className="uppercase tracking-[0.2em]">Retention rate</div>
+                  <div className="mt-2 text-slate-100">{selectedInvoice.retention_rate ?? 0}%</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-slate-950/80 overflow-hidden">
+              <div className="border-b border-white/10 bg-slate-900/80 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-500">Line items</div>
+              <div className="divide-y divide-white/10">
+                {(selectedInvoice.lineItems || []).map((item) => (
+                  <div key={item.id || `${item.description}-${Math.random()}`} className="grid gap-4 px-4 py-4 text-sm text-slate-200 sm:grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr]">
+                    <div>{item.description || '—'}</div>
+                    <div>{item.quantity}</div>
+                    <div>{new Intl.NumberFormat('en-US', { style: 'currency', currency: selectedInvoice.currency || 'GHS', minimumFractionDigits: 2 }).format(Number(item.unit_price || 0))}</div>
+                    <div>{new Intl.NumberFormat('en-US', { style: 'currency', currency: selectedInvoice.currency || 'GHS', minimumFractionDigits: 2 }).format(Number((item.quantity || 0) * (item.unit_price || 0)))}</div>
+                  </div>
+                ))}
+                {(!selectedInvoice.lineItems || selectedInvoice.lineItems.length === 0) && (
+                  <div className="px-4 py-4 text-sm text-slate-500">No line items available.</div>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </Modal>
 
     </div>
   )

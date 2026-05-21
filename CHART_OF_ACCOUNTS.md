@@ -36,6 +36,12 @@ The code structure reflects the major ledger categories used by Arcbuild Pro.
   2300–2399  Contract Liabilities
 3000–3999  Equity
 4000–4999  Revenue
+
+## 6. Retention vs Advance Billings
+- `2109 Retention Payable` is the designated current liability account for retention balances held by the client or subcontractor.
+- `2300 Advance Billings / Contract Liabilities` is reserved strictly for overbilling / advance billings arising from revenue recognition.
+- `2300` must never be used for retention payable transactions.
+- `2109` should never be used for advance billing / overbilling postings.
   4100–4199  Construction Revenue
   4200–4299  Architecture Revenue
   4300–4399  Real Estate Revenue

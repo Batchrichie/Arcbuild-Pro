@@ -37,7 +37,7 @@ ALTER TABLE invoices
 -- Section B1.3 — Insert GL account codes
 INSERT INTO chart_of_accounts (account_code, account_name, account_type) VALUES
   ('1300', 'Retention Receivable', 'asset'),
-  ('2300', 'Retention Payable',    'liability')
+  ('2109', 'Retention Payable',    'liability')
 ON CONFLICT (account_code) DO NOTHING;
 
 -- Section B1.4 — Row Level Security for retention_ledger

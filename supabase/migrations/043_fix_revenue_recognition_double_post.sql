@@ -1,13 +1,10 @@
--- Function: post_revenue_recognition_journal
--- Parameters:
--- p_project_id UUID,
--- p_pct_complete NUMERIC,
--- p_contract_value NUMERIC,
--- p_prior_recognised NUMERIC,
--- p_cost_to_date NUMERIC,
--- p_period_label TEXT,
--- p_recognised_by UUID DEFAULT NULL
+-- =============================================================================
+-- Migration 043: Fix double-posting in revenue recognition journal
+-- Corrects the revenue recognition function to write directly to ledger_entries
+-- and removes duplicate ledger entries created by the broken journal_lines mirror.
+-- =============================================================================
 
+-- Update the revenue recognition function to write only one set of ledger entries.
 CREATE OR REPLACE FUNCTION post_revenue_recognition_journal(
   p_project_id UUID,
   p_pct_complete NUMERIC,
@@ -125,3 +122,17 @@ BEGIN
   RETURN v_journal_id;
 END;
 $$;
+
+-- Remove duplicate ledger_entries created by the prior broken function.
+WITH duplicates AS (
+  SELECT id,
+         ROW_NUMBER() OVER (
+           PARTITION BY journal_entry_id, account_code, debit_amount, credit_amount, created_at
+           ORDER BY id
+         ) AS rn
+  FROM ledger_entries
+)
+DELETE FROM ledger_entries
+WHERE id IN (
+  SELECT id FROM duplicates WHERE rn > 1
+);

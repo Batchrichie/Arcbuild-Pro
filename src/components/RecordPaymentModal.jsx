@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import Modal from './ui/Modal'
 import { usePaymentReceipt } from '../hooks/usePaymentReceipt'
 import { getPaymentAccounts } from '../services/chartOfAccountsService'
+import { recordPayment } from '../services/paymentService'
 
 const DEFAULT_CASH_ACCOUNT_BY_CURRENCY = {
   GHS: '1101',
@@ -163,7 +164,7 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
     setLoading(true)
 
     try {
-      const { data, error: rpcError } = await supabase.rpc('record_invoice_payment', {
+      await recordPayment({
         invoice_uuid: invoice.id,
         payment_date_val: paymentDate,
         payment_reference_val: paymentReference,
@@ -171,14 +172,6 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
         payment_account_code: paymentAccountCode,
         acting_user_id: user.id,
       })
-
-      if (rpcError) {
-        throw rpcError
-      }
-
-      if (!data?.success) {
-        throw new Error(data?.error || 'Failed to record payment')
-      }
 
       generateReceipt({
         invoiceId: invoice.id,

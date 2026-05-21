@@ -1,5 +1,46 @@
 import { supabase } from '../lib/supabase'
 
+async function resolveProfileId(userId) {
+  if (userId) {
+    const { data: profileById, error: profileByIdError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (profileByIdError) throw profileByIdError
+    if (profileById) return profileById.id
+
+    const { data: profileByAuthUser, error: profileByAuthUserError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .single()
+
+    if (profileByAuthUserError) throw profileByAuthUserError
+    return profileByAuthUser?.id
+  }
+
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession()
+
+  if (sessionError) throw sessionError
+  if (!session?.user?.id) throw new Error('Unable to resolve current user profile ID.')
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('user_id', session.user.id)
+    .single()
+
+  if (profileError) throw profileError
+  if (!profile) throw new Error('No profile found for current user.')
+
+  return profile.id
+}
+
 const ACCOUNT_FIELDS = [
   'account_name',
   'account_type',
@@ -224,6 +265,7 @@ export async function createAccount(data, currentUserId) {
     throw new Error(`Account code ${data.code ?? data.account_code} already exists.`)
   }
 
+  const auditUserId = await resolveProfileId(currentUserId)
   const insertPayload = {
     account_code: String(data.code ?? data.account_code),
     account_name: data.account_name,
@@ -241,7 +283,7 @@ export async function createAccount(data, currentUserId) {
     status: data.status ?? 'Active',
     is_active: true,
     is_system: false,
-    created_by: currentUserId,
+    created_by: auditUserId,
   }
 
   const { data: created, error } = await supabase
@@ -254,7 +296,7 @@ export async function createAccount(data, currentUserId) {
 
   if (Number(data.opening_balance || 0) > 0) {
     try {
-      await postOpeningBalanceJournal(created, data.opening_balance, currentUserId)
+      await postOpeningBalanceJournal(created, data.opening_balance, auditUserId)
     } catch (err) {
       await supabase.from('chart_of_accounts').delete().eq('id', created.id)
       throw err
@@ -262,7 +304,7 @@ export async function createAccount(data, currentUserId) {
   }
 
   await supabase.from('audit_log').insert({
-    user_id: currentUserId,
+    user_id: auditUserId,
     action: 'INSERT',
     table_name: 'chart_of_accounts',
     record_id: created.id,
@@ -327,8 +369,9 @@ export async function updateAccount(code, data, currentUserId) {
 
   if (error) throw error
 
+  const auditUserId = await resolveProfileId(currentUserId)
   await supabase.from('audit_log').insert({
-    user_id: currentUserId,
+    user_id: auditUserId,
     action: 'UPDATE',
     table_name: 'chart_of_accounts',
     record_id: before.id,
@@ -338,7 +381,7 @@ export async function updateAccount(code, data, currentUserId) {
 
   if (openingBalanceChanged || accountTypeChanged) {
     const adjustmentAmount = Number((data.opening_balance ?? before.opening_balance) || 0)
-    await adjustOpeningBalanceJournal(updated, adjustmentAmount, currentUserId)
+    await adjustOpeningBalanceJournal(updated, adjustmentAmount, auditUserId)
   }
 
   return updated

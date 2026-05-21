@@ -1,5 +1,46 @@
 import { supabase } from '../lib/supabase'
 
+async function resolveProfileId(userId) {
+  if (userId) {
+    const { data: profileById, error: profileByIdError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (profileByIdError) throw profileByIdError
+    if (profileById) return profileById.id
+
+    const { data: profileByAuthUser, error: profileByAuthUserError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .single()
+
+    if (profileByAuthUserError) throw profileByAuthUserError
+    return profileByAuthUser?.id
+  }
+
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession()
+
+  if (sessionError) throw sessionError
+  if (!session?.user?.id) throw new Error('Unable to resolve current user profile ID.')
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('user_id', session.user.id)
+    .single()
+
+  if (profileError) throw profileError
+  if (!profile) throw new Error('No profile found for current user.')
+
+  return profile.id
+}
+
 const CLIENT_FIELDS = [
   'name',
   'client_type',
@@ -65,9 +106,10 @@ export async function getClientById(id) {
 }
 
 export async function createClient(clientData, currentUserId) {
+  const auditUserId = await resolveProfileId(currentUserId)
   const insertPayload = {
     ...sanitizeClientPayload(clientData),
-    created_by: currentUserId,
+    created_by: auditUserId,
   }
 
   const { data, error } = await supabase
@@ -79,7 +121,7 @@ export async function createClient(clientData, currentUserId) {
   if (error) throw error
 
   await supabase.from('audit_log').insert({
-    user_id: currentUserId,
+    user_id: auditUserId,
     action: 'INSERT',
     table_name: 'clients',
     record_id: data.id,
@@ -113,8 +155,9 @@ export async function updateClient(id, clientData, currentUserId) {
 
   if (error) throw error
 
+  const auditUserId = await resolveProfileId(currentUserId)
   await supabase.from('audit_log').insert({
-    user_id: currentUserId,
+    user_id: auditUserId,
     action: 'UPDATE',
     table_name: 'clients',
     record_id: id,

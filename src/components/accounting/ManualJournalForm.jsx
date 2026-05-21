@@ -73,7 +73,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
       setLoading(true)
       try {
         const [{ data: coa }, { data: projectData }, { data: divisionData }] = await Promise.all([
-          supabase.from('chart_of_accounts').select('account_code,account_name').order('account_code'),
+          supabase.from('chart_of_accounts').select('account_code,account_name').eq('is_active', true).order('account_code'),
           supabase.from('projects').select('id,name,division_id,divisions(id,name)').eq('status', 'active').order('name'),
           supabase.from('divisions').select('id,name').order('name'),
         ])
