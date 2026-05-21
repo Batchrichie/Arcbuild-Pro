@@ -8,6 +8,13 @@ const ACCOUNT_FIELDS = [
   'opening_balance',
   'status',
   'is_active',
+  'financial_statement',
+  'element',
+  'sub_element',
+  'nature',
+  'is_contra',
+  'is_payment_account',
+  'payment_method_type',
 ]
 
 const DB_FIELD_MAP = {
@@ -18,6 +25,13 @@ const DB_FIELD_MAP = {
   opening_balance: 'opening_balance',
   status: 'status',
   is_active: 'is_active',
+  financial_statement: 'financial_statement',
+  element: 'element',
+  sub_element: 'sub_element',
+  nature: 'nature',
+  is_contra: 'is_contra',
+  is_payment_account: 'is_payment_account',
+  payment_method_type: 'payment_method_type',
 }
 
 const OPENING_BALANCE_OFFSET_ACCOUNT = '3200'
@@ -46,7 +60,7 @@ const mapAccountRow = (account) => {
 export async function getAccounts(filters = {}) {
   let query = supabase
     .from('chart_of_accounts')
-    .select('id, account_code, account_name, account_type, description, parent_code, opening_balance, is_active, status, is_system, created_by, created_at, updated_at')
+    .select('id, account_code, account_name, account_type, description, parent_code, opening_balance, financial_statement, element, sub_element, nature, is_contra, is_payment_account, payment_method_type, is_active, status, is_system, created_by, created_at, updated_at')
     .order('account_code', { ascending: true })
 
   if (filters.account_type) query = query.eq('account_type', filters.account_type)
@@ -62,7 +76,7 @@ export async function getAccounts(filters = {}) {
 export async function getAccountByCode(code) {
   const { data, error } = await supabase
     .from('chart_of_accounts')
-    .select('id, account_code, account_name, account_type, description, parent_code, opening_balance, is_active, status, is_system, created_by, created_at, updated_at')
+    .select('id, account_code, account_name, account_type, description, parent_code, opening_balance, financial_statement, element, sub_element, nature, is_contra, is_payment_account, payment_method_type, is_active, status, is_system, created_by, created_at, updated_at')
     .eq('account_code', code)
     .maybeSingle()
 
@@ -217,6 +231,13 @@ export async function createAccount(data, currentUserId) {
     description: data.description,
     parent_code: data.parent_code || null,
     opening_balance: Number(data.opening_balance) || 0,
+    financial_statement: data.financial_statement ?? null,
+    element: data.element ?? null,
+    sub_element: data.sub_element ?? null,
+    nature: data.nature ?? null,
+    is_contra: Boolean(data.is_contra),
+    is_payment_account: Boolean(data.is_payment_account),
+    payment_method_type: data.payment_method_type ?? null,
     status: data.status ?? 'Active',
     is_active: true,
     is_system: false,
@@ -273,9 +294,19 @@ export async function updateAccount(code, data, currentUserId) {
   }
 
   if (before.is_system) {
-    const nonNameFields = Object.keys(data).filter((key) => key !== 'account_name')
-    if (nonNameFields.length > 0) {
-      throw new Error('System accounts may only have the account_name updated.')
+    const allowedSystemFields = [
+      'account_name',
+      'financial_statement',
+      'element',
+      'sub_element',
+      'nature',
+      'is_contra',
+      'is_payment_account',
+      'payment_method_type',
+    ]
+    const invalidSystemFields = Object.keys(data).filter((key) => !allowedSystemFields.includes(key))
+    if (invalidSystemFields.length > 0) {
+      throw new Error('System accounts may only have metadata fields updated.')
     }
   }
 
@@ -325,4 +356,31 @@ export async function getAccountsByCategory() {
     grouped[category].push(account)
     return grouped
   }, {})
+}
+
+export async function getPaymentAccounts() {
+  const { data, error } = await supabase
+    .from('chart_of_accounts')
+    .select('account_code, account_name, account_type, payment_method_type, nature')
+    .eq('is_payment_account', true)
+    .eq('is_active', true)
+    .eq('status', 'Active')
+    .order('payment_method_type', { ascending: true })
+    .order('account_code', { ascending: true })
+
+  if (error) throw error
+  return data ?? []
+}
+
+export async function getAccountsByStatement(statementType) {
+  const { data, error } = await supabase
+    .from('chart_of_accounts')
+    .select('account_code, account_name, opening_balance, financial_statement, element, sub_element, nature, is_contra, is_payment_account, payment_method_type')
+    .eq('financial_statement', statementType)
+    .eq('is_active', true)
+    .eq('status', 'Active')
+    .order('account_code', { ascending: true })
+
+  if (error) throw error
+  return data ?? []
 }

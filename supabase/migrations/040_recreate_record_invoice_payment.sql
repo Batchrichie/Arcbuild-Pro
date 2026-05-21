@@ -1,19 +1,16 @@
 -- =============================================================================
--- Migration 028: Payment Journal Fix
--- Phase 2C, Module 2C.1
---
--- Replaces record_invoice_payment() to post a payment journal entry
--- whenever a sent invoice is marked paid. This ensures Accounts
--- Receivable is reduced and cash/bank is updated in the general ledger.
+-- Migration 040: Recreate record_invoice_payment function
+-- Ensures the payment recording function exists with the expected public schema
+-- signature and behavior.
 -- =============================================================================
 
-CREATE OR REPLACE FUNCTION record_invoice_payment(
+CREATE OR REPLACE FUNCTION public.record_invoice_payment(
     invoice_uuid UUID,
     payment_date_val DATE,
     payment_reference_val TEXT,
     amount_received_ghs NUMERIC,
     payment_account_code TEXT DEFAULT NULL,
-    acting_user_id UUID
+    acting_user_id UUID DEFAULT NULL
 )
 RETURNS JSONB AS $$
 DECLARE

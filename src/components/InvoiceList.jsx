@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import RecordPaymentModal from './RecordPaymentModal'
 import StatusBadge from './ui/StatusBadge'
 import InvoicePdfLink from './pdf/InvoicePdfLink'
 
@@ -33,7 +32,6 @@ export default function InvoiceList() {
   const [divisionFilter, setDivisionFilter] = useState('all')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
-  const [paymentInvoice, setPaymentInvoice] = useState(null)
 
   const divisionOptions = useMemo(() => {
     const unique = new Map()
@@ -59,7 +57,7 @@ export default function InvoiceList() {
       let query = supabase
         .from('invoices')
         .select(
-          `id,invoice_number,currency,gross_total_ghs,status,requires_approval,rejected_at,rejection_note,created_at,due_date,created_by, client:clients(name), project:projects(name), division:divisions(name)`
+          `id,invoice_number,currency,gross_total_ghs,expected_receipt_ghs,fx_rate_to_ghs,status,requires_approval,rejected_at,rejection_note,created_at,due_date,created_by, client:clients(name), project:projects(name), division:divisions(name)`
         )
         .order('created_at', { ascending: false })
 
@@ -144,19 +142,6 @@ export default function InvoiceList() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const openPaymentModal = (invoice) => {
-    setPaymentInvoice(invoice)
-  }
-
-  const closePaymentModal = () => {
-    setPaymentInvoice(null)
-  }
-
-  const handlePaymentSuccess = async () => {
-    closePaymentModal()
-    await fetchInvoices()
   }
 
   const handleSubmitInvoice = (invoice) => {
@@ -335,15 +320,6 @@ export default function InvoiceList() {
                             Mark Sent
                           </button>
                         )}
-                        {invoice.status === 'sent' && (
-                          <button
-                            type="button"
-                            onClick={() => openPaymentModal(invoice)}
-                            className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
-                          >
-                            Record Payment
-                          </button>
-                        )}
                         {invoice.status === 'rejected' && (
                           <button
                             type="button"
@@ -380,12 +356,6 @@ export default function InvoiceList() {
         ) : null
       )}
 
-      <RecordPaymentModal
-        invoice={paymentInvoice}
-        open={Boolean(paymentInvoice)}
-        onClose={closePaymentModal}
-        onSuccess={handlePaymentSuccess}
-      />
     </div>
   )
 }

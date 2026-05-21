@@ -11,6 +11,7 @@ import GeneralLedger from '../../components/GeneralLedger'
 import FinancialStatements from '../../components/FinancialStatements'
 import RevenueRecognitionDashboard from '../../pages/revenue/RevenueRecognitionDashboard'
 import FxRateManager from '../../components/FxRateManager'
+import PaymentsReceived from '../payments/PaymentsReceived'
 import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
 import ProjectCostLedger from '../../components/ProjectCostLedger'
 import MilestoneInvoiceQueue from '../../components/MilestoneInvoiceQueue'
@@ -42,6 +43,7 @@ const NAV_SECTIONS = [
       { id: 'invoice-list', label: 'Invoice List' },
       { id: 'create-invoice', label: 'Create Invoice' },
       { id: 'milestone-queue', label: 'Milestone Queue' },
+      { id: 'payments-received', label: 'Payments Received' },
     ],
   },
   {
@@ -288,6 +290,8 @@ export default function AccountantPortal() {
         )
       case 'milestone-queue':
         return <MilestoneInvoiceQueue userRole="accountant" userId={profile?.id} />
+      case 'payments-received':
+        return <PaymentsReceived />
       case 'general-ledger':
         return <GeneralLedger />
       case 'chart-of-accounts':

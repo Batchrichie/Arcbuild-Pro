@@ -21,6 +21,14 @@ const STATUS_TOGGLES = [
 
 const CATEGORY_OPTIONS = getAccountCategories()
 
+const SUB_ELEMENT_OPTIONS = {
+  Asset: ['Current Asset', 'Non-Current Asset'],
+  Liability: ['Current Liability', 'Non-Current Liability'],
+  Equity: ['Contributed Capital', 'Retained Earnings', 'Other Comprehensive Income'],
+  Revenue: ['Operating Revenue', 'Other Income'],
+  Expense: ['Cost of Sales', 'Operating Expense', 'Finance Cost', 'Tax Expense', 'Other Expense'],
+}
+
 const ACCOUNT_TYPE_CODE_RANGES = {
   asset: { min: 1000, max: 1999 },
   liability: { min: 2000, max: 2999 },
@@ -37,6 +45,13 @@ const EMPTY_FORM = {
   parent_code: '',
   opening_balance: '0',
   status: 'Active',
+  financial_statement: '',
+  element: '',
+  sub_element: '',
+  nature: '',
+  is_contra: false,
+  is_payment_account: false,
+  payment_method_type: '',
   is_system: false,
 }
 
@@ -155,6 +170,13 @@ export default function ChartOfAccounts() {
       parent_code: account.parent_code ?? '',
       opening_balance: account.opening_balance != null ? String(account.opening_balance) : '0',
       status: account.status || 'Active',
+      financial_statement: account.financial_statement ?? '',
+      element: account.element ?? '',
+      sub_element: account.sub_element ?? '',
+      nature: account.nature ?? '',
+      is_contra: account.is_contra ?? false,
+      is_payment_account: account.is_payment_account ?? false,
+      payment_method_type: account.payment_method_type ?? '',
       is_system: account.is_system ?? false,
     })
     setFormError(null)
@@ -177,27 +199,39 @@ export default function ChartOfAccounts() {
       setFormError('Account type is required.')
       return
     }
+    if (!form.financial_statement?.trim()) {
+      setFormError('Financial Statement classification is required.')
+      return
+    }
+    if (form.is_payment_account && !form.payment_method_type) {
+      setFormError('Payment Method Type is required for payment accounts.')
+      return
+    }
 
     setSaving(true)
     try {
+      const payload = {
+        account_name: form.account_name,
+        account_type: form.account_type,
+        description: form.description,
+        parent_code: form.parent_code || null,
+        opening_balance: Number(form.opening_balance) || 0,
+        status: form.status,
+        financial_statement: form.financial_statement || null,
+        element: form.element || null,
+        sub_element: form.sub_element || null,
+        nature: form.nature || null,
+        is_contra: form.is_contra,
+        is_payment_account: form.is_payment_account,
+        payment_method_type: form.is_payment_account ? form.payment_method_type || null : null,
+      }
+
       if (editingAccount) {
-        await updateAccount(editingAccount.account_code, {
-          account_name: form.account_name,
-          account_type: form.account_type,
-          description: form.description,
-          parent_code: form.parent_code || null,
-          opening_balance: Number(form.opening_balance) || 0,
-          status: form.status,
-        }, profile.id)
+        await updateAccount(editingAccount.account_code, payload, profile.id)
       } else {
         await createAccount({
           account_code: form.account_code,
-          account_name: form.account_name,
-          account_type: form.account_type,
-          description: form.description,
-          parent_code: form.parent_code || null,
-          opening_balance: Number(form.opening_balance) || 0,
-          status: form.status,
+          ...payload,
         }, profile.id)
       }
 
@@ -294,6 +328,8 @@ export default function ChartOfAccounts() {
                               <th className="px-4 py-3 text-left">Code</th>
                       <th className="px-4 py-3 text-left">Name</th>
                       <th className="px-4 py-3 text-left">Type</th>
+                      <th className="px-4 py-3 text-left hidden lg:table-cell">Sub-Element</th>
+                      <th className="px-4 py-3 text-left hidden lg:table-cell">Nature</th>
                       <th className="px-4 py-3 text-left">Status</th>
                       <th className="px-4 py-3 text-left">Action</th>
                     </tr>
@@ -311,6 +347,8 @@ export default function ChartOfAccounts() {
                         </td>
                         <td className="px-4 py-3">{account.account_name}</td>
                         <td className="px-4 py-3">{account.account_type}</td>
+                        <td className="px-4 py-3 hidden lg:table-cell">{account.sub_element || '-'}</td>
+                        <td className="px-4 py-3 hidden lg:table-cell">{account.nature || '-'}</td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[account.status] ?? ''}`}>
                             {account.status}
@@ -457,6 +495,110 @@ export default function ChartOfAccounts() {
                   <option value="Inactive">Inactive</option>
                 </select>
               </label>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="space-y-2 text-sm text-slate-300">
+                <span>Financial Statement</span>
+                <select
+                  value={form.financial_statement}
+                  onChange={(e) => setForm((prev) => ({ ...prev, financial_statement: e.target.value }))}
+                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                >
+                  <option value="">Select financial statement</option>
+                  <option value="Balance Sheet">Balance Sheet</option>
+                  <option value="Income Statement">Income Statement</option>
+                  <option value="Memo">Memo</option>
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-slate-300">
+                <span>Element (IFRS)</span>
+                <select
+                  value={form.element}
+                  onChange={(e) => setForm((prev) => ({ ...prev, element: e.target.value, sub_element: '' }))}
+                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                >
+                  <option value="">Select element</option>
+                  <option value="Asset">Asset</option>
+                  <option value="Liability">Liability</option>
+                  <option value="Equity">Equity</option>
+                  <option value="Revenue">Revenue</option>
+                  <option value="Expense">Expense</option>
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-slate-300">
+                <span>Sub-Element</span>
+                <select
+                  value={form.sub_element}
+                  onChange={(e) => setForm((prev) => ({ ...prev, sub_element: e.target.value }))}
+                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  disabled={!form.element}
+                >
+                  <option value="">Select sub-element</option>
+                  {(SUB_ELEMENT_OPTIONS[form.element] || []).map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-slate-300">
+                <span>Nature</span>
+                <input
+                  type="text"
+                  value={form.nature}
+                  onChange={(e) => setForm((prev) => ({ ...prev, nature: e.target.value }))}
+                  placeholder="e.g. Cash and Cash Equivalents, Trade Receivables"
+                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                />
+              </label>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <label className="flex items-start gap-3 text-sm text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={form.is_contra}
+                  onChange={(e) => setForm((prev) => ({ ...prev, is_contra: e.target.checked }))}
+                  className="mt-1 h-4 w-4 rounded border-white/20 bg-slate-800 text-emerald-400 focus:ring-emerald-400"
+                />
+                <span>
+                  <span className="block font-medium">Contra Account</span>
+                  <span className="text-xs text-slate-500">Tick if this account reduces a related account (e.g. Accumulated Depreciation reduces PPE)</span>
+                </span>
+              </label>
+              <label className="flex items-start gap-3 text-sm text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={form.is_payment_account}
+                  onChange={(e) => setForm((prev) => ({ ...prev, is_payment_account: e.target.checked, payment_method_type: e.target.checked ? prev.payment_method_type : '' }))}
+                  className="mt-1 h-4 w-4 rounded border-white/20 bg-slate-800 text-emerald-400 focus:ring-emerald-400"
+                />
+                <span>
+                  <span className="block font-medium">Payment Account</span>
+                  <span className="text-xs text-slate-500">Tick if money can be received into this account (cash, bank, mobile money)</span>
+                </span>
+              </label>
+              <div className="space-y-3 text-sm text-slate-300">
+                <div className="font-medium">Payment Method Type</div>
+                {form.is_payment_account ? (
+                  <div className="flex flex-wrap gap-3">
+                    {['Cash', 'Bank', 'Mobile Money'].map((option) => (
+                      <label key={option} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-slate-800 px-3 py-2">
+                        <input
+                          type="radio"
+                          name="payment_method_type"
+                          value={option}
+                          checked={form.payment_method_type === option}
+                          onChange={(e) => setForm((prev) => ({ ...prev, payment_method_type: e.target.value }))}
+                          className="h-4 w-4 text-emerald-400"
+                        />
+                        <span>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-slate-500">Select Payment Account to choose method type.</div>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 justify-end">

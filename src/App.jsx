@@ -14,6 +14,7 @@ import RetentionDashboard from './pages/retention/RetentionDashboard'
 import RevenueRecognitionDashboard from './pages/revenue/RevenueRecognitionDashboard'
 import ProjectRegistry from './pages/projects/ProjectRegistry'
 import ChartOfAccounts from './pages/accounts/ChartOfAccounts'
+import PaymentsReceived from './pages/payments/PaymentsReceived'
 
 // Portal placeholders (Phase 4 will replace these)
 import CeoPortal        from './pages/portals/CeoPortal'
@@ -109,6 +110,12 @@ export default function App() {
           <Route path="/chart-of-accounts" element={
             <ProtectedRoute allowedRoles={['accountant', 'ceo']}>
               <ChartOfAccounts />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/payments-received" element={
+            <ProtectedRoute allowedRoles={['accountant', 'ceo']}>
+              <PaymentsReceived />
             </ProtectedRoute>
           } />
 

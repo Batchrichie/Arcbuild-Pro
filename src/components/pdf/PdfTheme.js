@@ -1,12 +1,4 @@
-import { StyleSheet, Font } from '@react-pdf/renderer'
-
-Font.register({
-  family: 'DMSans',
-  fonts: [
-    { src: 'https://fonts.gstatic.com/s/dmsans/v14/rP2Hp2ywxg089UriCZOIHQ.ttf' },
-    { src: 'https://fonts.gstatic.com/s/dmsans/v14/rP2Cp2ywxg089UriASitCBimCw.ttf', fontWeight: 'bold' },
-  ],
-})
+import { StyleSheet } from '@react-pdf/renderer'
 
 export const colors = {
   amber: '#F4BF4D',
@@ -23,7 +15,7 @@ export const colors = {
 
 export const pdfStyles = StyleSheet.create({
   page: {
-    fontFamily: 'DMSans',
+    fontFamily: 'Helvetica',
     fontSize: 10,
     color: colors.textPrimary,
     padding: 40,
@@ -53,7 +45,7 @@ export const pdfStyles = StyleSheet.create({
   logoPlaceholderText: {
     color: colors.dark,
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
   },
   logoImage: {
     width: 44,
@@ -67,7 +59,7 @@ export const pdfStyles = StyleSheet.create({
   companyName: {
     color: colors.amber,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
   },
   companyTagline: {
     color: colors.white,
@@ -76,7 +68,7 @@ export const pdfStyles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 11,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     color: colors.textPrimary,
     marginBottom: 8,
     paddingBottom: 4,
@@ -113,7 +105,7 @@ export const pdfStyles = StyleSheet.create({
   tableHeaderCell: {
     color: colors.dark,
     fontSize: 8,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     flex: 1,
   },
   tableCell: {
@@ -130,7 +122,7 @@ export const pdfStyles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 4,
     backgroundColor: '#F8FAFC',
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
   },
   footer: {
     position: 'absolute',
