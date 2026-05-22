@@ -147,13 +147,6 @@ export default function FxRateManager() {
             <div className="flex flex-wrap gap-4">
               {activeRates.map((rate) => {
                 const code = getRateCode(rate)
-                const accentText = code === 'USD'
-                  ? 'text-emerald-900 dark:text-white'
-                  : code === 'EUR'
-                    ? 'text-sky-900 dark:text-white'
-                    : code === 'GBP'
-                      ? 'text-violet-900 dark:text-white'
-                      : 'text-slate-900 dark:text-white'
                 return (
                   <div key={`${code}-${rate.rate_date}`} className={`rounded-3xl border p-5 shadow-sm ${CARD_STYLES[code] ?? CARD_STYLES.default}`}>
                             <div className="flex items-start gap-4">
@@ -189,7 +182,7 @@ export default function FxRateManager() {
             <div className="overflow-x-auto rounded-3xl border border-slate-200/70 bg-white dark:bg-black p-4 shadow-sm shadow-slate-200/40 dark:border-slate-800/70 dark:shadow-lg dark:shadow-slate-950/40">
               <table className="min-w-full text-left text-sm text-slate-900 dark:text-slate-200">
                 <thead>
-                  <tr className="bg-[#f1f5f9] border-b border-[#cbd5e1] text-[#0f172a] font-semibold dark:bg-black dark:border-[#0b1220] dark:text-[#e2e8f0]">
+                  <tr className="bg-surface-light border-b border-border text-text-primary font-semibold dark:bg-black dark:border-border dark:text-text">
                     <th className="px-4 py-3">Currency</th>
                     <th className="px-4 py-3">Code</th>
                     <th className="px-4 py-3">Rate</th>
@@ -208,11 +201,11 @@ export default function FxRateManager() {
                     return (
                       <tr
                         key={`${code}-${rate.rate_date}`}
-                        className={`${rowAccent} border-b border-[#e2e8f0] dark:border-[#0b1220] transition-colors duration-150 ${index % 2 === 0 ? 'bg-white dark:bg-black' : 'bg-[#f8fafc] dark:bg-black'} hover:bg-sky-50 dark:hover:bg-[#0b1220]`}
+                        className={`${rowAccent} border-b border-border dark:border-border transition-colors duration-150 ${index % 2 === 0 ? 'bg-white dark:bg-black' : 'bg-surface-2 dark:bg-black'} hover:bg-sky-50 dark:hover:bg-surface-3`}
                       >
-                        <td className="px-4 py-3 font-semibold text-[#0f172a] dark:text-[#e2e8f0]">{getRateName(rate)}</td>
-                        <td className="px-4 py-3 text-[#64748b] dark:text-[#94a3b8]">{code}</td>
-                        <td className="px-4 py-3 font-semibold text-[#0d9488] dark:text-[#2dd4bf]">{formatNumber(getRateValue(rate))}</td>
+                        <td className="px-4 py-3 font-semibold text-text-primary dark:text-text">{getRateName(rate)}</td>
+                        <td className="px-4 py-3 text-muted dark:text-text-muted">{code}</td>
+                        <td className="px-4 py-3 font-semibold text-teal dark:text-teal">{formatNumber(getRateValue(rate))}</td>
                       </tr>
                     )
                   })}

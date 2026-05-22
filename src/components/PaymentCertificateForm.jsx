@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import PaymentCertificatePdf from './pdf/PaymentCertificatePdf';
 import { supabase } from '../lib/supabase';
@@ -13,7 +13,7 @@ function formatGhs(value) {
   });
 }
 
-export default function PaymentCertificateForm({ userRole, userId }) {
+export default function PaymentCertificateForm({ userRole, userId, hideProjectSelector = false }) {
   const { user } = useAuth();
   const [subcontractors, setSubcontractors] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -31,15 +31,6 @@ export default function PaymentCertificateForm({ userRole, userId }) {
     currency: 'GHS',
     paymentDate: new Date().toISOString().split('T')[0],
   });
-
-  useEffect(() => {
-    loadSubcontractors();
-    loadProjects();
-  }, []);
-
-  useEffect(() => {
-    fetchFxRate();
-  }, [formData.currency, formData.paymentDate]);
 
   const loadSubcontractors = async () => {
     try {
@@ -99,7 +90,7 @@ export default function PaymentCertificateForm({ userRole, userId }) {
 
       if (err) throw err;
       setFxRate(Number(data) || 1);
-    } catch (err) {
+    } catch {
       try {
         const { data: fallback } = await supabase
           .from('exchange_rates')
@@ -114,6 +105,15 @@ export default function PaymentCertificateForm({ userRole, userId }) {
       }
     }
   };
+
+  useEffect(() => {
+    loadSubcontractors();
+    loadProjects();
+  }, []);
+
+  useEffect(() => {
+    fetchFxRate();
+  }, [formData.currency, formData.paymentDate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -313,7 +313,7 @@ export default function PaymentCertificateForm({ userRole, userId }) {
         </div>
 
         {formData.currency !== 'GHS' && grossNum > 0 && (
-          <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+          <div className="rounded-lg border border-border-soft bg-white/5 p-4 text-sm text-slate-300">
             <p>
               FX rate ({formData.currency} → GHS): <span className="text-white font-medium">{fxRate}</span>
             </p>
@@ -344,7 +344,7 @@ export default function PaymentCertificateForm({ userRole, userId }) {
               <span>WHT ({Math.round(whtRate * 100)}%):</span>
               <span>(GHS {formatGhs(whtAmount)})</span>
             </div>
-            <hr className="my-3 border-white/10" />
+            <hr className="my-3 border-border-soft" />
             <div className="flex justify-between text-white font-semibold">
               <span>Net Payable:</span>
               <span>GHS {formatGhs(netPayable)}</span>

@@ -4,7 +4,7 @@ import { useEmployee } from '../../context/EmployeeContext'
 import { useAuth } from '../../context/AuthContext'
 import { maskAccount, maskSsnit, maskTin } from '../../lib/employee-utils'
 
-const inputCls = 'w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white'
+const inputCls = 'w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2.5 text-sm text-white'
 
 const UPDATE_FIELDS = [
   'Full name',
@@ -78,14 +78,14 @@ export default function EmployeeProfile() {
 
   return (
     <div className="space-y-6 pb-4">
-      <section className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+      <section className="space-y-4 rounded-2xl border border-border-soft bg-white/5 p-4">
         <h3 className="font-semibold text-white">Personal</h3>
         <Field label="Full name" value={profile?.full_name} />
         <Field label="Email" value={email} />
         <Field label="Phone" value={profile?.phone} />
       </section>
 
-      <section className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+      <section className="space-y-4 rounded-2xl border border-border-soft bg-white/5 p-4">
         <h3 className="font-semibold text-white">Employment</h3>
         <Field label="Employee number" value={employee.employee_number} />
         <Field label="Job title" value={employee.job_title} />
@@ -95,13 +95,13 @@ export default function EmployeeProfile() {
         <Field label="Hire date" value={employee.hire_date} />
       </section>
 
-      <section className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+      <section className="space-y-4 rounded-2xl border border-border-soft bg-white/5 p-4">
         <h3 className="font-semibold text-white">Banking</h3>
         <Field label="Bank name" value={employee.bank_name} />
         <Field label="Account number" value={maskAccount(employee.bank_account)} />
       </section>
 
-      <section className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+      <section className="space-y-4 rounded-2xl border border-border-soft bg-white/5 p-4">
         <h3 className="font-semibold text-white">Payroll identifiers</h3>
         <Field label="TIN" value={maskTin(employee.tin)} />
         <Field label="SSNIT number" value={maskSsnit(employee.ssnit_number)} />
@@ -116,7 +116,7 @@ export default function EmployeeProfile() {
           Request update
         </button>
       ) : (
-        <form onSubmit={submitRequest} className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+        <form onSubmit={submitRequest} className="space-y-3 rounded-2xl border border-border-soft bg-white/5 p-4">
           <h3 className="font-semibold text-white">Request profile update</h3>
           <select className={inputCls} value={req.field} onChange={(e) => setReq({ ...req, field: e.target.value })}>
             {UPDATE_FIELDS.map((f) => (
@@ -129,7 +129,7 @@ export default function EmployeeProfile() {
           {status && <p className="text-sm text-emerald-300">{status}</p>}
           <div className="flex gap-2">
             <button type="submit" className="flex-1 rounded-full bg-orange-500 py-2.5 text-sm font-bold text-slate-950">Send to HR</button>
-            <button type="button" onClick={() => setShowRequest(false)} className="rounded-full border border-white/10 px-4 py-2.5 text-sm text-slate-300">Cancel</button>
+            <button type="button" onClick={() => setShowRequest(false)} className="rounded-full border border-border-soft px-4 py-2.5 text-sm text-slate-300">Cancel</button>
           </div>
         </form>
       )}

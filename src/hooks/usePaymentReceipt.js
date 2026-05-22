@@ -27,7 +27,7 @@ export function usePaymentReceipt() {
       a.remove()
 
       // open in new tab for printing
-      try { window.open(url, '_blank') } catch (e) { /* ignore */ }
+      try { window.open(url, '_blank') } catch { /* ignore */ }
 
       setTimeout(() => URL.revokeObjectURL(url), 60000)
     } catch (err) {

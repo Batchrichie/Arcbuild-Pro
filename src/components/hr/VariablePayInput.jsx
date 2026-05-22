@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { formatGhs } from '../../lib/formatGhs'
 import { loadVariablePay, saveVariablePay, computeOvertimeAmount } from '../../lib/payroll-variables'
 
-const cls = 'w-full rounded-lg border border-white/10 bg-slate-900 px-2 py-1.5 text-sm text-white'
+const cls = 'w-full rounded-lg border border-border-soft bg-slate-900 px-2 py-1.5 text-sm text-white'
 
 export default function VariablePayInput() {
   const [runs, setRuns] = useState([])
@@ -107,10 +107,10 @@ export default function VariablePayInput() {
               Submitted to accountant — read-only.
             </p>
           )}
-          <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-white/10">
+          <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-border-soft">
             <table className="w-full min-w-[960px] text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-xs uppercase text-slate-500">
+                <tr className="border-b border-border-soft text-left text-xs uppercase text-slate-500">
                   <th className="px-3 py-3">Employee</th>
                   <th className="px-3 py-3">Basic</th>
                   <th className="px-3 py-3">OT hours</th>
@@ -126,7 +126,7 @@ export default function VariablePayInput() {
                   const inp = inputs[emp.id] || {}
                   const otAmt = computeOvertimeAmount(inp.overtime_hours, inp.overtime_rate)
                   return (
-                    <tr key={emp.id} className="border-b border-white/5">
+                    <tr key={emp.id} className="border-b border-border-soft">
                       <td className="px-3 py-3 text-white">{emp.profiles?.full_name ?? emp.employee_number}</td>
                       <td className="px-3 py-3 text-slate-400">{formatGhs(emp.basic_salary)}</td>
                       <td className="px-3 py-2">

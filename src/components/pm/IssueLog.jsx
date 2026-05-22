@@ -125,7 +125,7 @@ export default function IssueLog({ readOnly = false, allProjects = false }) {
         <select
           value={projectFilter}
           onChange={(e) => setProjectFilter(e.target.value)}
-          className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white sm:max-w-xs"
+          className="w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white sm:max-w-xs"
         >
           <option value="">All projects</option>
           {projectOptions.map(([id, name]) => (
@@ -147,26 +147,26 @@ export default function IssueLog({ readOnly = false, allProjects = false }) {
       )}
 
       {showForm && !readOnly && (
-        <form onSubmit={addIssue} className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+        <form onSubmit={addIssue} className="space-y-3 rounded-2xl border border-border-soft bg-white/5 p-4">
           <input
             required
             placeholder="Title"
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+            className="w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
           />
           <textarea
             placeholder="Description"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+            className="w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
             rows={3}
           />
           <div className="grid grid-cols-2 gap-2">
             <select
               value={form.issue_type}
               onChange={(e) => setForm({ ...form, issue_type: e.target.value })}
-              className="rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+              className="rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
             >
               <option value="issue">Issue</option>
               <option value="risk">Risk</option>
@@ -175,7 +175,7 @@ export default function IssueLog({ readOnly = false, allProjects = false }) {
             <select
               value={form.severity}
               onChange={(e) => setForm({ ...form, severity: e.target.value })}
-              className="rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+              className="rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -187,13 +187,13 @@ export default function IssueLog({ readOnly = false, allProjects = false }) {
             type="date"
             value={form.due_date}
             onChange={(e) => setForm({ ...form, due_date: e.target.value })}
-            className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+            className="w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
           />
           <div className="flex gap-2">
             <button type="submit" className="min-touch flex-1 rounded-full bg-cyan-500 py-2.5 text-sm font-semibold text-slate-950">
               Save
             </button>
-            <button type="button" onClick={() => setShowForm(false)} className="min-touch rounded-full border border-white/10 px-4 py-2.5 text-sm text-slate-300">
+            <button type="button" onClick={() => setShowForm(false)} className="min-touch rounded-full border border-border-soft px-4 py-2.5 text-sm text-slate-300">
               Cancel
             </button>
           </div>
@@ -209,7 +209,7 @@ export default function IssueLog({ readOnly = false, allProjects = false }) {
       ) : (
         <ul className="space-y-3">
           {filtered.map((item) => (
-            <li key={item.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <li key={item.id} className="rounded-2xl border border-border-soft bg-white/5 p-4">
               <div className="flex flex-wrap gap-2">
                 {allProjects && item.projects?.name && (
                   <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-slate-300">{item.projects.name}</span>
@@ -243,12 +243,12 @@ export default function IssueLog({ readOnly = false, allProjects = false }) {
       )}
 
       {resolveId && !readOnly && (
-        <div className="fixed inset-x-0 bottom-0 z-[70] rounded-t-3xl border-t border-white/10 bg-slate-900 p-4 pb-8 lg:static lg:rounded-2xl lg:border">
+        <div className="fixed inset-x-0 bottom-0 z-[70] rounded-t-3xl border-t border-border-soft bg-slate-900 p-4 pb-8 lg:static lg:rounded-2xl lg:border">
           <h4 className="font-semibold text-white">Resolve issue</h4>
           <textarea
             value={resolutionNotes}
             onChange={(e) => setResolutionNotes(e.target.value)}
-            className="mt-3 w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white"
+            className="mt-3 w-full rounded-xl border border-border-soft bg-slate-950 px-3 py-2 text-sm text-white"
             rows={3}
             placeholder="Resolution notes"
           />
@@ -256,7 +256,7 @@ export default function IssueLog({ readOnly = false, allProjects = false }) {
             <button type="button" onClick={resolveIssue} className="min-touch flex-1 rounded-full bg-emerald-500 py-2.5 text-sm font-semibold text-slate-950">
               Confirm resolve
             </button>
-            <button type="button" onClick={() => setResolveId(null)} className="min-touch rounded-full border border-white/10 px-4 py-2.5 text-sm text-slate-300">
+            <button type="button" onClick={() => setResolveId(null)} className="min-touch rounded-full border border-border-soft px-4 py-2.5 text-sm text-slate-300">
               Cancel
             </button>
           </div>

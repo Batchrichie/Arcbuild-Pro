@@ -57,7 +57,7 @@ export default function TimesheetApproval() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6">
+      <div className="rounded-4xl border border-border-soft bg-slate-950/80 p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-white">Timesheet Approvals</h2>
@@ -79,7 +79,7 @@ export default function TimesheetApproval() {
         {message && <p className="mt-4 text-sm text-orange-300">{message}</p>}
       </div>
 
-      <div className="overflow-x-auto rounded-4xl border border-white/10 bg-slate-950/80 p-4">
+      <div className="overflow-x-auto rounded-4xl border border-border-soft bg-slate-950/80 p-4">
         <table className="min-w-full text-left text-sm text-slate-200">
           <thead className="bg-slate-900 text-slate-400">
             <tr>

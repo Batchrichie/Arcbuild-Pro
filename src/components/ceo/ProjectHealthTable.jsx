@@ -11,19 +11,19 @@ function budgetStatus(totalCosts, totalBudget) {
 
 export default function ProjectHealthTable({ projects, loading, onSelectProject }) {
   if (loading) {
-    return <div className="h-48 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
+    return <div className="h-48 animate-pulse rounded-2xl border border-border-soft bg-white/5" />
   }
 
   if (!projects?.length) {
     return (
-      <p className="rounded-2xl border border-white/10 bg-white/5 px-4 py-8 text-center text-sm text-slate-400">
+      <p className="rounded-2xl border border-border-soft bg-white/5 px-4 py-8 text-center text-sm text-slate-400">
         No active project finance data to display.
       </p>
     )
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10">
+    <div className="overflow-hidden rounded-2xl border border-border-soft">
       <table className="dark-table w-full text-sm">
         <thead>
           <tr>

@@ -5,7 +5,6 @@ import Modal from '../../components/ui/Modal'
 
 export default function RevenueRecognitionDashboard() {
   const { profile } = useAuth()
-  const [summary, setSummary] = useState([])
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
@@ -24,7 +23,6 @@ export default function RevenueRecognitionDashboard() {
     setLoading(true)
     try {
       const rows = await getCompanyRecognitionSummary()
-      setSummary(rows)
       setProjects(rows)
     } catch (err) {
       console.error(err)
@@ -46,7 +44,7 @@ export default function RevenueRecognitionDashboard() {
       } else {
         setPercent(project.pct_complete || 0)
       }
-    } catch (e) { setPercent(project.pct_complete || 0) }
+    } catch { setPercent(project.pct_complete || 0) }
     setModalOpen(true)
   }
 
@@ -77,13 +75,13 @@ export default function RevenueRecognitionDashboard() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-white">Revenue Recognition</h1>
         <div className="flex gap-2">
-          <button className="rounded-lg border border-white/10 px-3 py-2 text-sm" onClick={() => { if (confirm('Run recognition for all active projects?')) { /* noop for now */ } }}>Run All</button>
-          <button className="rounded-lg border border-white/10 px-3 py-2 text-sm">Export PDF</button>
-          <button className="rounded-lg border border-white/10 px-3 py-2 text-sm">Export Excel</button>
+          <button className="rounded-lg border border-border-soft px-3 py-2 text-sm" onClick={() => { if (confirm('Run recognition for all active projects?')) { /* noop for now */ } }}>Run All</button>
+          <button className="rounded-lg border border-border-soft px-3 py-2 text-sm">Export PDF</button>
+          <button className="rounded-lg border border-border-soft px-3 py-2 text-sm">Export Excel</button>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
         <table className="w-full text-sm text-slate-300">
           <thead className="text-xs text-slate-500 uppercase tracking-widest">
             <tr>
@@ -100,7 +98,7 @@ export default function RevenueRecognitionDashboard() {
             {loading ? (
               <tr><td colSpan={7} className="p-6 text-slate-400">Loading…</td></tr>
             ) : projects.map(p => (
-              <tr key={p.project_id} className="border-t border-white/5">
+              <tr key={p.project_id} className="border-t border-border-soft">
                 <td className="px-4 py-3">{p.project_name}</td>
                 <td className="px-4 py-3">{new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(p.contract_value)}</td>
                 <td className="px-4 py-3">{(p.pct_complete || 0).toFixed(2)}%</td>
@@ -108,7 +106,7 @@ export default function RevenueRecognitionDashboard() {
                 <td className="px-4 py-3">{new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(p.invoiced)}</td>
                 <td className="px-4 py-3">{p.billing_status}</td>
                 <td className="px-4 py-3">
-                  <button onClick={() => openRecognition(p)} className="rounded-lg border border-white/10 px-3 py-1 text-xs">Run Recognition</button>
+                  <button onClick={() => openRecognition(p)} className="rounded-lg border border-border-soft px-3 py-1 text-xs">Run Recognition</button>
                 </td>
               </tr>
             ))}
@@ -130,7 +128,7 @@ export default function RevenueRecognitionDashboard() {
           </div>
           <div className="flex gap-2">
             <button onClick={confirmRecognition} disabled={running} className="rounded-lg bg-emerald-500 px-4 py-2 text-white">{running ? 'Running...' : 'Confirm'}</button>
-            <button onClick={() => setModalOpen(false)} className="rounded-lg border border-white/10 px-4 py-2">Cancel</button>
+            <button onClick={() => setModalOpen(false)} className="rounded-lg border border-border-soft px-4 py-2">Cancel</button>
           </div>
         </div>
       </Modal>

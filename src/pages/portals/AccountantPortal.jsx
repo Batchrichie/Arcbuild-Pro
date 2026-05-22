@@ -219,7 +219,7 @@ export default function AccountantPortal() {
   useEffect(() => {
     try {
       document.title = `${COMPANY.appName} — Accountant`
-    } catch {}
+    } catch { /* best effort */ }
   }, [])
 
   const navigate = (viewId) => {
@@ -307,7 +307,7 @@ export default function AccountantPortal() {
       case 'import-statement':
         return <BankStatementImport />
       case 'reconciliation':
-        return <ReconciliationWorkspace onCreateJournal={(j) => navigate('new-journal')} />
+        return <ReconciliationWorkspace onCreateJournal={() => navigate('new-journal')} />
       case 'new-journal':
         return (
           <div>
@@ -393,12 +393,12 @@ export default function AccountantPortal() {
   const showMobileSubNav = MOBILE_SUB_NAV[mobileTab] && activeView !== 'dashboard'
 
   return (
-    <div className="portal-shell overflow-x-hidden">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-8 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside className="portal-sidebar hidden rounded-4xl border border-white/10 p-5 shadow-2xl shadow-black/20 lg:block hover-animate panel-surface soft-gradient-overlay">
+    <div className="portal-shell min-h-screen w-full overflow-x-hidden">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-8 lg:px-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+          <aside className="portal-sidebar hidden lg:flex lg:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl shadow-black/20 hover-animate panel-surface soft-gradient-overlay">
             <div className="mb-6">
-              <div className="inline-flex items-center gap-3 rounded-3xl bg-[rgba(20,184,166,0.12)] px-4 py-3 text-sm font-semibold text-teal-200">
+              <div className="inline-flex items-center gap-3 rounded-3xl bg-success-bg px-4 py-3 text-sm font-semibold text-teal-200">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-500 text-slate-950">AB</span>
                 <span>{COMPANY.name}</span>
               </div>
@@ -413,7 +413,7 @@ export default function AccountantPortal() {
               className={`min-touch mt-6 w-full rounded-2xl border px-4 py-3 text-left text-sm font-medium transition ${
                 activeView === 'dashboard'
                   ? 'border-teal-400/40 bg-teal-500/15 text-teal-100'
-                  : 'border-white/10 bg-white/5 text-slate-300 hover:border-teal-400/20'
+                  : 'border-border-soft bg-white/5 text-slate-300 hover:border-teal-400/20'
               }`}
             >
               Dashboard
@@ -432,7 +432,7 @@ export default function AccountantPortal() {
                         className={`min-touch w-full rounded-xl border px-3 py-2.5 text-left text-sm transition ${
                           activeView === item.id
                             ? 'border-teal-400/40 bg-teal-500/12 text-teal-100'
-                            : 'border-transparent text-slate-400 hover:border-white/10 hover:bg-white/5 hover:text-slate-200'
+                            : 'border-transparent text-slate-400 hover:border-border-soft hover:bg-white/5 hover:text-slate-200'
                         }`}
                       >
                         {item.label}
@@ -446,29 +446,29 @@ export default function AccountantPortal() {
             <button
               type="button"
               onClick={signOut}
-              className="min-touch mt-6 w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white hover:border-teal-400/40 hover-animate"
+              className="min-touch mt-auto w-full rounded-full border border-border-soft bg-white/5 px-4 py-3 text-sm text-white hover:border-teal-400/40 hover-animate"
             >
               Sign Out
             </button>
           </aside>
 
-          <main className="portal-main portal-main-with-tabs min-w-0 overflow-x-hidden">
-            <div className="mb-4 flex flex-col gap-3 lg:hidden">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="portal-eyebrow uppercase tracking-[0.2em] text-slate-500">Accountant</p>
-                  <h1 className="text-xl font-semibold text-white">{VIEW_TITLES[activeView] || 'Workspace'}</h1>
-                </div>
+          <main className="portal-main portal-main-with-tabs min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3 lg:hidden">
+              <div className="flex-1 min-w-0">
+                <p className="portal-eyebrow uppercase tracking-[0.2em] text-slate-500">Accountant</p>
+                <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-white truncate">{VIEW_TITLES[activeView] || 'Workspace'}</h1>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={signOut}
-                  className="min-touch shrink-0 rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300"
+                  className="min-touch rounded-full border border-border-soft px-4 py-2 text-sm text-slate-300"
                 >
                   Sign out
                 </button>
               </div>
-              <ThemeToggle className="self-start" />
             </div>
+            <ThemeToggle className="self-start" />
 
             {showMobileSubNav && (
               <div className="mb-4 flex gap-2 overflow-x-auto lg:hidden">
@@ -480,7 +480,7 @@ export default function AccountantPortal() {
                     className={`min-touch shrink-0 rounded-full border px-4 py-2 text-sm font-medium ${
                       activeView === item.id
                         ? 'border-teal-400/40 bg-teal-500/15 text-teal-100'
-                        : 'border-white/10 text-slate-400'
+                        : 'border-border-soft text-slate-400'
                     }`}
                   >
                     {item.label}
@@ -489,7 +489,7 @@ export default function AccountantPortal() {
               </div>
             )}
 
-            <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6 shadow-xl shadow-black/10">
+            <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
               {activeView !== 'dashboard' && (
                 <div className="mb-6 hidden lg:block">
                   <p className="portal-section-eyebrow uppercase tracking-[0.24em]">Workspace</p>
@@ -509,7 +509,7 @@ export default function AccountantPortal() {
               key={tab.id}
               type="button"
               onClick={() => handleMobileTab(tab.id)}
-              className={`flex min-h-11 min-w-12 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium hover-animate ${
+              className={`flex flex-1 flex-col items-center justify-center min-h-[3rem] py-2 text-xs font-medium ${
                 mobileTab === tab.id || (tab.id === 'more' && moreOpen) ? 'text-teal-300' : 'text-slate-500'
               }`}
             >
@@ -538,7 +538,7 @@ export default function AccountantPortal() {
                   key={item.id}
                   type="button"
                   onClick={() => navigate(item.id)}
-                  className="min-touch flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-slate-200"
+                  className="min-touch flex items-center gap-3 rounded-2xl border border-border-soft bg-white/5 px-4 py-3 text-left text-sm text-slate-200"
                 >
                   <span aria-hidden>{item.icon}</span>
                   {item.label}

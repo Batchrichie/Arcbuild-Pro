@@ -7,7 +7,7 @@ import RecentJournalEntries from './RecentJournalEntries'
 
 function ActionCard({ title, count, actionLabel, onAction, accent }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-lg shadow-black/10">
+    <div className="rounded-3xl panel-surface p-5 shadow-lg shadow-black/10">
       <p className="text-sm font-medium text-slate-400">{title}</p>
       <p className={`mt-2 text-3xl font-bold ${accent}`}>{count}</p>
       <button

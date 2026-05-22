@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
 const COST_TYPES = ['Materials', 'Labour', 'Subcontractors', 'Equipment Hire', 'Other'];
@@ -208,7 +208,7 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
   const selectedProject = projects.find((p) => p.id === formData.projectId);
 
   return (
-    <div className="rounded-4xl border border-white/10 bg-slate-950 p-6 max-w-2xl">
+    <div className="rounded-4xl border border-border-soft bg-slate-950 p-6 max-w-2xl">
       <h2 className="text-2xl font-semibold mb-6 text-white">Post Project Cost</h2>
 
       {error && (
@@ -258,7 +258,7 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
             onChange={handleInputChange}
             required
             disabled={loading}
-            className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:bg-slate-800"
+            className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:bg-slate-800"
           >
             <option value="">Select a project</option>
             {projects.map((project) => (
@@ -279,7 +279,7 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
             value={formData.costType}
             onChange={handleInputChange}
             required
-            className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
             <option value="">Select cost type</option>
             {COST_TYPES.map((type) => (
@@ -325,7 +325,7 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
             required
             rows="3"
             placeholder="Enter cost description"
-            className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           />
         </div>
 
@@ -391,7 +391,7 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
 
         {/* Project Info (display only) */}
         {selectedProject && (
-          <div className="rounded-2xl border border-white/10 bg-slate-900 p-3">
+          <div className="rounded-2xl border border-border-soft bg-slate-900 p-3">
             <p className="text-sm text-slate-300">
               <span className="font-semibold text-white">Division:</span> {selectedProject.divisions?.name}
             </p>

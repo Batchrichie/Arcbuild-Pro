@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useEmployee } from '../context/EmployeeContext'
 
 export default function TimesheetEntry() {
-  const { employee, loading: employeeLoading, reloadEmployee } = useEmployee()
+  const { employee, loading: employeeLoading } = useEmployee()
   const [projects, setProjects] = useState([])
   const [timesheets, setTimesheets] = useState([])
   const [form, setForm] = useState({
@@ -119,7 +119,7 @@ export default function TimesheetEntry() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-6">
+      <div className="rounded-3xl border border-border-soft bg-slate-950/80 p-6">
         <h2 className="text-xl font-semibold text-white">Log a Timesheet</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="space-y-2 text-sm text-slate-300">
@@ -205,7 +205,7 @@ export default function TimesheetEntry() {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-6">
+      <div className="rounded-3xl border border-border-soft bg-slate-950/80 p-6">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-white">My recent timesheets</h3>

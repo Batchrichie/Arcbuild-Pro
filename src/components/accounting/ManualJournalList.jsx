@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import JournalDrillDown from '../accountant/JournalDrillDown'
 
-const clsInput = 'w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white'
+const clsInput = 'w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white'
 
 export default function ManualJournalList({ readOnly = false }) {
   const { user } = useAuth()
@@ -126,7 +126,7 @@ export default function ManualJournalList({ readOnly = false }) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+      <div className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Journal History</p>
@@ -198,11 +198,11 @@ export default function ManualJournalList({ readOnly = false }) {
         </div>
       </div>
 
-      <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 shadow-xl shadow-black/10">
-        <div className="portal-table-scroll overflow-x-auto rounded-3xl border border-white/10 bg-slate-950/80">
+      <div className="rounded-4xl panel-surface p-4 shadow-xl shadow-black/10">
+        <div className="portal-table-scroll overflow-x-auto rounded-3xl border border-border-soft bg-slate-950/80">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-left text-xs uppercase tracking-[0.24em] text-slate-500">
+              <tr className="border-b border-border-soft text-left text-xs uppercase tracking-[0.24em] text-slate-500">
                 <th className="px-3 py-3">JE</th>
                 <th className="px-3 py-3">Date</th>
                 <th className="px-3 py-3">Description</th>
@@ -232,7 +232,7 @@ export default function ManualJournalList({ readOnly = false }) {
                   return (
                     <tr
                       key={entry.id}
-                      className={`border-t border-white/10 ${isReversed ? 'opacity-70 line-through text-slate-500' : 'hover:bg-white/5'}`}
+                      className={`border-t border-border-soft ${isReversed ? 'opacity-70 line-through text-slate-500' : 'hover:bg-white/5'}`}
                     >
                       <td className="px-3 py-3 text-slate-100">{entry.entry_number}</td>
                       <td className="px-3 py-3 text-slate-200">{entry.entry_date}</td>
@@ -248,7 +248,7 @@ export default function ManualJournalList({ readOnly = false }) {
                         <button
                           type="button"
                           onClick={() => setSelectedJournal(entry.id)}
-                          className="min-touch rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-200 transition hover:border-teal-400/30"
+                          className="min-touch rounded-full border border-border-soft bg-white/5 px-3 py-2 text-xs text-slate-200 transition hover:border-teal-400/30"
                         >
                           View
                         </button>
@@ -256,7 +256,7 @@ export default function ManualJournalList({ readOnly = false }) {
                           <button
                             type="button"
                             onClick={() => openReverseModal(entry)}
-                            className="min-touch rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-200 transition hover:border-rose-400/30 hover:text-rose-200"
+                            className="min-touch rounded-full border border-border-soft bg-white/5 px-3 py-2 text-xs text-slate-200 transition hover:border-rose-400/30 hover:text-rose-200"
                           >
                             Reverse
                           </button>
@@ -277,7 +277,7 @@ export default function ManualJournalList({ readOnly = false }) {
               type="button"
               disabled={page <= 1}
               onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-              className="min-touch rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
+              className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Prev
             </button>
@@ -285,7 +285,7 @@ export default function ManualJournalList({ readOnly = false }) {
               type="button"
               disabled={entries.length < limit}
               onClick={() => setPage((prev) => prev + 1)}
-              className="min-touch rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
+              className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Next
             </button>
@@ -308,7 +308,7 @@ export default function ManualJournalList({ readOnly = false }) {
                 <h3 className="text-lg font-semibold text-white">Reverse journal {reverseTarget.entry_number}</h3>
                 <p className="text-sm text-slate-400">Provide a reversal date and reason.</p>
               </div>
-              <button type="button" onClick={() => setReverseTarget(null)} className="min-touch rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300">
+              <button type="button" onClick={() => setReverseTarget(null)} className="min-touch rounded-full border border-border-soft px-4 py-2 text-sm text-slate-300">
                 Close
               </button>
             </div>
@@ -344,7 +344,7 @@ export default function ManualJournalList({ readOnly = false }) {
                 <button
                   type="button"
                   onClick={() => setReverseTarget(null)}
-                  className="min-touch rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200"
+                  className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200"
                 >
                   Cancel
                 </button>

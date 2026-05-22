@@ -101,13 +101,13 @@ export default function LeaveCalendar() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <button type="button" onClick={() => setCursor((c) => ({ year: c.month === 0 ? c.year - 1 : c.year, month: c.month === 0 ? 11 : c.month - 1 }))} className="rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300">Prev</button>
+        <button type="button" onClick={() => setCursor((c) => ({ year: c.month === 0 ? c.year - 1 : c.year, month: c.month === 0 ? 11 : c.month - 1 }))} className="rounded-full border border-border-soft px-4 py-2 text-sm text-slate-300">Prev</button>
         <h3 className="text-lg font-semibold text-white">{monthLabel}</h3>
-        <button type="button" onClick={() => setCursor((c) => ({ year: c.month === 11 ? c.year + 1 : c.year, month: c.month === 11 ? 0 : c.month + 1 }))} className="rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300">Next</button>
+        <button type="button" onClick={() => setCursor((c) => ({ year: c.month === 11 ? c.year + 1 : c.year, month: c.month === 11 ? 0 : c.month + 1 }))} className="rounded-full border border-border-soft px-4 py-2 text-sm text-slate-300">Next</button>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
-        <aside className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm">
+        <aside className="space-y-3 rounded-2xl border border-border-soft bg-white/5 p-4 text-sm">
           <p className="font-semibold text-white">Departments</p>
           {departments.map((d) => (
             <label key={d} className="flex items-center gap-2 text-slate-300">
@@ -129,12 +129,12 @@ export default function LeaveCalendar() {
         {loading ? (
           <div className="h-64 animate-pulse rounded-2xl bg-white/5" />
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-white/10">
+          <div className="overflow-x-auto rounded-2xl border border-border-soft">
             <table className="w-full min-w-[560px] border-collapse text-xs">
               <thead>
                 <tr>
                   {WEEKDAYS.map((w) => (
-                    <th key={w} className="border border-white/10 bg-white/5 px-2 py-2 text-slate-500">{w}</th>
+                    <th key={w} className="border border-border-soft bg-white/5 px-2 py-2 text-slate-500">{w}</th>
                   ))}
                 </tr>
               </thead>
@@ -142,7 +142,7 @@ export default function LeaveCalendar() {
                 {weeks.map((week, wi) => (
                   <tr key={wi}>
                     {week.map((day, di) => (
-                      <td key={di} className="min-h-[4.5rem] align-top border border-white/10 p-1">
+                      <td key={di} className="min-h-[4.5rem] align-top border border-border-soft p-1">
                         {day && (
                           <>
                             <span className="text-slate-500">{day}</span>

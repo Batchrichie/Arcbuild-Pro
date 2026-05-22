@@ -1,6 +1,22 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
+function HeadcountBlock({ title, items }) {
+  return (
+    <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
+      <h4 className="mb-3 font-semibold text-white">{title}</h4>
+      <ul className="space-y-2 text-sm">
+        {items.map((i) => (
+          <li key={i.label} className="flex justify-between text-slate-300">
+            <span className="capitalize">{i.label}</span>
+            <span className="font-semibold text-violet-200">{i.count}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 export default function HeadcountReport() {
   const [byDept, setByDept] = useState([])
   const [byDiv, setByDiv] = useState([])
@@ -37,20 +53,6 @@ export default function HeadcountReport() {
     load()
   }, [load])
 
-  const Block = ({ title, items }) => (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-      <h4 className="mb-3 font-semibold text-white">{title}</h4>
-      <ul className="space-y-2 text-sm">
-        {items.map((i) => (
-          <li key={i.label} className="flex justify-between text-slate-300">
-            <span className="capitalize">{i.label}</span>
-            <span className="font-semibold text-violet-200">{i.count}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-
   return (
     <div className="space-y-4">
       {loading ? (
@@ -59,9 +61,9 @@ export default function HeadcountReport() {
         <>
           <p className="text-2xl font-semibold text-white">Active headcount: {total}</p>
           <div className="grid gap-4 md:grid-cols-3">
-            <Block title="By department" items={byDept} />
-            <Block title="By division" items={byDiv} />
-            <Block title="By contract type" items={byContract} />
+            <HeadcountBlock title="By department" items={byDept} />
+            <HeadcountBlock title="By division" items={byDiv} />
+            <HeadcountBlock title="By contract type" items={byContract} />
           </div>
         </>
       )}

@@ -13,7 +13,7 @@ export default function GeneralLedger({ readOnly = false }) {
   const [limit] = useState(50)
   const [selectedJournal, setSelectedJournal] = useState(null)
   const [showAccount, setShowAccount] = useState(null)
-  const [totalCount, setTotalCount] = useState(0)
+  const [, setTotalCount] = useState(0)
 
   const offset = useMemo(() => (page - 1) * limit, [page, limit])
 
@@ -72,7 +72,7 @@ export default function GeneralLedger({ readOnly = false }) {
   }
 
   return (
-    <div className="mt-6 rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+    <div className="mt-6 rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h2 className="text-xl font-semibold text-white">General Ledger</h2>
         <div className="flex flex-wrap gap-2">
@@ -82,7 +82,7 @@ export default function GeneralLedger({ readOnly = false }) {
         </div>
       </div>
 
-      <div className="portal-table-scroll mt-4 rounded-3xl border border-white/10 bg-slate-950/70">
+      <div className="portal-table-scroll mt-4 rounded-3xl border border-border-soft bg-slate-950/70">
         <table className="w-full table-auto text-sm dark-table text-slate-200">
           <thead>
             <tr className="text-left text-slate-400">
@@ -98,7 +98,7 @@ export default function GeneralLedger({ readOnly = false }) {
           <tbody>
             {loading && (<tr><td colSpan={7} className="p-4 text-slate-400">Loading...</td></tr>)}
             {!loading && rows.map(r => (
-              <tr key={r.ledger_id} className="border-t border-white/10 hover:bg-white/5">
+              <tr key={r.ledger_id} className="border-t border-border-soft hover:bg-white/5">
                 <td className="p-2 text-slate-100">{r.entry_date?.split('T')[0]}</td>
                 <td className="p-2">
                   <button disabled={isReadOnly} onClick={() => expandJournal(r.journal_entry_id)} className="text-amber-300 underline disabled:text-slate-500">
@@ -122,7 +122,7 @@ export default function GeneralLedger({ readOnly = false }) {
       </div>
 
       {selectedJournal && selectedJournal.lines && (
-        <div className="mt-4 rounded-[1.75rem] border border-white/10 bg-[rgba(15,23,42,0.95)] p-4 shadow-sm">
+        <div className="mt-4 rounded-[1.75rem] border border-border-soft bg-surface p-4 shadow-sm">
           <h3 className="font-semibold text-white">Journal {selectedJournal.journalId}</h3>
           <table className="w-full text-sm mt-2 dark-table text-slate-200">
             <thead>
@@ -135,7 +135,7 @@ export default function GeneralLedger({ readOnly = false }) {
             </thead>
             <tbody>
               {selectedJournal.lines.map(l => (
-                <tr key={l.id} className="border-t border-white/10">
+                <tr key={l.id} className="border-t border-border-soft">
                   <td className="p-2 text-slate-100">{l.account_code} — {l.account_name}</td>
                   <td className="p-2 text-right text-slate-100">{l.debit_amount}</td>
                   <td className="p-2 text-right text-slate-100">{l.credit_amount}</td>

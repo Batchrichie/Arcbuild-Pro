@@ -268,7 +268,6 @@ export async function recordPayment({
     const invoice = invoiceById[allocation.invoiceId]
     const balanceDue = Number(invoice.balance_due ?? 0)
     const currentPaid = Number(invoice.amount_paid ?? 0)
-    const newAmountPaid = Number((currentPaid + allocation.amount).toFixed(2))
     let newBalanceDue = Number((balanceDue - allocation.amount).toFixed(2))
     if (Math.abs(newBalanceDue) <= 0.01) {
       newBalanceDue = 0

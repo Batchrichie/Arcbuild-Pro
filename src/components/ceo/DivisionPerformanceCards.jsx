@@ -13,7 +13,7 @@ export default function DivisionPerformanceCards({ divisionData, loading }) {
     return (
       <div className="grid gap-4 lg:grid-cols-2">
         {DIVISIONS.map((d) => (
-          <div key={d.name} className="h-64 animate-pulse rounded-3xl border border-white/10 bg-white/5" />
+          <div key={d.name} className="h-64 animate-pulse rounded-3xl border border-border-soft bg-white/5" />
         ))}
       </div>
     )
@@ -31,7 +31,7 @@ export default function DivisionPerformanceCards({ divisionData, loading }) {
         return (
           <div
             key={div.name}
-            className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-lg shadow-black/10"
+            className="rounded-3xl panel-surface p-5 shadow-lg shadow-black/10"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">

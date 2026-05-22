@@ -1,0 +1,60 @@
+import { defineConfig } from 'tailwindcss'
+
+export default defineConfig({
+  content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
+  darkMode: ['class'],
+  theme: {
+    extend: {
+      colors: {
+        bg: 'var(--color-bg)',
+        page: 'var(--color-background-page)',
+        surface: {
+          DEFAULT: 'var(--color-surface)',
+          2: 'var(--color-surface-2)',
+          3: 'var(--color-surface-3)',
+        },
+        'surface-light': 'var(--color-surface-light)',
+        panel: 'var(--color-panel)',
+        'surface-overlay': 'var(--color-surface-overlay)',
+        'surface-overlay-strong': 'var(--color-surface-overlay-strong)',
+        border: {
+          DEFAULT: 'var(--color-border)',
+          soft: 'var(--color-border-soft)',
+          strong: 'var(--color-border-strong)',
+        },
+        divider: 'var(--color-divider)',
+        text: {
+          DEFAULT: 'var(--color-text)',
+          primary: 'var(--color-text-primary)',
+          secondary: 'var(--color-text-secondary)',
+          muted: 'var(--color-text-muted)',
+          'muted-strong': 'var(--color-text-muted-strong)',
+          placeholder: 'var(--color-text-placeholder)',
+        },
+        amber: 'var(--color-amber)',
+        'amber-strong': 'var(--color-amber-strong)',
+        'amber-bg': 'var(--color-amber-bg)',
+        'amber-border': 'var(--color-amber-border)',
+        success: 'var(--color-success)',
+        'success-bg': 'var(--color-success-bg)',
+        'success-border': 'var(--color-success-border)',
+        warning: 'var(--color-warning)',
+        'warning-bg': 'var(--color-warning-bg)',
+        'warning-border': 'var(--color-warning-border)',
+        danger: 'var(--color-danger)',
+        'danger-bg': 'var(--color-danger-bg)',
+        'danger-border': 'var(--color-danger-border)',
+        info: 'var(--color-info)',
+        'info-bg': 'var(--color-info-bg)',
+        'info-border': 'var(--color-info-border)',
+        teal: 'var(--color-teal)',
+        'amber-text': 'var(--color-amber-text)',
+      },
+      boxShadow: {
+        card: 'var(--shadow-card)',
+        panel: 'var(--shadow-panel)',
+        elevated: 'var(--shadow-elevated)',
+      },
+    },
+  },
+})

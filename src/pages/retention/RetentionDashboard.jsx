@@ -196,7 +196,7 @@ export default function RetentionDashboard() {
   return (
     <div className="py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/95 p-6 shadow-2xl shadow-black/30">
+        <div className="rounded-[1.75rem] border border-border-soft bg-slate-950/95 p-6 shadow-2xl shadow-black/30">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h1 className="text-3xl font-semibold text-white">Retention Dashboard</h1>
@@ -207,13 +207,13 @@ export default function RetentionDashboard() {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleExportPlaceholder}
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10"
+                className="rounded-2xl border border-border-soft bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10"
               >
                 Export PDF
               </button>
               <button
                 onClick={handleExportPlaceholder}
-                className="rounded-2xl border border-white/10 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/15"
+                className="rounded-2xl border border-border-soft bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/15"
               >
                 Export Excel
               </button>
@@ -221,25 +221,25 @@ export default function RetentionDashboard() {
           </div>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div className="rounded-2xl border border-border-soft bg-white/5 p-5">
               <p className="text-xs uppercase tracking-[0.24em] text-slate-400 mb-3">Total Client Retention Held</p>
               <p className="text-2xl font-semibold text-white">GHS {Number(summary.clientBalance || 0).toLocaleString('en-GH', { minimumFractionDigits: 2 })}</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div className="rounded-2xl border border-border-soft bg-white/5 p-5">
               <p className="text-xs uppercase tracking-[0.24em] text-slate-400 mb-3">Total Client Retention Released</p>
               <p className="text-2xl font-semibold text-white">GHS {Number(summary.clientReleased || 0).toLocaleString('en-GH', { minimumFractionDigits: 2 })}</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div className="rounded-2xl border border-border-soft bg-white/5 p-5">
               <p className="text-xs uppercase tracking-[0.24em] text-slate-400 mb-3">Total Balance Due to ARCBUILD</p>
               <p className="text-2xl font-semibold text-white">GHS {Number(summary.clientBalance || 0).toLocaleString('en-GH', { minimumFractionDigits: 2 })}</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div className="rounded-2xl border border-border-soft bg-white/5 p-5">
               <p className="text-xs uppercase tracking-[0.24em] text-slate-400 mb-3">Total Subcontractor Retention Held</p>
               <p className="text-2xl font-semibold text-white">GHS {Number(summary.subcontractorBalance || 0).toLocaleString('en-GH', { minimumFractionDigits: 2 })}</p>
             </div>
           </div>
 
-          <div className="mt-8 rounded-3xl border border-white/10 bg-slate-900/80 p-6">
+          <div className="mt-8 rounded-3xl border border-border-soft bg-slate-900/80 p-6">
             <div className="grid gap-4 xl:grid-cols-[1fr_300px]">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
@@ -247,7 +247,7 @@ export default function RetentionDashboard() {
                   <select
                     value={filters.projectId}
                     onChange={(e) => handleFilterChange('projectId', e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    className="w-full rounded-2xl border border-border-soft bg-slate-950/90 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   >
                     <option value="">All projects</option>
                     {projects.map((project) => (
@@ -262,7 +262,7 @@ export default function RetentionDashboard() {
                   <select
                     value={filters.status}
                     onChange={(e) => handleFilterChange('status', e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    className="w-full rounded-2xl border border-border-soft bg-slate-950/90 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   >
                     {statusOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -277,7 +277,7 @@ export default function RetentionDashboard() {
                     type="date"
                     value={filters.dateFrom}
                     onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    className="w-full rounded-2xl border border-border-soft bg-slate-950/90 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   />
                 </div>
                 <div>
@@ -286,7 +286,7 @@ export default function RetentionDashboard() {
                     type="date"
                     value={filters.dateTo}
                     onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    className="w-full rounded-2xl border border-border-soft bg-slate-950/90 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   />
                 </div>
               </div>
@@ -294,7 +294,7 @@ export default function RetentionDashboard() {
               <div className="flex items-end justify-end">
                 <button
                   onClick={clearFilters}
-                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/10"
+                  className="rounded-2xl border border-border-soft bg-white/5 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/10"
                 >
                   Clear Filters
                 </button>
@@ -303,7 +303,7 @@ export default function RetentionDashboard() {
           </div>
 
           <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
-            <div className="inline-flex overflow-hidden rounded-2xl border border-white/10 bg-slate-950/90">
+            <div className="inline-flex overflow-hidden rounded-2xl border border-border-soft bg-slate-950/90">
               {['client', 'subcontractor'].map((tab) => (
                 <button
                   key={tab}
@@ -323,7 +323,7 @@ export default function RetentionDashboard() {
             </div>
           )}
 
-          <div className="mt-6 overflow-hidden rounded-3xl border border-white/10 bg-slate-950/90 shadow-inner shadow-black/20">
+          <div className="mt-6 overflow-hidden rounded-3xl border border-border-soft bg-slate-950/90 shadow-inner shadow-black/20">
             <div className="portal-table-scroll overflow-x-auto">
               <table className="min-w-full text-left text-sm">
                 <thead className="bg-slate-900/80 text-slate-300">
@@ -354,7 +354,7 @@ export default function RetentionDashboard() {
                     </tr>
                   ) : (
                     filteredLedger.map((row) => (
-                      <tr key={row.id} className="border-t border-white/10 hover:bg-white/5 transition">
+                      <tr key={row.id} className="border-t border-border-soft hover:bg-white/5 transition">
                         <td className="px-4 py-4 text-slate-200">{row.project?.name || '—'}</td>
                         <td className="px-4 py-4 text-slate-200">
                           {activeTab === 'client'
@@ -397,7 +397,7 @@ export default function RetentionDashboard() {
 
           {modal.isOpen && modal.row && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6">
-              <div className="w-full max-w-2xl rounded-3xl border border-white/10 bg-slate-950/95 p-6 shadow-2xl shadow-black/40">
+              <div className="w-full max-w-2xl rounded-3xl border border-border-soft bg-slate-950/95 p-6 shadow-2xl shadow-black/40">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h2 className="text-2xl font-semibold text-white">Release Retention</h2>
@@ -405,22 +405,22 @@ export default function RetentionDashboard() {
                   </div>
                   <button
                     onClick={closeModal}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-slate-300 transition hover:bg-white/10"
+                    className="rounded-full border border-border-soft bg-white/5 px-3 py-2 text-slate-300 transition hover:bg-white/10"
                   >
                     ✕
                   </button>
                 </div>
 
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Project</p>
                     <p className="mt-2 text-sm text-white">{modal.row.project?.name || '—'}</p>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Current Withheld</p>
                     <p className="mt-2 text-sm text-white">GHS {Number(modal.row.withheld_amount || 0).toLocaleString('en-GH', { minimumFractionDigits: 2 })}</p>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Current Balance</p>
                     <p className="mt-2 text-sm text-white">GHS {Number(modal.row.balance_amount || 0).toLocaleString('en-GH', { minimumFractionDigits: 2 })}</p>
                   </div>
@@ -436,7 +436,7 @@ export default function RetentionDashboard() {
                       step="0.01"
                       value={modal.releaseAmount}
                       onChange={(e) => setModal((prev) => ({ ...prev, releaseAmount: e.target.value }))}
-                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                     />
                   </div>
                   <div>
@@ -445,7 +445,7 @@ export default function RetentionDashboard() {
                       type="text"
                       value={modal.releaseInvoiceNumber}
                       onChange={(e) => setModal((prev) => ({ ...prev, releaseInvoiceNumber: e.target.value }))}
-                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                     />
                   </div>
                   <div>
@@ -454,7 +454,7 @@ export default function RetentionDashboard() {
                       value={modal.notes}
                       onChange={(e) => setModal((prev) => ({ ...prev, notes: e.target.value }))}
                       rows="3"
-                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                     />
                   </div>
                 </div>
@@ -473,7 +473,7 @@ export default function RetentionDashboard() {
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
                   <button
                     onClick={closeModal}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/10"
+                    className="rounded-2xl border border-border-soft bg-white/5 px-5 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/10"
                   >
                     Cancel
                   </button>

@@ -97,7 +97,7 @@ export default function HrPortal() {
   const [moreOpen, setMoreOpen] = useState(false)
 
   useEffect(() => {
-    try { document.title = `${COMPANY.appName} — HR` } catch {}
+    try { document.title = `${COMPANY.appName} — HR` } catch { /* best effort */ }
   }, [])
 
   const navigate = (view) => {
@@ -154,10 +154,10 @@ export default function HrPortal() {
   }
 
   return (
-    <div className="portal-shell overflow-x-hidden">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-8 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside className="portal-sidebar hidden rounded-4xl border border-white/10 p-5 shadow-2xl lg:block">
+    <div className="portal-shell min-h-screen w-full overflow-x-hidden">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-8 lg:px-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+          <aside className="portal-sidebar hidden lg:flex lg:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl">
             <div className="mb-6 inline-flex items-center gap-3 rounded-3xl bg-violet-500/15 px-4 py-3 text-sm font-semibold text-violet-200">
               <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
               {COMPANY.shortName}
@@ -188,37 +188,39 @@ export default function HrPortal() {
                 </div>
               ))}
             </nav>
-            <button type="button" onClick={signOut} className="min-touch mt-6 w-full rounded-full border border-white/10 py-3 text-sm text-slate-300">
+            <button type="button" onClick={signOut} className="min-touch mt-6 w-full rounded-full border border-border-soft py-3 text-sm text-slate-300">
               Sign Out
             </button>
           </aside>
 
-          <main className="portal-main portal-main-with-tabs min-w-0 overflow-x-hidden pb-24 lg:pb-8">
-            <div className="mb-4 flex flex-col gap-3 lg:hidden">
-              <div className="flex items-center justify-between">
-                <h1 className="text-xl font-semibold text-white">{VIEW_TITLES[activeView]}</h1>
-                <button type="button" onClick={signOut} className="text-sm text-slate-400">Sign out</button>
+          <main className="portal-main portal-main-with-tabs min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3 lg:hidden">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl sm:text-2xl font-semibold text-white truncate">{VIEW_TITLES[activeView]}</h1>
               </div>
-              <ThemeToggle className="self-start" />
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button type="button" onClick={signOut} className="text-sm text-slate-400">Sign out</button>
+                <ThemeToggle className="self-start" />
+              </div>
             </div>
             {activeView !== 'dashboard' && (
               <div className="mb-4 hidden lg:block">
                 <h2 className="text-2xl font-semibold text-white">{VIEW_TITLES[activeView]}</h2>
               </div>
             )}
-            <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">{renderView()}</div>
+            <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">{renderView()}</div>
           </main>
         </div>
       </div>
 
       <nav className="portal-mobile-nav lg:hidden">
-        <div className="mx-auto flex max-w-lg justify-around">
+        <div className="mx-auto flex max-w-lg justify-around px-1">
           {MOBILE_TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => handleMobileTab(tab.id)}
-              className={`flex min-h-[2.75rem] flex-1 flex-col items-center justify-center py-2 text-xs font-medium ${
+              className={`flex flex-1 flex-col items-center justify-center min-h-[3rem] py-2 text-xs font-medium ${
                 mobileTab === tab.id ? 'text-violet-300' : 'text-slate-500'
               }`}
             >
@@ -239,7 +241,7 @@ export default function HrPortal() {
                 key={item.id}
                 type="button"
                 onClick={() => navigate(item.id)}
-                className="mb-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-slate-200"
+                className="mb-2 w-full rounded-xl border border-border-soft bg-white/5 px-4 py-3 text-left text-sm text-slate-200"
               >
                 {item.label}
               </button>

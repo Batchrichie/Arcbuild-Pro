@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   LineChart,
   Line,
@@ -370,7 +370,7 @@ export default function AssetRegister({ readOnly = false, userRole, userId }) {
       {showAddForm && !readOnly && (
         <form
           onSubmit={handleAddAsset}
-          className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 space-y-4"
+          className="rounded-3xl panel-surface p-6 space-y-4"
         >
           <h3 className="text-lg font-semibold text-white">Register New Asset</h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -484,10 +484,10 @@ export default function AssetRegister({ readOnly = false, userRole, userId }) {
         </form>
       )}
 
-      <div className="overflow-x-auto rounded-3xl border border-white/10">
+      <div className="overflow-x-auto rounded-3xl border border-border-soft">
         <table className="w-full min-w-[1100px]">
           <thead>
-            <tr className="border-b border-white/10 bg-white/5">
+            <tr className="border-b border-border-soft bg-white/5">
               <th className="px-3 py-3 text-left text-xs font-semibold uppercase text-slate-400">Code</th>
               <th className="px-3 py-3 text-left text-xs font-semibold uppercase text-slate-400">Name</th>
               <th className="px-3 py-3 text-left text-xs font-semibold uppercase text-slate-400">Category</th>
@@ -519,7 +519,7 @@ export default function AssetRegister({ readOnly = false, userRole, userId }) {
               </tr>
             ) : (
               filteredAssets.map((asset) => (
-                <tr key={asset.id} className="border-b border-white/5 hover:bg-white/5">
+                <tr key={asset.id} className="border-b border-border-soft hover:bg-white/5">
                   <td className="px-3 py-2 text-sm font-mono text-slate-300">{asset.asset_code}</td>
                   <td className="px-3 py-2 text-sm text-white">{asset.asset_name}</td>
                   <td className="px-3 py-2 text-sm text-slate-300">{asset.category}</td>
@@ -584,7 +584,7 @@ export default function AssetRegister({ readOnly = false, userRole, userId }) {
 
       {showDepreciationModal && !readOnly && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-slate-900 p-6 shadow-2xl">
+          <div className="w-full max-w-md rounded-3xl border border-border-soft bg-slate-900 p-6 shadow-2xl">
             <h3 className="text-lg font-semibold text-white">Run Monthly Depreciation</h3>
             <p className="mt-1 text-sm text-slate-400">
               Posts depreciation for all active assets for the selected month.
@@ -629,7 +629,7 @@ export default function AssetRegister({ readOnly = false, userRole, userId }) {
       )}
 
       {nbvAsset && (
-        <div className="rounded-3xl border border-teal-400/30 bg-[rgba(20,184,166,0.08)] p-6">
+        <div className="rounded-3xl border border-teal-400/30 bg-success-bg p-6">
           <div className="flex justify-between items-start mb-4">
             <div>
               <h3 className="text-lg font-semibold text-white">NBV History — {nbvAsset.asset_name}</h3>
@@ -673,7 +673,7 @@ export default function AssetRegister({ readOnly = false, userRole, userId }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <form
             onSubmit={handleDispose}
-            className="w-full max-w-md rounded-3xl border border-white/10 bg-slate-900 p-6 shadow-2xl"
+            className="w-full max-w-md rounded-3xl border border-border-soft bg-slate-900 p-6 shadow-2xl"
           >
             <h3 className="text-lg font-semibold text-white">Dispose Asset</h3>
             <p className="mt-1 text-sm text-slate-400">

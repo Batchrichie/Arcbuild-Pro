@@ -273,12 +273,12 @@ export default function ChartOfAccounts() {
           placeholder="Search code or name…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="min-w-60 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-400/50"
+          className="min-w-60 rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-400/50"
         />
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
+          className="rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
         >
           <option value="">All Account Types</option>
           {CATEGORY_OPTIONS.map((category) => (
@@ -294,7 +294,7 @@ export default function ChartOfAccounts() {
               className={
                 statusFilter === toggle.value
                   ? 'rounded-xl border border-emerald-400/30 bg-emerald-500/15 px-3 py-2 text-sm font-semibold text-emerald-100'
-                  : 'rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-sm text-slate-300 hover:bg-white/5'
+                  : 'rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-sm text-slate-300 hover:bg-white/5'
               }
             >
               {toggle.label}
@@ -309,12 +309,12 @@ export default function ChartOfAccounts() {
 
       <div className="space-y-8">
         {loading ? (
-          <div className="rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-8 text-center text-slate-500">Loading accounts…</div>
+          <div className="rounded-2xl border border-border-soft bg-surface-overlay p-8 text-center text-slate-500">Loading accounts…</div>
         ) : Object.keys(filteredGroups).length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-8 text-center text-slate-500">No accounts found.</div>
+          <div className="rounded-2xl border border-border-soft bg-surface-overlay p-8 text-center text-slate-500">No accounts found.</div>
         ) : (
           Object.entries(filteredGroups).map(([category, accounts]) => (
-            <section key={category} className="rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4">
+            <section key={category} className="rounded-2xl border border-border-soft bg-surface-overlay p-4">
               <div className="mb-4 flex items-center justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-semibold text-white">{category}</h2>
@@ -323,7 +323,7 @@ export default function ChartOfAccounts() {
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-slate-300">
-                  <thead className="border-b border-white/10 text-xs uppercase tracking-widest text-slate-500">
+                  <thead className="border-b border-border-soft text-xs uppercase tracking-widest text-slate-500">
                     <tr>
                               <th className="px-4 py-3 text-left">Code</th>
                       <th className="px-4 py-3 text-left">Name</th>
@@ -336,7 +336,7 @@ export default function ChartOfAccounts() {
                   </thead>
                   <tbody>
                     {accounts.map((account) => (
-                      <tr key={account.account_code} className="border-b border-white/5 hover:bg-white/5 transition">
+                      <tr key={account.account_code} className="border-b border-border-soft hover:bg-white/5 transition">
                         <td className="px-4 py-3 font-medium text-white">
                           <div className="flex items-center gap-2">
                             <span>{account.account_code}</span>
@@ -359,7 +359,7 @@ export default function ChartOfAccounts() {
                             <button
                               type="button"
                               onClick={() => openEdit(account)}
-                              className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition"
+                              className="rounded-lg border border-border-soft bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition"
                             >
                               Edit
                             </button>
@@ -379,7 +379,7 @@ export default function ChartOfAccounts() {
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-slate-900 p-6 overflow-y-auto max-h-[90vh] space-y-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-border-soft bg-slate-900 p-6 overflow-y-auto max-h-[90vh] space-y-4">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-white">
@@ -394,7 +394,7 @@ export default function ChartOfAccounts() {
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300 hover:bg-white/10 transition"
+                className="rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-slate-300 hover:bg-white/10 transition"
               >
                 Close
               </button>
@@ -413,7 +413,7 @@ export default function ChartOfAccounts() {
                     value={form.account_code}
                     placeholder="Select account type to auto-fill code"
                     disabled
-                    className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                    className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                   />
                   <span
                     title="Account codes are permanently locked once saved."
@@ -429,7 +429,7 @@ export default function ChartOfAccounts() {
                   type="text"
                   value={form.account_name}
                   onChange={(e) => setForm((prev) => ({ ...prev, account_name: e.target.value }))}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 />
               </label>
               <label className="space-y-2 text-sm text-slate-300">
@@ -438,7 +438,7 @@ export default function ChartOfAccounts() {
                   value={form.account_type}
                   onChange={(e) => handleAccountTypeChange(e.target.value)}
                   disabled={form.is_system}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 >
                   <option value="">Select account type</option>
                   {CATEGORY_OPTIONS.map((category) => (
@@ -452,7 +452,7 @@ export default function ChartOfAccounts() {
                   value={form.description}
                   onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                   rows={4}
-                  className="w-full rounded-2xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-2xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 />
               </label>
               <label className="space-y-2 text-sm text-slate-300 sm:col-span-2">
@@ -461,7 +461,7 @@ export default function ChartOfAccounts() {
                   value={form.parent_code}
                   onChange={(e) => setForm((prev) => ({ ...prev, parent_code: e.target.value }))}
                   disabled={form.is_system}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 >
                   <option value="">None</option>
                   {activeAccounts.map((account) => (
@@ -480,7 +480,7 @@ export default function ChartOfAccounts() {
                   value={form.opening_balance}
                   onChange={(e) => setForm((prev) => ({ ...prev, opening_balance: e.target.value }))}
                   disabled={form.is_system}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 />
                 <p className="text-xs text-slate-500">Opening balances are posted to the ledger and offset to Opening Balances Equity.</p>
               </label>
@@ -489,7 +489,7 @@ export default function ChartOfAccounts() {
                 <select
                   value={form.status}
                   onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
@@ -503,7 +503,7 @@ export default function ChartOfAccounts() {
                 <select
                   value={form.financial_statement}
                   onChange={(e) => setForm((prev) => ({ ...prev, financial_statement: e.target.value }))}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 >
                   <option value="">Select financial statement</option>
                   <option value="Balance Sheet">Balance Sheet</option>
@@ -516,7 +516,7 @@ export default function ChartOfAccounts() {
                 <select
                   value={form.element}
                   onChange={(e) => setForm((prev) => ({ ...prev, element: e.target.value, sub_element: '' }))}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 >
                   <option value="">Select element</option>
                   <option value="Asset">Asset</option>
@@ -531,7 +531,7 @@ export default function ChartOfAccounts() {
                 <select
                   value={form.sub_element}
                   onChange={(e) => setForm((prev) => ({ ...prev, sub_element: e.target.value }))}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                   disabled={!form.element}
                 >
                   <option value="">Select sub-element</option>
@@ -547,7 +547,7 @@ export default function ChartOfAccounts() {
                   value={form.nature}
                   onChange={(e) => setForm((prev) => ({ ...prev, nature: e.target.value }))}
                   placeholder="e.g. Cash and Cash Equivalents, Trade Receivables"
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 />
               </label>
             </div>
@@ -582,7 +582,7 @@ export default function ChartOfAccounts() {
                 {form.is_payment_account ? (
                   <div className="flex flex-wrap gap-3">
                     {['Cash', 'Bank', 'Mobile Money'].map((option) => (
-                      <label key={option} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-slate-800 px-3 py-2">
+                      <label key={option} className="inline-flex items-center gap-2 rounded-xl border border-border-soft bg-slate-800 px-3 py-2">
                         <input
                           type="radio"
                           name="payment_method_type"
@@ -605,7 +605,7 @@ export default function ChartOfAccounts() {
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 hover:bg-white/10 transition"
+                className="rounded-xl border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-300 hover:bg-white/10 transition"
               >
                 Cancel
               </button>

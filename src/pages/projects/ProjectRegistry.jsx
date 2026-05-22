@@ -51,7 +51,7 @@ export default function ProjectRegistry() {
   const [clients, setClients] = useState([])
   const [divisions, setDivisions] = useState([])
   const [loading, setLoading] = useState(true)
-  const [loadingMeta, setLoadingMeta] = useState(true)
+  const [, setLoadingMeta] = useState(true)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
@@ -221,12 +221,12 @@ export default function ProjectRegistry() {
           placeholder="Search projects…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-400/50 w-72"
+          className="rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-400/50 w-72"
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
+          className="rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
         >
           <option value="">All Statuses</option>
           {statusOptions.map((status) => (
@@ -236,7 +236,7 @@ export default function ProjectRegistry() {
         <select
           value={divisionFilter}
           onChange={(e) => setDivisionFilter(e.target.value)}
-          className="rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
+          className="rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
         >
           <option value="">All Divisions</option>
           {divisions.map((division) => (
@@ -249,9 +249,9 @@ export default function ProjectRegistry() {
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">{error}</div>
       )}
 
-      <div className="overflow-x-auto rounded-2xl border border-white/10">
+      <div className="overflow-x-auto rounded-2xl border border-border-soft">
         <table className="w-full text-sm text-slate-300">
-          <thead className="border-b border-white/10 text-xs uppercase tracking-widest text-slate-500">
+          <thead className="border-b border-border-soft text-xs uppercase tracking-widest text-slate-500">
             <tr>
               <th className="px-4 py-3 text-left">Project Name</th>
               <th className="px-4 py-3 text-left">Client</th>
@@ -276,7 +276,7 @@ export default function ProjectRegistry() {
               paginatedProjects.map((project) => (
                 <tr
                   key={project.id}
-                  className="cursor-pointer border-b border-white/5 hover:bg-white/5 transition"
+                  className="cursor-pointer border-b border-border-soft hover:bg-white/5 transition"
                   onClick={() => openProject(project, !canEdit)}
                 >
                   <td className="px-4 py-3 font-medium text-white">{project.name}</td>
@@ -298,12 +298,12 @@ export default function ProjectRegistry() {
                           event.stopPropagation()
                           openProject(project, false)
                         }}
-                        className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition"
+                        className="rounded-lg border border-border-soft bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition"
                       >
                         Edit
                       </button>
                     ) : (
-                      <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">View</span>
+                      <span className="rounded-lg border border-border-soft bg-white/5 px-3 py-1 text-xs text-slate-300">View</span>
                     )}
                   </td>
                 </tr>
@@ -319,7 +319,7 @@ export default function ProjectRegistry() {
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="rounded-lg border border-white/10 px-3 py-1 disabled:opacity-40 hover:bg-white/5 transition"
+            className="rounded-lg border border-border-soft px-3 py-1 disabled:opacity-40 hover:bg-white/5 transition"
           >
             Prev
           </button>
@@ -328,7 +328,7 @@ export default function ProjectRegistry() {
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="rounded-lg border border-white/10 px-3 py-1 disabled:opacity-40 hover:bg-white/5 transition"
+            className="rounded-lg border border-border-soft px-3 py-1 disabled:opacity-40 hover:bg-white/5 transition"
           >
             Next
           </button>
@@ -337,7 +337,7 @@ export default function ProjectRegistry() {
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-slate-900 p-6 space-y-4 overflow-y-auto max-h-[90vh]">
+          <div className="w-full max-w-2xl rounded-2xl border border-border-soft bg-slate-900 p-6 space-y-4 overflow-y-auto max-h-[90vh]">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-white">{editingProject ? (readOnly ? 'Project Details' : 'Edit Project') : 'New Project'}</h2>
@@ -346,7 +346,7 @@ export default function ProjectRegistry() {
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300 hover:bg-white/10 transition"
+                className="rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-slate-300 hover:bg-white/10 transition"
               >
                 Close
               </button>
@@ -364,7 +364,7 @@ export default function ProjectRegistry() {
                   value={form.name}
                   onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                   disabled={readOnly}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 />
               </label>
               <label className="space-y-2 text-sm text-slate-300">
@@ -373,7 +373,7 @@ export default function ProjectRegistry() {
                   value={form.client_id}
                   onChange={(e) => setForm((prev) => ({ ...prev, client_id: e.target.value }))}
                   disabled={readOnly}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 >
                   <option value="">Select client</option>
                   {clients.map((client) => (
@@ -387,7 +387,7 @@ export default function ProjectRegistry() {
                   value={form.division_id}
                   onChange={(e) => setForm((prev) => ({ ...prev, division_id: e.target.value }))}
                   disabled={readOnly}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 >
                   <option value="">Select division</option>
                   {divisions.map((division) => (
@@ -403,7 +403,7 @@ export default function ProjectRegistry() {
                   value={form.contract_value}
                   onChange={(e) => setForm((prev) => ({ ...prev, contract_value: e.target.value }))}
                   disabled={readOnly}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 />
               </label>
               <label className="space-y-2 text-sm text-slate-300">
@@ -413,7 +413,7 @@ export default function ProjectRegistry() {
                   value={form.start_date}
                   onChange={(e) => setForm((prev) => ({ ...prev, start_date: e.target.value }))}
                   disabled={readOnly}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 />
               </label>
               <label className="space-y-2 text-sm text-slate-300">
@@ -423,7 +423,7 @@ export default function ProjectRegistry() {
                   value={form.end_date}
                   onChange={(e) => setForm((prev) => ({ ...prev, end_date: e.target.value }))}
                   disabled={readOnly}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 />
               </label>
               <label className="space-y-2 text-sm text-slate-300">
@@ -432,7 +432,7 @@ export default function ProjectRegistry() {
                   value={form.status}
                   onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
                   disabled={readOnly}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 >
                   {statusOptions.map((status) => (
                     <option key={status} value={status}>{STATUS_LABELS[status]}</option>
@@ -445,7 +445,7 @@ export default function ProjectRegistry() {
                   value={form.completion_method}
                   onChange={(e) => setForm((prev) => ({ ...prev, completion_method: e.target.value }))}
                   disabled={readOnly}
-                  className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                 >
                   {COMPLETION_METHODS.map((method) => (
                     <option key={method.value} value={method.value}>{method.label}</option>
@@ -461,7 +461,7 @@ export default function ProjectRegistry() {
                     value={form.budget_cost}
                     onChange={(e) => setForm((prev) => ({ ...prev, budget_cost: e.target.value }))}
                     disabled={readOnly}
-                    className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                    className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                   />
                 </label>
               )}
@@ -474,7 +474,7 @@ export default function ProjectRegistry() {
                 onChange={(e) => setForm((prev) => ({ ...prev, recognition_notes: e.target.value }))}
                 disabled={readOnly}
                 rows={4}
-                className="w-full rounded-2xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                className="w-full rounded-2xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
               />
             </label>
 
@@ -482,7 +482,7 @@ export default function ProjectRegistry() {
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 hover:bg-white/10 transition"
+                className="rounded-xl border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-300 hover:bg-white/10 transition"
               >
                 Cancel
               </button>

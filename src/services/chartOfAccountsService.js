@@ -75,7 +75,6 @@ const DB_FIELD_MAP = {
   payment_method_type: 'payment_method_type',
 }
 
-const OPENING_BALANCE_OFFSET_ACCOUNT = '3200'
 const OPENING_BALANCE_SOURCE_TYPE = 'opening_balance'
 const OPENING_BALANCE_ENTRY_DATE = import.meta.env.VITE_OPENING_BALANCE_ENTRY_DATE || new Date(Date.now() - 86400000).toISOString().slice(0, 10)
 
@@ -136,48 +135,6 @@ async function getOpeningBalanceJournalId(accountId) {
 
   if (error) throw error
   return data?.id ?? null
-}
-
-function getOpeningBalanceLines(account_code, account_name, account_type, opening_balance) {
-  const amount = Number(opening_balance || 0)
-  if (!amount || amount <= 0) return []
-
-  const isDebitAccount = ['asset', 'expense'].includes(account_type)
-  if (isDebitAccount) {
-    return [
-      {
-        account_code,
-        account_name,
-        debit_amount: amount,
-        credit_amount: 0,
-        line_description: `Opening balance for ${account_code}`,
-      },
-      {
-        account_code: OPENING_BALANCE_OFFSET_ACCOUNT,
-        account_name: 'Opening Balances Equity',
-        debit_amount: 0,
-        credit_amount: amount,
-        line_description: `Opening balance offset for ${account_code}`,
-      },
-    ]
-  }
-
-  return [
-    {
-      account_code: OPENING_BALANCE_OFFSET_ACCOUNT,
-      account_name: 'Opening Balances Equity',
-      debit_amount: amount,
-      credit_amount: 0,
-      line_description: `Opening balance offset for ${account_code}`,
-    },
-    {
-      account_code,
-      account_name,
-      debit_amount: 0,
-      credit_amount: amount,
-      line_description: `Opening balance for ${account_code}`,
-    },
-  ]
 }
 
 export async function postOpeningBalanceJournal(account, opening_balance, currentUserId) {

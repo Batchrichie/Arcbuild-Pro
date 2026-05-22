@@ -52,7 +52,7 @@ const TEMPLATES = [
   },
 ]
 
-const clsInput = 'w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white'
+const clsInput = 'w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white'
 
 export default function ManualJournalForm({ initialDescription = '', initialReference = '', initialJournalDate = '', initialLines = [] }) {
   const { user } = useAuth()
@@ -266,7 +266,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
 
   return (
     <div className="space-y-6">
-      <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+      <div className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Manual Journal</p>
@@ -312,7 +312,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
         </div>
       </div>
 
-      <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+      <div className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm text-slate-400">Common journal templates</p>
@@ -324,7 +324,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
                 key={template.label}
                 type="button"
                 onClick={() => fillTemplate(template)}
-                className="min-touch rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-teal-400/30 hover:bg-teal-500/10"
+                className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-teal-400/30 hover:bg-teal-500/10"
               >
                 {template.label}
               </button>
@@ -332,7 +332,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
           </div>
         </div>
 
-        <div className="portal-table-scroll mt-6 overflow-x-auto rounded-3xl border border-white/10 bg-slate-950/70">
+        <div className="portal-table-scroll mt-6 overflow-x-auto rounded-3xl border border-border-soft bg-slate-950/70">
           <table className="min-w-full text-sm">
             <thead>
               <tr className="text-left text-xs uppercase tracking-[0.24em] text-slate-500">
@@ -349,7 +349,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
             </thead>
             <tbody>
               {lines.map((line, index) => (
-                <tr key={line.id} className="border-t border-white/10">
+                <tr key={line.id} className="border-t border-border-soft">
                   <td className="px-3 py-3 text-slate-300">{index + 1}</td>
                   <td className="px-3 py-3">
                     <input
@@ -431,7 +431,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
                     <button
                       type="button"
                       onClick={() => removeLine(index)}
-                      className="min-touch rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300 transition hover:border-red-400/40 hover:text-red-200"
+                      className="min-touch rounded-full border border-border-soft bg-white/5 px-3 py-2 text-xs text-slate-300 transition hover:border-red-400/40 hover:text-red-200"
                       disabled={lines.length <= 2}
                     >
                       Remove
@@ -444,7 +444,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4 text-sm text-slate-200">
+          <div className="rounded-3xl border border-border-soft bg-slate-950/80 p-4 text-sm text-slate-200">
             <p className="font-semibold text-white">Balance</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               <div>
@@ -464,12 +464,12 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
             </div>
           </div>
 
-          <div className="space-y-3 rounded-3xl border border-white/10 bg-slate-950/80 p-4">
+          <div className="space-y-3 rounded-3xl border border-border-soft bg-slate-950/80 p-4">
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={handleSaveDraft}
-                className="min-touch rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-teal-400/30 hover:bg-teal-500/10"
+                className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-teal-400/30 hover:bg-teal-500/10"
               >
                 Save as Draft
               </button>
@@ -493,7 +493,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
           <button
             type="button"
             onClick={addLine}
-            className="min-touch rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-teal-400/30 hover:bg-teal-500/10"
+            className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-teal-400/30 hover:bg-teal-500/10"
           >
             Add Line
           </button>

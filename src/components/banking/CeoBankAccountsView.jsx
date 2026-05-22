@@ -15,10 +15,6 @@ export default function CeoBankAccountsView() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    loadAccounts()
-  }, [])
-
   async function loadAccounts() {
     setLoading(true)
     try {
@@ -35,7 +31,7 @@ export default function CeoBankAccountsView() {
           .order('entry_date', { ascending: false })
 
         if (balanceError) throw balanceError
-        const grouped = {}
+        const grouped = {};
         (balanceData || []).forEach((row) => {
           if (!grouped[row.account_code]) grouped[row.account_code] = row.running_balance
         })
@@ -49,13 +45,17 @@ export default function CeoBankAccountsView() {
     }
   }
 
+  useEffect(() => {
+    loadAccounts()
+  }, [])
+
   const rows = useMemo(() => accounts.map((account) => ({
     ...account,
     gl_balance: account.gl_account_code ? balances[account.gl_account_code] ?? 0 : null,
   })), [accounts, balances])
 
   return (
-    <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-6 shadow-xl shadow-black/10">
+    <div className="rounded-4xl border border-border-soft bg-surface-overlay p-6 shadow-xl shadow-black/10">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Bank overview</p>
@@ -85,7 +85,7 @@ export default function CeoBankAccountsView() {
               <tr><td colSpan="6" className="p-4 text-center text-slate-400">No bank accounts registered.</td></tr>
             ) : (
               rows.map((account) => (
-                <tr key={account.id} className="border-t border-white/10">
+                <tr key={account.id} className="border-t border-border-soft">
                   <td className="px-3 py-3 text-slate-200">{account.account_name}</td>
                   <td className="px-3 py-3 text-slate-200">{account.bank_name}</td>
                   <td className="px-3 py-3 text-slate-200">{maskAccountNumber(account.account_number)}</td>

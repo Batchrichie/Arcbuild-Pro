@@ -17,15 +17,26 @@ export function ThemeProvider({ children }) {
   // Use layout effect so the body class update runs before paint,
   // preventing a flash between themes on reload.
   useLayoutEffect(() => {
+    const root = document.documentElement
+    root.classList.add('theme-switching')
+    root.classList.toggle('theme-light', theme === 'light')
+    root.classList.toggle('theme-dark', theme === 'dark')
+    root.classList.toggle('dark', theme === 'dark')
     document.body.classList.toggle('theme-light', theme === 'light')
     document.body.classList.toggle('theme-dark', theme === 'dark')
-    document.body.classList.toggle('dark', theme === 'dark')
-    document.documentElement.classList.toggle('dark', theme === 'dark')
+    root.dataset.theme = theme
+
+    const frameId = requestAnimationFrame(() => {
+      root.classList.remove('theme-switching')
+    })
+
     try {
       window.localStorage.setItem('arcbuild_theme', theme)
     } catch {
       // ignore
     }
+
+    return () => cancelAnimationFrame(frameId)
   }, [theme])
 
   const value = useMemo(

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from './ui/Modal'
 import { supabase } from '../lib/supabase';
 
@@ -199,7 +199,6 @@ export default function MilestoneManager({
     }
   };
 
-  const selectedProject = projects.find((p) => p.id === selectedProjectId);
   const visibleMilestones = inProgressOnly
     ? milestones.filter((m) => m.status === 'in_progress')
     : milestones;
@@ -207,7 +206,7 @@ export default function MilestoneManager({
   return (
     <div className="space-y-6">
       {/* Header & Project Selector */}
-      <div className="rounded-4xl border border-white/10 bg-slate-950 p-6">
+      <div className="rounded-4xl border border-border-soft bg-slate-950 p-6">
         <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
           <div>
             <h2 className="text-2xl font-semibold text-white">Milestone Manager</h2>
@@ -237,7 +236,7 @@ export default function MilestoneManager({
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
               disabled={loading}
-              className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:bg-slate-800"
+              className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:bg-slate-800"
             >
               <option value="">Choose a project</option>
               {projects.map((project) => (
@@ -264,7 +263,7 @@ export default function MilestoneManager({
                     setAddFormData((prev) => ({ ...prev, title: e.target.value }))
                   }
                   placeholder="e.g., Foundation Complete"
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="w-full rounded-2xl border border-border-soft bg-slate-900 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 />
               </div>
               <div>
@@ -275,7 +274,7 @@ export default function MilestoneManager({
                   onChange={(e) =>
                     setAddFormData((prev) => ({ ...prev, dueDate: e.target.value }))
                   }
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 />
               </div>
             </div>
@@ -288,7 +287,7 @@ export default function MilestoneManager({
                 }
                 placeholder="Milestone description..."
                 rows="2"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="w-full rounded-2xl border border-border-soft bg-slate-900 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -305,7 +304,7 @@ export default function MilestoneManager({
                     setAddFormData((prev) => ({ ...prev, percentageComplete: e.target.value }))
                   }
                   placeholder="0-100"
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="w-full rounded-2xl border border-border-soft bg-slate-900 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 />
               </div>
               <div>
@@ -338,7 +337,7 @@ export default function MilestoneManager({
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="min-touch rounded-2xl border border-white/10 bg-slate-900 px-5 py-3 text-sm font-medium text-slate-200 hover:bg-slate-900/80"
+                className="min-touch rounded-2xl border border-border-soft bg-slate-900 px-5 py-3 text-sm font-medium text-slate-200 hover:bg-slate-900/80"
               >
                 Cancel
               </button>
@@ -358,7 +357,7 @@ export default function MilestoneManager({
             visibleMilestones.map((milestone) => (
               <div
                 key={milestone.id}
-                className="rounded-4xl border border-white/10 bg-slate-950 p-6 shadow-sm transition-shadow hover:border-cyan-400/30"
+                className="rounded-4xl border border-border-soft bg-slate-950 p-6 shadow-sm transition-shadow hover:border-cyan-400/30"
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Left: Title & Description */}

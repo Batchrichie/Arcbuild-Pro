@@ -44,19 +44,6 @@ export default function ManagementReports() {
   // Budget vs actual
   const [budgetRows, setBudgetRows] = useState([])
 
-  useEffect(() => {
-    if (activeTab === 'Revenue by Division') {
-      loadIncome()
-    }
-  }, [activeTab, year])
-
-  useEffect(() => {
-    if (activeTab === 'Project Profitability') loadProjects()
-    if (activeTab === 'Aged Payables') loadPayables()
-    if (activeTab === 'Employee Cost') loadEmployeeCosts()
-    if (activeTab === 'Budget vs Actual') loadBudget()
-  }, [activeTab])
-
   async function loadIncome() {
     const start = `${year}-01-01`
     const end = `${year}-12-31`
@@ -116,7 +103,7 @@ export default function ManagementReports() {
     if (error) return console.warn(error)
     // aggregate actuals
     const { data: actuals } = await supabase.from('project_costs').select('cost_category,amount')
-    const actualMap = {}
+    const actualMap = {};
     (actuals||[]).forEach(a=>{ actualMap[a.cost_category] = (actualMap[a.cost_category]||0)+Number(a.amount||0) })
     const rows = (data||[]).map(b=>({
       cost_category: b.cost_category,
@@ -127,6 +114,19 @@ export default function ManagementReports() {
     }))
     setBudgetRows(rows)
   }
+
+  useEffect(() => {
+    if (activeTab === 'Revenue by Division') {
+      loadIncome()
+    }
+  }, [activeTab, year])
+
+  useEffect(() => {
+    if (activeTab === 'Project Profitability') loadProjects()
+    if (activeTab === 'Aged Payables') loadPayables()
+    if (activeTab === 'Employee Cost') loadEmployeeCosts()
+    if (activeTab === 'Budget vs Actual') loadBudget()
+  }, [activeTab])
 
   const revenueChartData = useMemo(() => {
     // pivot by month and division
@@ -195,7 +195,6 @@ export default function ManagementReports() {
                     return (<tr key={div}><td>{div}</td>{monthly.map((m,idx)=><td key={idx} className="text-right">{formatGhs(m)}</td>)}<td className="text-right font-semibold">{formatGhs(ytd)}</td></tr>)
                   })}
                   <tr className="border-t text-slate-200"><td className="font-semibold">Totals</td>{Array.from({length:12}).map((_,i)=>{
-                    const tot = revenueChartData.reduce((s,d)=>s+Number(d[Object.keys(d).find(k=>k!=='month')||'']||0),0)
                     return <td key={i} className="text-right">{formatGhs(0)}</td>
                   })}<td className="text-right font-semibold">{formatGhs(incomeRows.reduce((s,r)=>s+Number(r.amount||0),0))}</td></tr>
                 </tbody>

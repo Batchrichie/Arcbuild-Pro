@@ -27,7 +27,7 @@ export default function TaxLiabilitiesPanel({ balances, loading }) {
 
   if (loading) {
     return (
-      <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-5">
+      <div className="rounded-3xl panel-surface p-5">
         <div className="h-40 animate-pulse rounded-xl bg-white/5" />
       </div>
     )

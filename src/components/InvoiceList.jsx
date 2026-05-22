@@ -15,15 +15,6 @@ const STATUS_OPTIONS = [
   { value: 'rejected', label: 'Rejected' },
 ]
 
-const STATUS_BADGES = {
-  draft: 'bg-slate-100 text-slate-800',
-  pending_approval: 'bg-amber-100 text-amber-800',
-  approved: 'bg-blue-100 text-blue-800',
-  sent: 'bg-indigo-100 text-indigo-800',
-  paid: 'bg-emerald-100 text-emerald-800',
-  rejected: 'bg-red-100 text-red-800',
-}
-
 export default function InvoiceList() {
   const { user } = useAuth()
   const [invoices, setInvoices] = useState([])
@@ -49,10 +40,6 @@ export default function InvoiceList() {
     })
     return [{ value: 'all', label: 'All divisions' }, ...Array.from(unique, ([value, label]) => ({ value, label }))]
   }, [invoices])
-
-  useEffect(() => {
-    fetchInvoices()
-  }, [statusFilter, divisionFilter, dateFrom, dateTo])
 
   const fetchInvoices = async () => {
     setLoading(true)
@@ -118,6 +105,10 @@ export default function InvoiceList() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchInvoices()
+  }, [statusFilter, divisionFilter, dateFrom, dateTo])
 
   const updateInvoiceStatus = async (invoice, newStatus, rejectionReason = null) => {
     if (!user?.id) {
@@ -258,7 +249,7 @@ export default function InvoiceList() {
           </button>
         </div>
       )}
-      <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] px-6 py-6 shadow-xl shadow-black/10">
+      <div className="rounded-4xl panel-surface px-6 py-6 shadow-xl shadow-black/10">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <label className="space-y-2 text-sm text-slate-300">
@@ -266,7 +257,7 @@ export default function InvoiceList() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                className="w-full rounded-2xl border border-border-soft bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
               >
                 {STATUS_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -281,7 +272,7 @@ export default function InvoiceList() {
               <select
                 value={divisionFilter}
                 onChange={(e) => setDivisionFilter(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                className="w-full rounded-2xl border border-border-soft bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
               >
                 {divisionOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -297,7 +288,7 @@ export default function InvoiceList() {
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                className="w-full rounded-2xl border border-border-soft bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
               />
             </label>
 
@@ -307,7 +298,7 @@ export default function InvoiceList() {
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                className="w-full rounded-2xl border border-border-soft bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
               />
             </label>
           </div>
@@ -320,7 +311,7 @@ export default function InvoiceList() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-xl shadow-black/10">
+      <div className="overflow-hidden rounded-4xl panel-surface shadow-xl shadow-black/10">
         <div className="portal-table-scroll">
           <table className="min-w-full dark-table text-sm text-slate-200">
             <thead>
@@ -350,7 +341,7 @@ export default function InvoiceList() {
                 </tr>
               ) : (
                 invoices.map((invoice) => (
-                  <tr key={invoice.id} className="border-t border-white/10 hover:bg-white/5">
+                  <tr key={invoice.id} className="border-t border-border-soft hover:bg-white/5">
                     <td className="px-6 py-4 text-sm text-slate-100">{invoice.invoice_number}</td>
                     <td className="px-6 py-4 text-sm text-slate-100">{invoice.client?.name || 'Unknown'}</td>
                     <td className="px-6 py-4 text-sm text-slate-100">{invoice.project?.name || 'Unassigned'}</td>
@@ -451,7 +442,7 @@ export default function InvoiceList() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4">
+            <div className="rounded-3xl border border-border-soft bg-slate-950/80 p-4">
               <div className="grid gap-4 sm:grid-cols-3 text-sm text-slate-300">
                 <div>
                   <div className="uppercase tracking-[0.2em]">Amount</div>
@@ -468,8 +459,8 @@ export default function InvoiceList() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-slate-950/80 overflow-hidden">
-              <div className="border-b border-white/10 bg-slate-900/80 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-200">Line items</div>
+            <div className="rounded-3xl border border-border-soft bg-slate-950/80 overflow-hidden">
+              <div className="border-b border-border-soft bg-slate-900/80 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-200">Line items</div>
               <div className="divide-y divide-white/10">
                 <div className="grid gap-4 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-400 sm:grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr]">
                   <div>Description</div>
@@ -477,8 +468,8 @@ export default function InvoiceList() {
                   <div className="text-right">Unit price</div>
                   <div className="text-right">Amount</div>
                 </div>
-                {(selectedInvoice.lineItems || []).map((item) => (
-                  <div key={item.id || `${item.description}-${Math.random()}`} className="grid gap-4 px-4 py-4 text-sm text-slate-200 sm:grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr]">
+                {(selectedInvoice.lineItems || []).map((item, index) => (
+                  <div key={item.id || `${item.description || 'line'}-${index}`} className="grid gap-4 px-4 py-4 text-sm text-slate-200 sm:grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr]">
                     <div>{item.description || '—'}</div>
                     <div className="text-right">{item.quantity}</div>
                     <div className="text-right">{new Intl.NumberFormat('en-US', { style: 'currency', currency: selectedInvoice.currency || 'GHS', minimumFractionDigits: 2 }).format(Number(item.unit_price || 0))}</div>

@@ -47,17 +47,17 @@ function ClientPortalContent() {
       // Client portal defaults to light theme
       setTheme('light')
       return () => { setTheme('dark') }
-    } catch {}
+    } catch { /* best effort */ }
   }, [setTheme])
 
   useEffect(() => {
-    try { document.title = `${COMPANY.appName} — Client` } catch {}
+    try { document.title = `${COMPANY.appName} — Client` } catch { /* best effort */ }
   }, [])
 
   return (
-    <div className="client-portal min-h-screen bg-slate-50 text-slate-900">
+    <div className="portal-shell min-h-screen w-full overflow-x-hidden bg-slate-50 text-slate-900">
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3">
             <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-xl object-cover" />
             <div className="hidden sm:block">
@@ -137,7 +137,7 @@ function ClientPortalContent() {
         </>
       )}
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <main className="w-full min-w-0 overflow-x-hidden pb-24 lg:pb-0 px-4 py-8 sm:px-6 lg:px-8">
         {loading ? (
           <div className="h-48 animate-pulse rounded-2xl bg-slate-200" />
         ) : (

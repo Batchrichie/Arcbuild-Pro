@@ -92,7 +92,7 @@ export default function ClientDetail({ clientId: clientIdProp, onBack }) {
           ['Payment Terms',   `${client.payment_terms ?? 30} days`],
           ['Credit Limit',    fmt(client.credit_limit)],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <div key={label} className="rounded-xl border border-border-soft bg-white/5 p-4">
             <div className="text-xs uppercase tracking-widest text-slate-500">{label}</div>
             <div className="mt-1 text-sm text-white">{value}</div>
           </div>
@@ -100,7 +100,7 @@ export default function ClientDetail({ clientId: clientIdProp, onBack }) {
       </div>
 
       {ageing && (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-3">
+        <div className="rounded-2xl border border-border-soft bg-white/5 p-5 space-y-3">
           <h2 className="text-sm font-semibold text-white uppercase tracking-widest">Aged Receivables</h2>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {[
@@ -110,7 +110,7 @@ export default function ClientDetail({ clientId: clientIdProp, onBack }) {
               ['61–90 days',ageing.days_61_90],
               ['90+ days',  ageing.days_90_plus],
             ].map(([label, value]) => (
-              <div key={label} className="rounded-xl border border-white/10 bg-white/5 p-3 text-center">
+              <div key={label} className="rounded-xl border border-border-soft bg-white/5 p-3 text-center">
                 <div className="text-xs text-slate-500">{label}</div>
                 <div className="mt-1 text-sm font-semibold text-white">{fmt(value)}</div>
               </div>
@@ -122,9 +122,9 @@ export default function ClientDetail({ clientId: clientIdProp, onBack }) {
 
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-white uppercase tracking-widest">Invoices</h2>
-        <div className="overflow-x-auto rounded-2xl border border-white/10">
+        <div className="overflow-x-auto rounded-2xl border border-border-soft">
           <table className="w-full text-sm text-slate-300">
-            <thead className="border-b border-white/10 text-xs uppercase tracking-widest text-slate-500">
+            <thead className="border-b border-border-soft text-xs uppercase tracking-widest text-slate-500">
               <tr>
                 {['Invoice #','Status','Amount','Currency','Issue Date','Due Date','Payment Date'].map(h => (
                   <th key={h} className="px-4 py-3 text-left">{h}</th>
@@ -135,7 +135,7 @@ export default function ClientDetail({ clientId: clientIdProp, onBack }) {
               {invoices.length === 0 ? (
                 <tr><td colSpan={7} className="px-4 py-6 text-center text-slate-500">No invoices found.</td></tr>
               ) : invoices.map(inv => (
-                <tr key={inv.id} className="border-b border-white/5 hover:bg-white/5 transition">
+                <tr key={inv.id} className="border-b border-border-soft hover:bg-white/5 transition">
                   <td className="px-4 py-3 font-medium text-white">{inv.invoice_number}</td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${INVOICE_STATUS_STYLE[inv.status] ?? ''}`}>
@@ -155,7 +155,7 @@ export default function ClientDetail({ clientId: clientIdProp, onBack }) {
       </div>
 
       {client.notes && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+        <div className="rounded-xl border border-border-soft bg-white/5 p-4">
           <div className="text-xs uppercase tracking-widest text-slate-500 mb-2">Notes</div>
           <p className="text-sm text-slate-300 whitespace-pre-wrap">{client.notes}</p>
         </div>

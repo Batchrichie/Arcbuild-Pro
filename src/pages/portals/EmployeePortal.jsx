@@ -36,7 +36,7 @@ function EmployeePortalContent() {
   const [leaveOpen, setLeaveOpen] = useState(false)
   const [timesheetOpen, setTimesheetOpen] = useState(false)
   useEffect(() => {
-    try { document.title = `${COMPANY.appName} — Employee` } catch {}
+    try { document.title = `${COMPANY.appName} — Employee` } catch { /* best effort */ }
   }, [])
 
   const goPayslip = (line) => {
@@ -78,10 +78,10 @@ function EmployeePortalContent() {
   }
 
   return (
-    <div className="portal-shell overflow-x-hidden">
-      <div className="mx-auto max-w-3xl px-4 py-6 lg:max-w-6xl lg:py-8">
-        <div className="grid gap-6 lg:grid-cols-[200px_minmax(0,1fr)]">
-          <aside className="portal-sidebar hidden rounded-3xl border border-white/10 p-4 lg:block">
+    <div className="portal-shell min-h-screen w-full overflow-x-hidden">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+          <aside className="portal-sidebar hidden lg:flex lg:flex-col rounded-3xl border border-border-soft p-4">
             <p className="portal-eyebrow text-slate-500">Employee</p>
             <p className="mt-1 truncate font-semibold text-white">{profile?.full_name}</p>
             <nav className="mt-6 space-y-1">
@@ -98,26 +98,28 @@ function EmployeePortalContent() {
                 </button>
               ))}
             </nav>
-            <button type="button" onClick={signOut} className="mt-6 w-full rounded-full border border-white/10 py-2.5 text-sm text-slate-400">
+            <button type="button" onClick={signOut} className="mt-6 w-full rounded-full border border-border-soft py-2.5 text-sm text-slate-400">
               Sign out
             </button>
           </aside>
 
-          <main className="portal-main portal-employee-main min-w-0">
-            <div className="mb-4 flex flex-col gap-3 lg:hidden">
-              <div className="flex items-center justify-between">
-                <h1 className="text-xl font-semibold text-white">{TITLES[tab]}</h1>
-                <button type="button" onClick={signOut} className="text-sm text-slate-400">Sign out</button>
+          <main className="portal-main portal-employee-main min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3 lg:hidden">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl sm:text-2xl font-semibold text-white truncate">{TITLES[tab]}</h1>
               </div>
-              <ThemeToggle className="self-start" />
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button type="button" onClick={signOut} className="text-sm text-slate-400">Sign out</button>
+                <ThemeToggle className="self-start" />
+              </div>
             </div>
-            <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">{render()}</div>
+            <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">{render()}</div>
           </main>
         </div>
       </div>
 
       <nav className="portal-mobile-nav" aria-label="Employee navigation">
-        <div className="mx-auto flex max-w-lg justify-around px-0.5">
+        <div className="mx-auto flex max-w-lg justify-around px-1">
           {TABS.map((t) => (
             <button
               key={t.id}

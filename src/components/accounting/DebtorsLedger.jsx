@@ -241,22 +241,22 @@ export default function DebtorsLedger({ readOnly = false }) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+      <div className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Debtors Ledger</p>
             <h2 className="mt-2 text-2xl font-semibold text-white">Aged Receivables Summary</h2>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={exportSummary} className="min-touch rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200">Export Aged Receivables</button>
-            <button type="button" onClick={exportFullLedger} className="min-touch rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200">Export Full Debtors Ledger</button>
+            <button type="button" onClick={exportSummary} className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200">Export Aged Receivables</button>
+            <button type="button" onClick={exportFullLedger} className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200">Export Full Debtors Ledger</button>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-5">
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Client</span>
-            <select value={filters.clientId} onChange={(e) => handleFilterChange('clientId', e.target.value)} className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white">
+            <select value={filters.clientId} onChange={(e) => handleFilterChange('clientId', e.target.value)} className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white">
               <option value="">All clients</option>
               {clients.map((client) => (
                 <option key={client.id} value={client.id}>{client.name}</option>
@@ -265,7 +265,7 @@ export default function DebtorsLedger({ readOnly = false }) {
           </label>
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Division</span>
-            <select value={filters.division} onChange={(e) => handleFilterChange('division', e.target.value)} className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white">
+            <select value={filters.division} onChange={(e) => handleFilterChange('division', e.target.value)} className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white">
               <option value="">All divisions</option>
               {DIVISIONS.map((division) => (
                 <option key={division} value={division}>{division}</option>
@@ -274,7 +274,7 @@ export default function DebtorsLedger({ readOnly = false }) {
           </label>
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Status</span>
-            <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white">
+            <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white">
               {STATUS_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
@@ -282,20 +282,20 @@ export default function DebtorsLedger({ readOnly = false }) {
           </label>
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-[0.2em] text-slate-400">From</span>
-            <input type="date" value={filters.from} onChange={(e) => handleFilterChange('from', e.target.value)} className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white" />
+            <input type="date" value={filters.from} onChange={(e) => handleFilterChange('from', e.target.value)} className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white" />
           </label>
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-[0.2em] text-slate-400">To</span>
-            <input type="date" value={filters.to} onChange={(e) => handleFilterChange('to', e.target.value)} className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white" />
+            <input type="date" value={filters.to} onChange={(e) => handleFilterChange('to', e.target.value)} className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white" />
           </label>
         </div>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-slate-400">{summary.length} client(s) shown</p>
-          <button type="button" onClick={resetFilters} className="min-touch rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200">Reset Filters</button>
+          <button type="button" onClick={resetFilters} className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200">Reset Filters</button>
         </div>
 
-        <div className="mt-6 portal-table-scroll overflow-x-auto rounded-3xl border border-white/10 bg-slate-950/80">
+        <div className="mt-6 portal-table-scroll overflow-x-auto rounded-3xl border border-border-soft bg-slate-950/80">
           <table className="min-w-full text-sm">
             <thead>
               <tr className="text-left text-xs uppercase tracking-[0.24em] text-slate-500">
@@ -318,7 +318,7 @@ export default function DebtorsLedger({ readOnly = false }) {
                 <tr><td colSpan={10} className="p-4 text-slate-400">No data</td></tr>
               ) : (
                 summary.map((c) => (
-                  <tr key={c.client_id} className="border-t border-white/10 hover:bg-white/5 cursor-pointer" onClick={() => handleExpand(c.client_id)}>
+                  <tr key={c.client_id} className="border-t border-border-soft hover:bg-white/5 cursor-pointer" onClick={() => handleExpand(c.client_id)}>
                     <td className="px-3 py-3 text-slate-200">{c.client_name}</td>
                     <td className="px-3 py-3 text-slate-200">{c.client_type}</td>
                     <td className="px-3 py-3 text-right text-slate-200">{formatGhs(c.total_invoiced_ghs)}</td>
@@ -335,7 +335,7 @@ export default function DebtorsLedger({ readOnly = false }) {
             </tbody>
             {summary.length > 0 && (
               <tfoot>
-                <tr className="border-t border-white/10 bg-white/5 text-slate-300">
+                <tr className="border-t border-border-soft bg-white/5 text-slate-300">
                   <td className="px-3 py-3 font-semibold">Totals</td>
                   <td className="px-3 py-3" />
                   <td className="px-3 py-3 text-right font-semibold">{formatGhs(summaryTotals.total_invoiced_ghs)}</td>
@@ -354,16 +354,16 @@ export default function DebtorsLedger({ readOnly = false }) {
       </div>
 
       {expandedClient && (
-        <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+        <div className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-white">Transactions — {summary.find((s) => s.client_id === expandedClient)?.client_name}</h3>
               <p className="text-sm text-slate-400">Running balance shown on the right</p>
             </div>
-            <button type="button" onClick={() => setExpandedClient(null)} className="min-touch rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300">Close</button>
+            <button type="button" onClick={() => setExpandedClient(null)} className="min-touch rounded-full border border-border-soft px-4 py-2 text-sm text-slate-300">Close</button>
           </div>
 
-          <div className="mt-4 portal-table-scroll overflow-x-auto rounded-3xl border border-white/10 bg-slate-950/80">
+          <div className="mt-4 portal-table-scroll overflow-x-auto rounded-3xl border border-border-soft bg-slate-950/80">
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-[0.24em] text-slate-500">
@@ -394,7 +394,7 @@ export default function DebtorsLedger({ readOnly = false }) {
                     const overdue = Number(r.days_overdue || 0)
                     const rowClass = r.invoice_status === 'paid' ? 'bg-emerald-900/40 text-emerald-200' : overdue > 30 ? 'bg-rose-900/30 text-rose-200' : overdue > 0 ? 'bg-amber-900/20 text-amber-200' : ''
                     return (
-                      <tr key={r.invoice_id} className={`border-t border-white/10 ${rowClass}`}>
+                      <tr key={r.invoice_id} className={`border-t border-border-soft ${rowClass}`}>
                         <td className="px-3 py-3 text-slate-200">{r.transaction_date}</td>
                         <td className="px-3 py-3 text-slate-200">{r.invoice_number}</td>
                         <td className="px-3 py-3 text-slate-200">{r.project_name || '—'}</td>
@@ -410,7 +410,7 @@ export default function DebtorsLedger({ readOnly = false }) {
                         <td className="px-3 py-3 text-slate-200">{r.invoice_status}</td>
                         <td className="px-3 py-3">
                           {!readOnly && r.days_overdue > 0 && (
-                            <button type="button" onClick={() => alert('Send Reminder stub for ' + r.invoice_number)} className="min-touch rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-200">Send Reminder</button>
+                            <button type="button" onClick={() => alert('Send Reminder stub for ' + r.invoice_number)} className="min-touch rounded-full border border-border-soft bg-white/5 px-3 py-2 text-xs text-slate-200">Send Reminder</button>
                           )}
                         </td>
                       </tr>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 const SIZE_CLASSES = {
@@ -36,7 +36,7 @@ export default function Modal({ open, onClose, title, size = 'md', children, foo
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative z-10 w-full ${SIZE_CLASSES[size] || SIZE_CLASSES.md} max-h-[95vh] overflow-y-auto rounded-[2rem] border border-white/10 bg-slate-950 shadow-2xl shadow-black/40 ${className}`}
+        className={`relative z-10 w-full ${SIZE_CLASSES[size] || SIZE_CLASSES.md} max-h-[95vh] overflow-y-auto rounded-[2rem] border border-border-soft bg-slate-950 shadow-2xl shadow-black/40 ${className}`}
       >
         <div className="flex flex-col gap-4 p-6 sm:p-8">
           <div className="flex items-start justify-between gap-4">
@@ -46,7 +46,7 @@ export default function Modal({ open, onClose, title, size = 'md', children, foo
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 transition hover:bg-white/10"
+              className="rounded-full border border-border-soft bg-white/5 px-3 py-2 text-sm text-slate-200 transition hover:bg-white/10"
             >
               Close
             </button>
@@ -54,7 +54,7 @@ export default function Modal({ open, onClose, title, size = 'md', children, foo
 
           <div className="space-y-6">{children}</div>
 
-          {footer && <div className="mt-2 border-t border-white/10 pt-4">{footer}</div>}
+          {footer && <div className="mt-2 border-t border-border-soft pt-4">{footer}</div>}
         </div>
       </div>
     </div>,

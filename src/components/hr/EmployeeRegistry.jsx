@@ -10,7 +10,7 @@ const EMPTY = {
   bank_account: '', is_ssnit_exempt: false, is_paye_exempt: false, send_invite: true,
 }
 
-const cls = 'w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white'
+const cls = 'w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white'
 
 export default function EmployeeRegistry() {
   const [rows, setRows] = useState([])
@@ -167,15 +167,15 @@ export default function EmployeeRegistry() {
         <button type="button" onClick={() => { setWizard(true); setStep(0) }} className="rounded-full bg-violet-500 px-5 py-2.5 text-sm font-semibold text-white">Add Employee</button>
       </div>
       {loading ? <div className="h-40 animate-pulse rounded-2xl bg-white/5" /> : (
-        <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-white/10">
+        <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-border-soft">
           <table className="w-full min-w-[880px] text-sm">
-            <thead><tr className="border-b border-white/10 text-left text-xs uppercase text-slate-500">
+            <thead><tr className="border-b border-border-soft text-left text-xs uppercase text-slate-500">
               <th className="px-3 py-3">#</th><th className="px-3 py-3">Name</th><th className="px-3 py-3">Title</th>
               <th className="px-3 py-3">Dept</th><th className="px-3 py-3">Division</th><th className="px-3 py-3">Basic</th>
               <th className="px-3 py-3">Contract</th><th className="px-3 py-3">Hired</th><th className="px-3 py-3">Status</th>
             </tr></thead>
             <tbody>{filtered.map((r) => (
-              <tr key={r.id} onClick={() => openDetail(r)} className="cursor-pointer border-b border-white/5 hover:bg-white/5">
+              <tr key={r.id} onClick={() => openDetail(r)} className="cursor-pointer border-b border-border-soft hover:bg-white/5">
                 <td className="px-3 py-3 text-slate-400">{r.employee_number}</td>
                 <td className="px-3 py-3 text-white">{r.profiles?.full_name}</td>
                 <td className="px-3 py-3 text-slate-400">{r.job_title ?? '—'}</td>
@@ -196,7 +196,7 @@ export default function EmployeeRegistry() {
             <button
               type="button"
               onClick={() => setStep(step - 1)}
-              className="rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300"
+              className="rounded-full border border-border-soft px-4 py-2 text-sm text-slate-300"
             >
               Back
             </button>

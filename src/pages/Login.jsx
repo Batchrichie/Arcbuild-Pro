@@ -53,7 +53,7 @@ export default function Login() {
       const destination = ROLE_ROUTES[profile.role] ?? '/unauthorized'
       navigate(destination, { replace: true })
 
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred. Please try again.')
       setLoading(false)
     }

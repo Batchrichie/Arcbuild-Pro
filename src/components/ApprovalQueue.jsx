@@ -188,7 +188,7 @@ export default function ApprovalQueue() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-white/10 bg-(--color-surface) px-6 py-6 shadow-xl shadow-black/10">
+      <div className="rounded-3xl border border-border-soft bg-surface px-6 py-6 shadow-xl shadow-black/10">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-white">Pending Approvals</h1>
@@ -196,20 +196,20 @@ export default function ApprovalQueue() {
               {profile?.full_name ?? 'CEO'} portal — {pendingCount} invoice(s) waiting review.
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-[rgba(29,158,117,0.12)] px-4 py-2 text-sm font-semibold text-(--color-success)">
-            <span className="inline-flex h-2.5 w-2.5 rounded-full bg-(--color-success)" />
+          <div className="inline-flex items-center gap-2 rounded-full bg-success-bg px-4 py-2 text-sm font-semibold text-success">
+            <span className="inline-flex h-2.5 w-2.5 rounded-full bg-success" />
             {pendingCount} pending approval
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-3xl border border-(--color-danger)/20 bg-[rgba(226,75,74,0.08)] px-4 py-3 text-sm text-(--color-danger)">
+        <div className="rounded-3xl border border-danger/20 bg-danger-bg px-4 py-3 text-sm text-danger">
           {error}
         </div>
       )}
 
-      <div className="overflow-hidden rounded-3xl border border-white/10 bg-(--color-surface-2) shadow-xl shadow-black/10">
+      <div className="overflow-hidden rounded-3xl border border-border-soft bg-surface-2 shadow-xl shadow-black/10">
         <div className="overflow-x-auto">
           <table className="min-w-full dark-table text-sm text-slate-200">
             <thead>
@@ -234,8 +234,8 @@ export default function ApprovalQueue() {
               ) : invoices.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="px-6 py-10">
-                    <div className="mx-auto flex max-w-xl flex-col items-center justify-center gap-4 rounded-3xl border border-(--color-success)/20 bg-[rgba(29,158,117,0.08)] px-6 py-10 text-center text-slate-200">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-(--color-success)/20 text-(--color-success)">
+                    <div className="mx-auto flex max-w-xl flex-col items-center justify-center gap-4 rounded-3xl border border-success/20 bg-success-bg px-6 py-10 text-center text-slate-200">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-success/20 text-success">
                         ✓
                       </div>
                       <p className="text-lg font-semibold">All approvals are clear</p>
@@ -245,7 +245,7 @@ export default function ApprovalQueue() {
                 </tr>
               ) : (
                 invoices.map((invoice) => (
-                  <tr key={invoice.id} className="border-t border-white/5 hover:bg-[rgba(255,255,255,0.04)]">
+                  <tr key={invoice.id} className="border-t border-border-soft hover:bg-surface-overlay">
                     <td className="px-6 py-4 text-sm text-slate-200">{invoice.invoice_number}</td>
                     <td className="px-6 py-4 text-sm text-slate-200">{invoice.client?.name || 'Unknown'}</td>
                     <td className="px-6 py-4 text-sm text-slate-200">{invoice.project?.name || 'Unassigned'}</td>
@@ -261,14 +261,14 @@ export default function ApprovalQueue() {
                         <button
                           type="button"
                           onClick={() => handleApprove(invoice)}
-                          className="min-touch rounded-full bg-(--color-success) px-4 py-2 text-sm font-semibold text-white hover:bg-[#17915c]"
+                          className="min-touch rounded-full bg-success px-4 py-2 text-sm font-semibold text-white hover:bg-success/90"
                         >
                           Approve
                         </button>
                         <button
                           type="button"
                           onClick={() => openRejectModal(invoice)}
-                          className="min-touch rounded-full bg-(--color-danger) px-4 py-2 text-sm font-semibold text-white hover:bg-[#c03e3a]"
+                          className="min-touch rounded-full bg-danger px-4 py-2 text-sm font-semibold text-white hover:bg-danger/90"
                         >
                           Reject
                         </button>
@@ -284,8 +284,8 @@ export default function ApprovalQueue() {
 
       {selectedInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-slate-950 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+          <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-border-soft bg-slate-950 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border-soft px-6 py-4">
               <div>
                 <h2 className="text-xl font-semibold text-white">Reject Invoice</h2>
                 <p className="text-sm text-slate-400">{selectedInvoice.invoice_number}</p>
@@ -293,7 +293,7 @@ export default function ApprovalQueue() {
               <button
                 type="button"
                 onClick={closeRejectModal}
-                className="rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:bg-white/5"
+                className="rounded-full border border-border-soft px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:bg-white/5"
               >
                 Close
               </button>
@@ -310,7 +310,7 @@ export default function ApprovalQueue() {
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
                   rows="5"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-red-400/50 focus:bg-white/10 outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-red-400/50 focus:bg-white/10 outline-none"
                 />
               </label>
 
@@ -320,11 +320,11 @@ export default function ApprovalQueue() {
                 </div>
               )}
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+              <div className="flex justify-end gap-3 pt-4 border-t border-border-soft">
                 <button
                   type="button"
                   onClick={closeRejectModal}
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10"
+                  className="rounded-xl border border-border-soft bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10"
                 >
                   Cancel
                 </button>
