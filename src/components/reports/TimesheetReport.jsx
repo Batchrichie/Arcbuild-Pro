@@ -15,7 +15,7 @@ function downloadCsv(filename, rows) {
 
 export default function TimesheetReport() {
   const [rows, setRows] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function TimesheetReport() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6">
+      <div className="rounded-4xl border border-border-soft bg-slate-950/80 p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-white">Timesheet Summary</h2>
@@ -91,7 +91,7 @@ export default function TimesheetReport() {
 
       {error && <p className="rounded-3xl border border-rose-500/20 bg-rose-500/5 p-4 text-sm text-rose-200">{error}</p>}
 
-      <div className="overflow-x-auto rounded-4xl border border-white/10 bg-slate-950/80 p-4">
+      <div className="overflow-x-auto rounded-4xl border border-border-soft bg-slate-950/80 p-4">
         <div className="flex items-center justify-between">
           <p className="text-sm text-slate-400">Latest 200 timesheet records from the summary view.</p>
           <button

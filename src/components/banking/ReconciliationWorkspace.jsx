@@ -3,13 +3,6 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { formatGhs } from '../../lib/formatGhs'
 
-function maskAccountNumber(value) {
-  if (!value) return '—'
-  const trimmed = String(value).trim()
-  if (trimmed.length <= 4) return trimmed
-  return `${'*'.repeat(Math.max(0, trimmed.length - 4))}${trimmed.slice(-4)}`
-}
-
 export default function ReconciliationWorkspace({ onCreateJournal }) {
   const { user } = useAuth()
   const [bankAccounts, setBankAccounts] = useState([])
@@ -90,7 +83,6 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
   }, [bankTransactions, glEntries])
 
   const unmatchedBank = bankTransactions.filter((tx) => !tx.matched_ledger_entry_id && tx.match_status !== 'excluded')
-  const excludedBank = bankTransactions.filter((tx) => tx.match_status === 'excluded')
   const unmatchedGl = glEntries.filter((gl) => !matchedMap.has(gl.id))
 
   const balanceDifference = Number(statementClosingBalance || 0) - Number(glClosingBalance || 0)
@@ -189,7 +181,7 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+      <div className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Bank reconciliation</p>
@@ -206,7 +198,7 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
             <select
               value={selectedAccountId}
               onChange={(e) => setSelectedAccountId(e.target.value)}
-              className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+              className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
             >
               <option value="">Select account</option>
               {bankAccounts.map((account) => (
@@ -223,7 +215,7 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
                 type="date"
                 value={periodStart}
                 onChange={(e) => setPeriodStart(e.target.value)}
-                className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+                className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
               />
             </label>
             <label className="block text-sm text-slate-300">
@@ -232,14 +224,14 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
                 type="date"
                 value={periodEnd}
                 onChange={(e) => setPeriodEnd(e.target.value)}
-                className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+                className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
               />
             </label>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-3">
-          <div className="rounded-3xl border border-white/10 bg-slate-950 p-4">
+          <div className="rounded-3xl border border-border-soft bg-slate-950 p-4">
             <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Statement close</p>
             <p className="mt-3 text-3xl font-semibold text-white">{formatGhs(Number(statementClosingBalance) || 0)}</p>
             <input
@@ -247,15 +239,15 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
               step="0.01"
               value={statementClosingBalance}
               onChange={(e) => setStatementClosingBalance(e.target.value)}
-              className="mt-4 w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+              className="mt-4 w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
               placeholder="Closing balance"
             />
           </div>
-          <div className="rounded-3xl border border-white/10 bg-slate-950 p-4">
+          <div className="rounded-3xl border border-border-soft bg-slate-950 p-4">
             <p className="text-sm uppercase tracking-[0.18em] text-slate-500">GL closing</p>
             <p className="mt-3 text-3xl font-semibold text-white">{formatGhs(glClosingBalance)}</p>
           </div>
-          <div className="rounded-3xl border border-white/10 bg-slate-950 p-4">
+          <div className="rounded-3xl border border-border-soft bg-slate-950 p-4">
             <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Difference</p>
             <p className={`mt-3 text-3xl font-semibold ${completionReady ? 'text-emerald-300' : 'text-rose-300'}`}>
               {formatGhs(balanceDifference)}
@@ -275,14 +267,14 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.3fr_0.9fr]">
-        <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+        <section className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
           <h3 className="text-lg font-semibold text-white">Matched transactions</h3>
           <div className="mt-4 space-y-4">
             {matchedPairs.length === 0 ? (
               <p className="text-slate-400">No matched transactions yet.</p>
             ) : (
               matchedPairs.map((pair) => (
-                <div key={pair.bank.id} className="rounded-3xl border border-white/10 bg-slate-950 p-4">
+                <div key={pair.bank.id} className="rounded-3xl border border-border-soft bg-slate-950 p-4">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
                       <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Bank</p>
@@ -308,10 +300,10 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
           </div>
         </section>
 
-        <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+        <section className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
           <h3 className="text-lg font-semibold text-white">Unmatched items</h3>
           <div className="mt-4 grid gap-6">
-            <div className="rounded-3xl border border-white/10 bg-slate-950 p-4">
+            <div className="rounded-3xl border border-border-soft bg-slate-950 p-4">
               <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Bank statements</p>
               {unmatchedBank.length === 0 ? (
                 <p className="mt-4 text-slate-400">No unmatched bank transactions.</p>
@@ -322,7 +314,7 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
                       key={tx.id}
                       type="button"
                       onClick={() => setSelectedBankTx(tx)}
-                      className={`w-full rounded-2xl border px-4 py-3 text-left transition ${selectedBankTx?.id === tx.id ? 'border-emerald-400/40 bg-emerald-500/10' : 'border-white/10 bg-slate-900 hover:border-emerald-400/20'}`}>
+                      className={`w-full rounded-2xl border px-4 py-3 text-left transition ${selectedBankTx?.id === tx.id ? 'border-emerald-400/40 bg-emerald-500/10' : 'border-border-soft bg-slate-900 hover:border-emerald-400/20'}`}>
                       <div className="flex items-center justify-between gap-4">
                         <span>{tx.transaction_date}</span>
                         <span>{tx.debit_amount ? formatGhs(tx.debit_amount) : formatGhs(tx.credit_amount)}</span>
@@ -333,7 +325,7 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
                 </div>
               )}
               {selectedBankTx && (
-                <div className="mt-4 space-y-3 rounded-3xl border border-white/10 bg-slate-900 p-4">
+                <div className="mt-4 space-y-3 rounded-3xl border border-border-soft bg-slate-900 p-4">
                   <p className="text-sm font-semibold text-white">Selected transaction</p>
                   <p className="text-slate-300">{selectedBankTx.description}</p>
                   <div className="flex flex-wrap gap-2">
@@ -347,7 +339,7 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
                     <button
                       type="button"
                       onClick={() => setSelectedBankTx(null)}
-                      className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300"
+                      className="rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-300"
                     >
                       Clear
                     </button>
@@ -356,7 +348,7 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
               )}
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-slate-950 p-4">
+            <div className="rounded-3xl border border-border-soft bg-slate-950 p-4">
               <p className="text-sm uppercase tracking-[0.2em] text-slate-500">GL entries</p>
               {unmatchedGl.length === 0 ? (
                 <p className="mt-4 text-slate-400">No unmatched GL entries.</p>
@@ -367,7 +359,7 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
                       key={gl.id}
                       type="button"
                       onClick={() => setSelectedGlEntry(gl)}
-                      className={`w-full rounded-2xl border px-4 py-3 text-left transition ${selectedGlEntry?.id === gl.id ? 'border-emerald-400/40 bg-emerald-500/10' : 'border-white/10 bg-slate-900 hover:border-emerald-400/20'}`}>
+                      className={`w-full rounded-2xl border px-4 py-3 text-left transition ${selectedGlEntry?.id === gl.id ? 'border-emerald-400/40 bg-emerald-500/10' : 'border-border-soft bg-slate-900 hover:border-emerald-400/20'}`}>
                       <div className="flex items-center justify-between gap-4">
                         <span>{gl.account_code}</span>
                         <span>{gl.debit ? formatGhs(gl.debit) : formatGhs(gl.credit)}</span>
@@ -378,7 +370,7 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
                 </div>
               )}
               {selectedGlEntry && (
-                <div className="mt-4 space-y-3 rounded-3xl border border-white/10 bg-slate-900 p-4">
+                <div className="mt-4 space-y-3 rounded-3xl border border-border-soft bg-slate-900 p-4">
                   <p className="text-sm font-semibold text-white">Selected GL entry</p>
                   <p className="text-slate-300">{selectedGlEntry.description || 'No description'}</p>
                   <div className="flex flex-wrap gap-2">

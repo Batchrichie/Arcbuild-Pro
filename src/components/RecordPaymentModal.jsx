@@ -204,7 +204,7 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10"
+            className="rounded-xl border border-border-soft bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10"
           >
             Cancel
           </button>
@@ -227,7 +227,7 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
         )}
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4">
+          <div className="rounded-3xl border border-border-soft bg-slate-950/80 p-4">
             <div className="text-xs uppercase tracking-[0.16em] text-slate-500">Invoice</div>
             <div className="mt-3 text-lg font-semibold text-white">{activeInvoice.invoice_number || 'Untitled'}</div>
             <div className="mt-2 space-y-1 text-sm text-slate-400">
@@ -237,7 +237,7 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4">
+          <div className="rounded-3xl border border-border-soft bg-slate-950/80 p-4">
             <div className="text-xs uppercase tracking-[0.16em] text-slate-500">Due</div>
             <div className="mt-3 text-lg font-semibold text-white">
               {formatCurrency(outstandingAmount, 'GHS')}
@@ -257,7 +257,7 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
               type="text"
               value={paymentReference}
               onChange={(e) => setPaymentReference(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-slate-500 focus:border-emerald-400/50 focus:bg-white/10 outline-none"
+              className="w-full rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-white placeholder-slate-500 focus:border-emerald-400/50 focus:bg-white/10 outline-none"
               placeholder="Enter payment reference"
             />
           </label>
@@ -268,7 +268,7 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
               type="date"
               value={paymentDate}
               onChange={(e) => setPaymentDate(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white outline-none"
+              className="w-full rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-white outline-none"
             />
           </label>
 
@@ -277,7 +277,7 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
             <select
               value={paymentAccountCode}
               onChange={(e) => setPaymentAccountCode(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white focus:border-emerald-400/50 focus:bg-white/10 outline-none"
+              className="w-full rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-white focus:border-emerald-400/50 focus:bg-white/10 outline-none"
             >
               <option value="">Select cash or bank account</option>
               {paymentAccounts.map((account) => (
@@ -296,13 +296,13 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
               step="0.01"
               value={amountReceived}
               onChange={(e) => setAmountReceived(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-slate-500 focus:border-emerald-400/50 focus:bg-white/10 outline-none"
+              className="w-full rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-white placeholder-slate-500 focus:border-emerald-400/50 focus:bg-white/10 outline-none"
             />
           </label>
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
             <div className="text-xs uppercase tracking-[0.16em] text-slate-400">Invoice Currency</div>
             <div className="mt-2 text-lg font-semibold text-white">{invoiceCurrency}</div>
             {invoiceCurrency !== 'GHS' && (
@@ -312,12 +312,12 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
             )}
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
             <div className="text-xs uppercase tracking-[0.16em] text-slate-400">Target GHS Receipt</div>
             <div className="mt-2 text-lg font-semibold text-white">{formatCurrency(expectedReceiptGhs, 'GHS')}</div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
             <div className="text-xs uppercase tracking-[0.16em] text-slate-400">Outstanding</div>
             <div className="mt-2 text-lg font-semibold text-white">{formatCurrency(outstandingAmount, 'GHS')}</div>
             <div className="mt-1 text-sm text-slate-400">This invoice will be marked paid after recording.</div>
@@ -341,14 +341,14 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
           )}
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4">
+        <div className="rounded-3xl border border-border-soft bg-slate-950/80 p-4">
           <div className="text-sm font-medium text-slate-200">General Ledger Preview</div>
           <div className="mt-4 space-y-3 text-sm text-slate-300">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="flex items-center justify-between border-b border-border-soft pb-3">
               <span>Debit: Payment Account</span>
               <span>{formatCurrency(amountReceived, 'GHS')}</span>
             </div>
-            <div className="flex items-center justify-between border-b border-white/10 pb-3 pt-3">
+            <div className="flex items-center justify-between border-b border-border-soft pb-3 pt-3">
               <span>Credit: Accounts Receivable (1110)</span>
               <span>{formatCurrency(arCreditAmount, 'GHS')}</span>
             </div>
@@ -358,7 +358,7 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
                 <span>{fxEntry.debit_amount > 0 ? formatCurrency(fxEntry.debit_amount, 'GHS') : formatCurrency(fxEntry.credit_amount, 'GHS')}</span>
               </div>
             )}
-            <div className="rounded-2xl border border-white/10 bg-slate-950/90 p-3 text-xs text-slate-400">
+            <div className="rounded-2xl border border-border-soft bg-slate-950/90 p-3 text-xs text-slate-400">
               Selected account: {selectedAccount ? `${selectedAccount.account_code} — ${selectedAccount.account_name}` : 'No account selected'}
             </div>
           </div>

@@ -31,10 +31,10 @@ export default function EmployeeCostReport() {
       ) : (
         <>
           <p className="text-lg font-semibold text-violet-200">Total: {formatGhs(total)}</p>
-          <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-white/10">
+          <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-border-soft">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-xs uppercase text-slate-500">
+                <tr className="border-b border-border-soft text-left text-xs uppercase text-slate-500">
                   <th className="px-4 py-3">Employee</th>
                   <th className="px-4 py-3">Department</th>
                   <th className="px-4 py-3">Division</th>
@@ -47,7 +47,7 @@ export default function EmployeeCostReport() {
                 {rows.map((r) => {
                   const line = Number(r.basic_salary || 0) + Number(r.monthly_allowances || 0)
                   return (
-                    <tr key={r.id} className="border-b border-white/5">
+                    <tr key={r.id} className="border-b border-border-soft">
                       <td className="px-4 py-3 text-white">{r.profiles?.full_name}</td>
                       <td className="px-4 py-3 text-slate-400">{r.department ?? '—'}</td>
                       <td className="px-4 py-3 text-slate-400">{r.division?.name ?? '—'}</td>

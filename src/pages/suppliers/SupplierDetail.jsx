@@ -91,7 +91,7 @@ export default function SupplierDetail({ supplierId: supplierIdProp, onBack }) {
           ['Payment Terms',   `${supplier.payment_terms ?? 30} days`],
           ['Credit Limit',    fmt(supplier.credit_limit)],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <div key={label} className="rounded-xl border border-border-soft bg-white/5 p-4">
             <div className="text-xs uppercase tracking-widest text-slate-500">{label}</div>
             <div className="mt-1 text-sm text-white">{value}</div>
           </div>
@@ -99,7 +99,7 @@ export default function SupplierDetail({ supplierId: supplierIdProp, onBack }) {
       </div>
 
       {ageing && (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-3">
+        <div className="rounded-2xl border border-border-soft bg-white/5 p-5 space-y-3">
           <h2 className="text-sm font-semibold text-white uppercase tracking-widest">Aged Payables</h2>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {[
@@ -109,7 +109,7 @@ export default function SupplierDetail({ supplierId: supplierIdProp, onBack }) {
               ['61–90 days', ageing.days_61_90],
               ['90+ days',   ageing.days_90_plus],
             ].map(([label, value]) => (
-              <div key={label} className="rounded-xl border border-white/10 bg-white/5 p-3 text-center">
+              <div key={label} className="rounded-xl border border-border-soft bg-white/5 p-3 text-center">
                 <div className="text-xs text-slate-500">{label}</div>
                 <div className="mt-1 text-sm font-semibold text-white">{fmt(value)}</div>
               </div>
@@ -121,9 +121,9 @@ export default function SupplierDetail({ supplierId: supplierIdProp, onBack }) {
 
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-white uppercase tracking-widest">Linked Project Costs</h2>
-        <div className="overflow-x-auto rounded-2xl border border-white/10">
+        <div className="overflow-x-auto rounded-2xl border border-border-soft">
           <table className="w-full text-sm text-slate-300">
-            <thead className="border-b border-white/10 text-xs uppercase tracking-widest text-slate-500">
+            <thead className="border-b border-border-soft text-xs uppercase tracking-widest text-slate-500">
               <tr>
                 {['Description','Amount','Date','Type','Status'].map(h => (
                   <th key={h} className="px-4 py-3 text-left">{h}</th>
@@ -134,7 +134,7 @@ export default function SupplierDetail({ supplierId: supplierIdProp, onBack }) {
               {costs.length === 0 ? (
                 <tr><td colSpan={5} className="px-4 py-6 text-center text-slate-500">No costs linked to this supplier.</td></tr>
               ) : costs.map(c => (
-                <tr key={c.id} className="border-b border-white/5 hover:bg-white/5 transition">
+                <tr key={c.id} className="border-b border-border-soft hover:bg-white/5 transition">
                   <td className="px-4 py-3 text-white">{c.description}</td>
                   <td className="px-4 py-3">{fmt(c.amount)}</td>
                   <td className="px-4 py-3">{c.cost_date ?? '—'}</td>
@@ -148,7 +148,7 @@ export default function SupplierDetail({ supplierId: supplierIdProp, onBack }) {
       </div>
 
       {supplier.notes && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+        <div className="rounded-xl border border-border-soft bg-white/5 p-4">
           <div className="text-xs uppercase tracking-widest text-slate-500 mb-2">Notes</div>
           <p className="text-sm text-slate-300 whitespace-pre-wrap">{supplier.notes}</p>
         </div>

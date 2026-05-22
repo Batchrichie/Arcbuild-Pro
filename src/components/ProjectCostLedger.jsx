@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
 export default function ProjectCostLedger({ userRole, userId, projectId = null, initialCostType = '', hideProjectSelector = false }) {
@@ -124,8 +124,6 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
     }));
   };
 
-  const selectedProject = projects.find((p) => p.id === selectedProjectId);
-
   // Calculate totals
   const totals = {
     materials: costs
@@ -170,7 +168,7 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-4xl border border-white/10 bg-slate-950 p-6">
+      <div className="rounded-4xl border border-border-soft bg-slate-950 p-6">
         <h2 className="text-2xl font-semibold text-white mb-4">Project Cost Ledger</h2>
 
         {error && (
@@ -187,7 +185,7 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
               disabled={loading}
-              className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:bg-slate-800"
+              className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:bg-slate-800"
             >
               <option value="">Choose a project</option>
               {projects.map((project) => (
@@ -202,7 +200,7 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
 
       {/* Filters */}
       {selectedProjectId && (
-        <div className="rounded-4xl border border-white/10 bg-slate-950 p-6">
+        <div className="rounded-4xl border border-border-soft bg-slate-950 p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Filters</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -211,7 +209,7 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
                 name="costType"
                 value={filters.costType}
                 onChange={handleFilterChange}
-                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
               >
                 <option value="">All Types</option>
                 <option value="Materials">Materials</option>
@@ -228,7 +226,7 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
                 name="dateFrom"
                 value={filters.dateFrom}
                 onChange={handleFilterChange}
-                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
             </div>
             <div>
@@ -238,7 +236,7 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
                 name="dateTo"
                 value={filters.dateTo}
                 onChange={handleFilterChange}
-                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
             </div>
           </div>
@@ -249,12 +247,12 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
       {selectedProjectId && !loading && costs.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
           {[
-            { label: 'Materials', value: totals.materials, color: 'bg-slate-900 border-white/10 text-cyan-100' },
-            { label: 'Labour', value: totals.labour, color: 'bg-slate-900 border-white/10 text-emerald-100' },
-            { label: 'Subcontractors', value: totals.subcontractors, color: 'bg-slate-900 border-white/10 text-violet-100' },
-            { label: 'Equipment', value: totals.equipment, color: 'bg-slate-900 border-white/10 text-orange-200' },
-            { label: 'Other', value: totals.other, color: 'bg-slate-900 border-white/10 text-slate-200' },
-            { label: 'Total', value: grandTotal, color: 'bg-slate-900 border-white/10 text-cyan-100 col-span-2 md:col-span-1' },
+            { label: 'Materials', value: totals.materials, color: 'bg-slate-900 border-border-soft text-cyan-100' },
+            { label: 'Labour', value: totals.labour, color: 'bg-slate-900 border-border-soft text-emerald-100' },
+            { label: 'Subcontractors', value: totals.subcontractors, color: 'bg-slate-900 border-border-soft text-violet-100' },
+            { label: 'Equipment', value: totals.equipment, color: 'bg-slate-900 border-border-soft text-orange-200' },
+            { label: 'Other', value: totals.other, color: 'bg-slate-900 border-border-soft text-slate-200' },
+            { label: 'Total', value: grandTotal, color: 'bg-slate-900 border-border-soft text-cyan-100 col-span-2 md:col-span-1' },
           ].map((item) => (
             <div key={item.label} className={`rounded-2xl border p-4 ${item.color}`}>
               <p className="text-xs font-semibold uppercase text-slate-400">{item.label}</p>
@@ -268,10 +266,10 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
 
       {/* Costs Table */}
       {selectedProjectId && (
-        <div className="rounded-4xl border border-white/10 bg-slate-950 overflow-hidden shadow-sm">
+        <div className="rounded-4xl border border-border-soft bg-slate-950 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-900/80 border-b border-white/10">
+              <thead className="bg-slate-900/80 border-b border-border-soft">
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">Date</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">Type</th>
@@ -298,7 +296,7 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
                   </tr>
                 ) : (
                   costs.map((cost) => (
-                    <tr key={cost.id} className="border-b border-white/10 hover:bg-slate-900/70">
+                    <tr key={cost.id} className="border-b border-border-soft hover:bg-slate-900/70">
                       <td className="px-6 py-4 text-sm text-slate-300">
                         {new Date(cost.date_incurred).toLocaleDateString('en-GH')}
                       </td>
@@ -343,7 +341,7 @@ export default function ProjectCostLedger({ userRole, userId, projectId = null, 
 
           {/* Table Footer with Grand Total */}
           {costs.length > 0 && (
-            <div className="bg-slate-900/80 px-6 py-4 border-t border-white/10">
+            <div className="bg-slate-900/80 px-6 py-4 border-t border-border-soft">
               <div className="flex justify-end items-center space-x-8">
                 <div>
                   <p className="text-sm text-slate-400">Grand Total (GHS)</p>

@@ -4,13 +4,11 @@ import { fetchAnnualLeaveEntitlement } from '../../lib/hr-config'
 
 export default function LeaveBalances() {
   const [rows, setRows] = useState([])
-  const [entitlement, setEntitlement] = useState(21)
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
     setLoading(true)
     const annual = await fetchAnnualLeaveEntitlement()
-    setEntitlement(annual)
     const year = new Date().getFullYear()
     const yearStart = `${year}-01-01`
     const yearEnd = `${year}-12-31`
@@ -62,10 +60,10 @@ export default function LeaveBalances() {
       {loading ? (
         <div className="h-32 animate-pulse rounded-2xl bg-white/5" />
       ) : (
-        <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-white/10">
+        <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-border-soft">
           <table className="w-full min-w-[520px] text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-left text-xs uppercase text-slate-500">
+              <tr className="border-b border-border-soft text-left text-xs uppercase text-slate-500">
                 <th className="px-4 py-3">Employee</th>
                 <th className="px-4 py-3">Entitlement</th>
                 <th className="px-4 py-3">Taken</th>
@@ -74,7 +72,7 @@ export default function LeaveBalances() {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.id} className="border-b border-white/5">
+                <tr key={r.id} className="border-b border-border-soft">
                   <td className="px-4 py-3 text-white">{r.name}</td>
                   <td className="px-4 py-3 text-slate-400">{r.entitlement}</td>
                   <td className="px-4 py-3 text-slate-400">{r.taken}</td>

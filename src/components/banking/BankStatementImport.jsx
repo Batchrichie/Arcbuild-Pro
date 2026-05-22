@@ -37,7 +37,6 @@ export default function BankStatementImport() {
   const { user } = useAuth()
   const [bankAccounts, setBankAccounts] = useState([])
   const [selectedAccountId, setSelectedAccountId] = useState('')
-  const [fileError, setFileError] = useState('')
   const [csvHeaders, setCsvHeaders] = useState([])
   const [csvRows, setCsvRows] = useState([])
   const [mapping, setMapping] = useState({})
@@ -108,7 +107,6 @@ export default function BankStatementImport() {
     setMapping({})
     setPreviewRows([])
     setSummary(null)
-    setFileError('')
   }
 
   const handleImport = async () => {
@@ -199,7 +197,7 @@ export default function BankStatementImport() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+      <div className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Bank statement import</p>
@@ -221,7 +219,7 @@ export default function BankStatementImport() {
                 <select
                   value={selectedAccountId}
                   onChange={(e) => setSelectedAccountId(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+                  className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
                 >
                   <option value="">Select account</option>
                   {bankAccounts.map((account) => (
@@ -237,13 +235,13 @@ export default function BankStatementImport() {
                   type="file"
                   accept=".csv"
                   onChange={handleFileChange}
-                  className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+                  className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
                 />
               </label>
             </div>
 
             {csvHeaders.length > 0 && (
-              <div className="rounded-3xl border border-white/10 bg-slate-950 p-4">
+              <div className="rounded-3xl border border-border-soft bg-slate-950 p-4">
                 <p className="text-sm font-semibold text-white mb-3">Column mapping</p>
                 <div className="grid gap-4">
                   {MAPPING_FIELDS.map((field) => (
@@ -252,7 +250,7 @@ export default function BankStatementImport() {
                       <select
                         value={mapping[field.key] || ''}
                         onChange={(e) => setMapping((prev) => ({ ...prev, [field.key]: e.target.value }))}
-                        className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+                        className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
                       >
                         <option value="">Map column</option>
                         {csvHeaders.map((column) => (
@@ -266,7 +264,7 @@ export default function BankStatementImport() {
             )}
 
             {previewRows.length > 0 && (
-              <div className="rounded-3xl border border-white/10 bg-slate-950 p-4">
+              <div className="rounded-3xl border border-border-soft bg-slate-950 p-4">
                 <p className="text-sm font-semibold text-white mb-3">Preview</p>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm text-slate-200">
@@ -281,7 +279,7 @@ export default function BankStatementImport() {
                     </thead>
                     <tbody>
                       {previewRows.map((row, index) => (
-                        <tr key={index} className="border-t border-white/10">
+                        <tr key={index} className="border-t border-border-soft">
                           <td className="px-3 py-2">{row.transaction_date}</td>
                           <td className="px-3 py-2">{row.description}</td>
                           <td className="px-3 py-2 text-right">{row.debit_amount ? formatGhs(row.debit_amount) : '—'}</td>
@@ -296,7 +294,7 @@ export default function BankStatementImport() {
             )}
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-slate-950 p-6">
+          <div className="rounded-3xl border border-border-soft bg-slate-950 p-6">
             <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Import summary</p>
             <div className="mt-6 space-y-3 text-sm text-slate-300">
               <p>{csvRows.length ? `${csvRows.length} rows loaded` : 'Upload a bank statement CSV to begin.'}</p>
@@ -311,7 +309,7 @@ export default function BankStatementImport() {
               {loading ? 'Importing…' : 'Import statement'}
             </button>
             {summary && (
-              <div className="mt-4 rounded-2xl border border-white/10 bg-slate-900 p-4 text-sm text-slate-200">
+              <div className="mt-4 rounded-2xl border border-border-soft bg-slate-900 p-4 text-sm text-slate-200">
                 <p>Imported: {summary.imported}</p>
                 <p>Duplicates skipped: {summary.skipped}</p>
                 {summary.autoMatchResult && (

@@ -1,5 +1,5 @@
 import { Document, Page, Text, View, Image } from '@react-pdf/renderer'
-import { pdfStyles, colors } from './PdfTheme'
+import { pdfStyles } from './PdfTheme'
 import { COMPANY } from '../../lib/company-config'
 import logo from '../../assets/ModuloDevLogo.png'
 

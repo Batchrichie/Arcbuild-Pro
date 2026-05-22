@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-export default function AccountStatement({ accountCode, onClose, readOnly = false }) {
+export default function AccountStatement({ accountCode, onClose }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
 

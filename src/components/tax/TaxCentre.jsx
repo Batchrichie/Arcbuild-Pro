@@ -321,7 +321,7 @@ export default function TaxCentre({ readOnly = false }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-4xl border border-white/10 bg-slate-950/80 p-6 shadow-2xl shadow-black/20 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-4xl border border-border-soft bg-slate-950/80 p-6 shadow-2xl shadow-black/20 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">Tax Management Centre</p>
           <h1 className="mt-2 text-3xl font-semibold text-white">GRA Compliance & filings</h1>
@@ -335,7 +335,7 @@ export default function TaxCentre({ readOnly = false }) {
               className={`min-touch rounded-full border px-4 py-2 text-sm font-medium transition ${
                 activeTab === tabId
                   ? 'border-amber-400/40 bg-amber-500/15 text-amber-100'
-                  : 'border-white/10 bg-white/5 text-slate-300 hover:border-amber-400/20'
+                  : 'border-border-soft bg-white/5 text-slate-300 hover:border-amber-400/20'
               }`}
             >
               {tabId === 'calendar' ? 'Tax Calendar' : tabId === 'vat' ? 'VAT Return' : tabId === 'wht' ? 'WHT Certificates' : 'Filing History'}
@@ -355,7 +355,7 @@ export default function TaxCentre({ readOnly = false }) {
                 id="tax-filter"
                 value={calendarFilter}
                 onChange={(event) => setCalendarFilter(event.target.value)}
-                className="rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/40"
+                className="rounded-2xl border border-border-soft bg-slate-950/80 px-4 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/40"
               >
                 {TAX_TYPES.map((type) => (
                   <option key={type} value={type}>
@@ -389,7 +389,7 @@ export default function TaxCentre({ readOnly = false }) {
               ))
             ) : filteredCalendarRows.length ? (
               filteredCalendarRows.map((row) => (
-                <article key={row.id} className="rounded-3xl border border-white/10 bg-slate-950/80 p-5 shadow-inner shadow-black/20">
+                <article key={row.id} className="rounded-3xl border border-border-soft bg-slate-950/80 p-5 shadow-inner shadow-black/20">
                   <div className="flex items-center justify-between gap-3">
                     <TaxTypeBadge taxType={row.tax_type} />
                     <TaxStatusBadge status={row.status} />
@@ -428,7 +428,7 @@ export default function TaxCentre({ readOnly = false }) {
                 </article>
               ))
             ) : (
-              <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-8 text-slate-400">
+              <div className="rounded-3xl border border-border-soft bg-slate-950/80 p-8 text-slate-400">
                 No tax calendar obligations found.
               </div>
             )}
@@ -444,12 +444,12 @@ export default function TaxCentre({ readOnly = false }) {
               <h2 className="mt-2 text-2xl font-semibold text-white">Monthly VAT computation</h2>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-2 text-sm text-slate-300">
+              <label className="flex items-center gap-3 rounded-2xl border border-border-soft bg-slate-950/80 px-4 py-2 text-sm text-slate-300">
                 Month:
                 <select
                   value={vatPeriod}
                   onChange={(event) => setVatPeriod(event.target.value)}
-                  className="rounded-2xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 focus:outline-none"
+                  className="rounded-2xl border border-border-soft bg-slate-950/80 px-3 py-2 text-sm text-slate-100 focus:outline-none"
                 >
                   {vatMonthOptions.map((option) => (
                     <option key={option} value={option}>
@@ -461,14 +461,14 @@ export default function TaxCentre({ readOnly = false }) {
               <button
                 type="button"
                 onClick={loadVatReturn}
-                className="min-touch rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:border-amber-400/30"
+                className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:border-amber-400/30"
               >
                 Refresh
               </button>
             </div>
           </div>
 
-          <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6">
+          <div className="rounded-4xl border border-border-soft bg-slate-950/80 p-6">
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">VAT RETURN — {monthLabelFromKey(vatPeriod)}</p>
@@ -476,7 +476,7 @@ export default function TaxCentre({ readOnly = false }) {
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className="min-touch rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:border-amber-400/30"
+                  className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:border-amber-400/30"
                   onClick={() => {
                     window.alert('PDF generation is not implemented in this phase.')
                   }}
@@ -511,7 +511,7 @@ export default function TaxCentre({ readOnly = false }) {
                       <span>Input VAT (purchases):</span>
                       <span className="font-semibold text-white">(GHS {formatGhs(vatReturn?.input_vat)})</span>
                     </div>
-                    <div className="border-t border-white/10 pt-3 text-white">
+                    <div className="border-t border-border-soft pt-3 text-white">
                       <div className="flex items-center justify-between gap-4">
                         <span>Net VAT Due:</span>
                         <span className="font-semibold">GHS {formatGhs(vatReturn?.net_vat_due)}</span>
@@ -527,7 +527,7 @@ export default function TaxCentre({ readOnly = false }) {
                       <span>GetFUND Due:</span>
                       <span className="font-semibold text-white">GHS {formatGhs(vatReturn?.getfund_due)}</span>
                     </div>
-                    <div className="border-t border-white/10 pt-3 text-white">
+                    <div className="border-t border-border-soft pt-3 text-white">
                       <div className="flex items-center justify-between gap-4 text-lg font-semibold">
                         <span>TOTAL DUE TO GRA:</span>
                         <span>GHS {formatGhs(vatReturn?.total_due)}</span>
@@ -556,7 +556,7 @@ export default function TaxCentre({ readOnly = false }) {
                 id="wht-year"
                 value={whtYear}
                 onChange={(event) => setWhtYear(Number(event.target.value))}
-                className="rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-2 text-sm text-slate-100 focus:outline-none"
+                className="rounded-2xl border border-border-soft bg-slate-950/80 px-4 py-2 text-sm text-slate-100 focus:outline-none"
               >
                 {whtYears.map((year) => (
                   <option key={year} value={year}>
@@ -567,7 +567,7 @@ export default function TaxCentre({ readOnly = false }) {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-4xl border border-white/10 bg-slate-950/80">
+          <div className="overflow-hidden rounded-4xl border border-border-soft bg-slate-950/80">
             <div className="grid gap-6 p-6">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-white/10 text-sm text-slate-300">
@@ -598,7 +598,7 @@ export default function TaxCentre({ readOnly = false }) {
                             <PDFDownloadLink
                             document={<WhtCertificatePdf certificate={row} />}
                             fileName={`wht-certificate-${row.tin || row.subcontractor_name || row.name || rowIndex}.pdf`}
-                            className="min-touch rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-amber-400/30"
+                            className="min-touch rounded-full border border-border-soft bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-amber-400/30"
                           >
                             {({ loading: pdfLoading }) => (pdfLoading ? 'Preparing PDF…' : 'Generate WHT Certificate')}
                           </PDFDownloadLink>
@@ -616,7 +616,7 @@ export default function TaxCentre({ readOnly = false }) {
                 </table>
               </div>
 
-              <div className="rounded-3xl border border-white/10 bg-slate-950/90 p-4 text-sm text-slate-300">
+              <div className="rounded-3xl border border-border-soft bg-slate-950/90 p-4 text-sm text-slate-300">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="font-semibold text-white">Total WHT deducted</span>
                   <span className="text-lg font-semibold text-amber-200">GHS {formatGhs(whtTotalDeducted)}</span>
@@ -634,12 +634,12 @@ export default function TaxCentre({ readOnly = false }) {
               <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Filing history</p>
               <h2 className="mt-2 text-2xl font-semibold text-white">Tax filings and records</h2>
             </div>
-            <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-2 text-sm text-slate-300">
+            <label className="flex items-center gap-3 rounded-2xl border border-border-soft bg-slate-950/80 px-4 py-2 text-sm text-slate-300">
               Tax type:
               <select
                 value={historyFilterType}
                 onChange={(event) => setHistoryFilterType(event.target.value)}
-                className="rounded-2xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 focus:outline-none"
+                className="rounded-2xl border border-border-soft bg-slate-950/80 px-3 py-2 text-sm text-slate-100 focus:outline-none"
               >
                 {TAX_TYPES.map((type) => (
                   <option key={type} value={type}>
@@ -648,12 +648,12 @@ export default function TaxCentre({ readOnly = false }) {
                 ))}
               </select>
             </label>
-            <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-2 text-sm text-slate-300">
+            <label className="flex items-center gap-3 rounded-2xl border border-border-soft bg-slate-950/80 px-4 py-2 text-sm text-slate-300">
               Year:
               <select
                 value={historyYear}
                 onChange={(event) => setHistoryYear(Number(event.target.value))}
-                className="rounded-2xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 focus:outline-none"
+                className="rounded-2xl border border-border-soft bg-slate-950/80 px-3 py-2 text-sm text-slate-100 focus:outline-none"
               >
                 {historyYears.map((year) => (
                   <option key={year} value={year}>
@@ -664,14 +664,14 @@ export default function TaxCentre({ readOnly = false }) {
             </label>
           </div>
 
-          <div className="overflow-hidden rounded-4xl border border-white/10 bg-slate-950/80">
+          <div className="overflow-hidden rounded-4xl border border-border-soft bg-slate-950/80">
             <div className="p-4 sm:p-6">
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-slate-400">{filteredFilings.length} filings matching your filters</p>
                 <button
                   type="button"
                   onClick={downloadCsv}
-                  className="min-touch inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:border-amber-400/30"
+                  className="min-touch inline-flex items-center justify-center rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:border-amber-400/30"
                 >
                   Export to CSV
                 </button>
@@ -723,7 +723,7 @@ export default function TaxCentre({ readOnly = false }) {
         <>
           <div className="fixed inset-0 z-40 bg-black/70" />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-2xl overflow-hidden rounded-4xl border border-white/10 bg-slate-950 p-6 shadow-2xl shadow-black/40">
+            <div className="w-full max-w-2xl overflow-hidden rounded-4xl border border-border-soft bg-slate-950 p-6 shadow-2xl shadow-black/40">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Mark as filed</p>
@@ -732,7 +732,7 @@ export default function TaxCentre({ readOnly = false }) {
                 <button
                   type="button"
                   onClick={closeMarkModal}
-                  className="min-touch rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-amber-400/30"
+                  className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-amber-400/30"
                 >
                   Close
                 </button>
@@ -745,7 +745,7 @@ export default function TaxCentre({ readOnly = false }) {
                     type="text"
                     value={markForm.gra_reference}
                     onChange={(event) => setMarkForm({ ...markForm, gra_reference: event.target.value })}
-                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
+                    className="w-full rounded-2xl border border-border-soft bg-slate-900/80 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-slate-300">
@@ -755,7 +755,7 @@ export default function TaxCentre({ readOnly = false }) {
                     step="0.01"
                     value={markForm.amount_paid}
                     onChange={(event) => setMarkForm({ ...markForm, amount_paid: event.target.value })}
-                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
+                    className="w-full rounded-2xl border border-border-soft bg-slate-900/80 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
                   />
                 </label>
               </div>
@@ -766,7 +766,7 @@ export default function TaxCentre({ readOnly = false }) {
                   rows="4"
                   value={markForm.notes}
                   onChange={(event) => setMarkForm({ ...markForm, notes: event.target.value })}
-                  className="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
+                  className="w-full rounded-3xl border border-border-soft bg-slate-900/80 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
                 />
               </label>
 
@@ -785,7 +785,7 @@ export default function TaxCentre({ readOnly = false }) {
                 <button
                   type="button"
                   onClick={closeMarkModal}
-                  className="min-touch rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-amber-400/30"
+                  className="min-touch rounded-full border border-border-soft bg-white/5 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-amber-400/30"
                 >
                   Cancel
                 </button>

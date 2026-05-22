@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
-export default function MilestoneInvoiceQueue({ userRole, userId }) {
+export default function MilestoneInvoiceQueue() {
   const [queueItems, setQueueItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

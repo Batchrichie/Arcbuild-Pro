@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getRetentionSummary } from '../services/retentionService'
 import { getRecognitionHistory } from '../services/revenueRecognitionService'
@@ -238,13 +238,13 @@ export default function ProjectFinanceDashboard({
     <div className="space-y-6">
       {/* Error Alert */}
       {error && (
-        <div className="rounded-2xl border border-red-400/30 bg-[rgba(239,68,68,0.1)] p-4 backdrop-blur-sm">
+        <div className="rounded-2xl border border-danger/30 bg-danger-bg p-4 backdrop-blur-sm">
           <p className="text-sm text-red-200">{error}</p>
         </div>
       )}
 
       {!hideProjectSelector && (
-        <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+        <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
           <label className="text-sm uppercase tracking-[0.16em] text-slate-400 block mb-3">Select Project</label>
           <select
             value={selectedProject || ''}
@@ -265,14 +265,14 @@ export default function ProjectFinanceDashboard({
           {/* Metric Strip — Row 1 */}
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {/* Contract Value */}
-            <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+            <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Contract Value</p>
               <p className="text-2xl font-bold text-white">{formatCurrency(finance.contract_value)}</p>
               <p className="text-xs text-slate-500 mt-2">{currentProject?.name}</p>
             </div>
 
             {/* Total Invoiced */}
-            <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+            <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Total Invoiced</p>
               <p className="text-2xl font-bold text-teal-200">{formatCurrency(finance.total_invoiced_ghs)}</p>
               <p className="text-xs text-slate-400 mt-2">
@@ -281,14 +281,14 @@ export default function ProjectFinanceDashboard({
             </div>
 
             {/* Total Received */}
-            <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+            <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Total Received</p>
               <p className="text-2xl font-bold text-emerald-300">{formatCurrency(finance.total_received_ghs)}</p>
               <p className="text-xs text-emerald-400 mt-2">Payments received</p>
             </div>
 
             {/* Outstanding */}
-            <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+            <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Outstanding</p>
               <p className="text-2xl font-bold text-amber-300">{formatCurrency(finance.total_outstanding_ghs)}</p>
               <p className="text-xs text-amber-400 mt-2">Awaiting payment</p>
@@ -298,14 +298,14 @@ export default function ProjectFinanceDashboard({
           {/* Metric Strip — Row 2 */}
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {/* Total Costs */}
-            <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+            <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Total Costs</p>
               <p className="text-2xl font-bold text-red-300">{formatCurrency(finance.total_costs_ghs)}</p>
               <p className="text-xs text-red-400 mt-2">All categories</p>
             </div>
 
             {/* Gross Profit */}
-            <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+            <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Gross Profit</p>
               <p className={`text-2xl font-bold ${finance.gross_profit_ghs >= 0 ? 'text-emerald-300' : 'text-red-300'}`}>
                 {formatCurrency(finance.gross_profit_ghs)}
@@ -316,7 +316,7 @@ export default function ProjectFinanceDashboard({
             </div>
 
             {/* Gross Margin */}
-            <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+            <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Gross Margin</p>
               <p className="text-2xl font-bold text-blue-300">{formatPct(finance.gross_margin_pct)}</p>
               <p className="text-xs text-blue-400 mt-2">
@@ -330,7 +330,7 @@ export default function ProjectFinanceDashboard({
             </div>
 
             {/* Financial Completion */}
-            <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm lg:col-span-3">
+            <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm lg:col-span-3">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Financial Completion</p>
               <p className="text-xl font-bold text-purple-300 mb-3">{formatPct(finance.financial_completion_pct)}</p>
               <div className="w-full h-3 rounded-full bg-white/10 overflow-hidden">
@@ -343,12 +343,12 @@ export default function ProjectFinanceDashboard({
           </div>
 
           {/* Budget vs Actual Table */}
-          <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+          <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
             <div className="portal-table-scroll overflow-x-auto">
             <h3 className="text-lg font-semibold text-white mb-4">Budget vs Actual</h3>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b border-border-soft">
                   <th className="text-left py-3 px-4 text-slate-300 font-semibold">Category</th>
                   <th className="text-right py-3 px-4 text-slate-300 font-semibold">Budget (GHS)</th>
                   <th className="text-right py-3 px-4 text-slate-300 font-semibold">Actual (GHS)</th>
@@ -358,7 +358,7 @@ export default function ProjectFinanceDashboard({
               </thead>
               <tbody>
                 {budgetData.map((row, idx) => (
-                  <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition">
+                  <tr key={idx} className="border-b border-border-soft hover:bg-white/5 transition">
                     <td className="py-3 px-4 text-slate-200">{row.category}</td>
                     <td className="text-right py-3 px-4 text-slate-300">{formatCurrency(row.budget)}</td>
                     <td className="text-right py-3 px-4 text-slate-300">{formatCurrency(row.actual)}</td>
@@ -377,7 +377,7 @@ export default function ProjectFinanceDashboard({
                   </tr>
                 ))}
                 {/* Total Row */}
-                <tr className="bg-white/5 border-t-2 border-white/10">
+                <tr className="bg-white/5 border-t-2 border-border-soft">
                   <td className="py-3 px-4 font-bold text-white">TOTAL</td>
                   <td className="text-right py-3 px-4 font-bold text-white">{formatCurrency(finance.total_budget_ghs)}</td>
                   <td className="text-right py-3 px-4 font-bold text-white">{formatCurrency(finance.total_costs_ghs)}</td>
@@ -399,7 +399,7 @@ export default function ProjectFinanceDashboard({
           </div>
 
           {/* Budget vs Actual Chart */}
-          <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+          <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
             <h3 className="text-lg font-semibold text-white mb-4">Cost Breakdown</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={budgetData}>
@@ -424,7 +424,7 @@ export default function ProjectFinanceDashboard({
 
           {/* Retention Section */}
           {finance.contract_id && (
-            <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+            <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-white">Client Retention</h3>
@@ -433,17 +433,17 @@ export default function ProjectFinanceDashboard({
               </div>
 
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Retention %</p>
                   <p className="text-2xl font-bold text-white">{finance.retention_percentage}%</p>
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Total Held</p>
                   <p className="text-2xl font-bold text-amber-300">{formatCurrency(finance.total_retention_held)}</p>
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Status</p>
                   <div className="flex items-center gap-2 mt-2">
                     <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
@@ -457,18 +457,18 @@ export default function ProjectFinanceDashboard({
                 </div>
               </div>
 
-              <div className="mt-6 rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+              <div className="mt-6 rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
                 <h3 className="text-lg font-semibold text-white mb-4">Retention Summary</h3>
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Client Retention Balance</p>
                     <p className="text-2xl font-bold text-white">{formatCurrency(retentionSummary.clientBalance)}</p>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Subcontractor Retention Balance</p>
                     <p className="text-2xl font-bold text-white">{formatCurrency(retentionSummary.subcontractorBalance)}</p>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-center justify-between">
+                  <div className="rounded-2xl border border-border-soft bg-white/5 p-4 flex items-center justify-between">
                     <div>
                       <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Details</p>
                       <p className="text-sm text-slate-300">View the full retention ledger and release history.</p>
@@ -487,7 +487,7 @@ export default function ProjectFinanceDashboard({
                 <button
                   onClick={handleReleaseRetention}
                   disabled={releaseLoading}
-                  className="mt-4 rounded-2xl border border-emerald-400/40 bg-[rgba(16,185,129,0.15)] px-6 py-3 text-sm font-medium text-emerald-200 transition hover:border-emerald-400/60 hover:bg-[rgba(16,185,129,0.25)] disabled:opacity-50"
+                  className="mt-4 rounded-2xl border border-teal/40 bg-success-bg px-6 py-3 text-sm font-medium text-emerald-200 transition hover:border-teal/60 hover:bg-teal/25 disabled:opacity-50"
                 >
                   {releaseLoading ? 'Processing...' : 'Release Retention'}
                 </button>
@@ -497,7 +497,7 @@ export default function ProjectFinanceDashboard({
 
           {/* Milestone Timeline */}
           {/* Revenue Recognition Section */}
-          <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+          <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-white">Revenue Recognition</h3>
@@ -511,12 +511,12 @@ export default function ProjectFinanceDashboard({
             </div>
 
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
                 <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Completion Method</p>
                 <p className="text-sm text-white">{currentProject?.completion_method || 'cost'}</p>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
                 <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">% Complete</p>
                 <p className="text-2xl font-bold text-white">{(currentProject?.pct_complete ?? finance?.pct_complete ?? 0).toFixed(2)}%</p>
                 <div className="w-full h-2 rounded-full bg-white/10 mt-2 overflow-hidden">
@@ -524,7 +524,7 @@ export default function ProjectFinanceDashboard({
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
                 <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Latest Recognition</p>
                 <p className="text-sm text-white">{recognitionHistory?.[0]?.period_label || '—'}</p>
                 <p className="text-sm text-slate-300 mt-1">Period Revenue: {recognitionHistory?.[0]?.period_revenue ?? '—'}</p>
@@ -538,7 +538,7 @@ export default function ProjectFinanceDashboard({
               ) : (
                 <div className="space-y-2">
                   {recognitionHistory.map((r) => (
-                    <div key={r.id} className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-slate-300">
+                    <div key={r.id} className="rounded-xl border border-border-soft bg-white/5 p-3 text-sm text-slate-300">
                       <div className="flex items-center justify-between">
                         <div>{r.recognition_date} — {r.period_label}</div>
                         <div>{new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(r.period_revenue || 0)}</div>
@@ -550,11 +550,11 @@ export default function ProjectFinanceDashboard({
             </div>
           </div>
           {milestones.length > 0 && (
-            <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
+            <div className="rounded-3xl panel-surface p-6 shadow-lg shadow-black/20 backdrop-blur-sm">
               <h3 className="text-lg font-semibold text-white mb-4">Project Milestones</h3>
               <div className="space-y-3">
                 {milestones.map((milestone, idx) => (
-                  <div key={idx} className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-center justify-between">
+                  <div key={idx} className="rounded-2xl border border-border-soft bg-white/5 p-4 flex items-center justify-between">
                     <div className="flex-1">
                       <p className="font-semibold text-white">{milestone.title}</p>
                       <p className="text-xs text-slate-400 mt-1">

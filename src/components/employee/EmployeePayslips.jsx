@@ -76,7 +76,7 @@ export default function EmployeePayslips({ initialLineId, onClearInitial }) {
       {loading ? (
         <div className="h-32 animate-pulse rounded-2xl bg-white/5" />
       ) : rows.length === 0 ? (
-        <p className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-slate-500">No payslips yet.</p>
+        <p className="rounded-2xl border border-border-soft bg-white/5 p-8 text-center text-slate-500">No payslips yet.</p>
       ) : (
         <ul className="space-y-3">
           {rows.map((row) => (
@@ -84,7 +84,7 @@ export default function EmployeePayslips({ initialLineId, onClearInitial }) {
               <button
                 type="button"
                 onClick={() => setSelected(row)}
-                className="min-touch w-full rounded-2xl border border-white/10 bg-white/5 p-4 text-left transition hover:border-orange-400/30"
+                className="min-touch w-full rounded-2xl border border-border-soft bg-white/5 p-4 text-left transition hover:border-orange-400/30"
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>

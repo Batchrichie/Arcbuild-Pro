@@ -49,10 +49,10 @@ export default function ComplianceTracker() {
       {loading ? (
         <div className="h-40 animate-pulse rounded-2xl bg-white/5" />
       ) : (
-        <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-white/10">
+        <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-border-soft">
           <table className="w-full min-w-[720px] text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-left text-xs uppercase text-slate-500">
+              <tr className="border-b border-border-soft text-left text-xs uppercase text-slate-500">
                 <th className="px-4 py-3">Employee</th>
                 <th className="px-4 py-3 text-center">TIN</th>
                 <th className="px-4 py-3 text-center">SSNIT</th>
@@ -62,7 +62,7 @@ export default function ComplianceTracker() {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.id} className="border-b border-white/5">
+                <tr key={r.id} className="border-b border-border-soft">
                   <td className="px-4 py-3 text-white">{r.profiles?.full_name ?? r.employee_number}</td>
                   <td className="px-4 py-3 text-center"><Tick ok={!!r.tin} /></td>
                   <td className="px-4 py-3 text-center"><Tick ok={!!r.ssnit_number} /></td>

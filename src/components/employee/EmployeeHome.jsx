@@ -105,7 +105,7 @@ export default function EmployeeHome({ onViewPayslip }) {
           <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-slate-500">Upcoming leave</h3>
           <ul className="space-y-2">
             {upcomingLeave.map((l, i) => (
-              <li key={`${l.start_date}-${i}`} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm">
+              <li key={`${l.start_date}-${i}`} className="rounded-2xl border border-border-soft bg-white/5 px-4 py-3 text-sm">
                 <span className="font-medium capitalize text-white">{l.leave_type}</span>
                 <span className="text-slate-400">
                   {' '}
@@ -117,7 +117,7 @@ export default function EmployeeHome({ onViewPayslip }) {
         </section>
       )}
 
-      <section className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <section className="rounded-2xl border border-border-soft bg-white/5 p-4">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">Recent payslip</h3>
         {loading ? (
           <div className="mt-3 h-16 animate-pulse rounded-xl bg-white/5" />

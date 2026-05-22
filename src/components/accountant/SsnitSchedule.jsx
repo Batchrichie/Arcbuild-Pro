@@ -123,12 +123,12 @@ export default function SsnitSchedule() {
   }
 
   if (loading) {
-    return <div className="h-48 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
+    return <div className="h-48 animate-pulse rounded-2xl border border-border-soft bg-white/5" />
   }
 
   if (!run) {
     return (
-      <p className="rounded-2xl border border-white/10 bg-white/5 px-4 py-8 text-center text-sm text-slate-400">
+      <p className="rounded-2xl border border-border-soft bg-white/5 px-4 py-8 text-center text-sm text-slate-400">
         No posted payroll run found. Post a payroll run to generate the SSNIT schedule.
       </p>
     )
@@ -142,7 +142,7 @@ export default function SsnitSchedule() {
           Export CSV
         </button>
       </div>
-      <div className="portal-table-scroll rounded-2xl border border-white/10">
+      <div className="portal-table-scroll rounded-2xl border border-border-soft">
         <table className="dark-table min-w-[800px] text-sm">
           <thead>
             <tr>

@@ -154,7 +154,7 @@ export default function SupplierRegistry({ onViewSupplier }) {
               ],
               'Suppliers.xlsx'
             )}
-            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-white/10 transition">
+            className="rounded-xl border border-border-soft bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-white/10 transition">
             Export Excel
           </button>
           {canEdit && (
@@ -169,10 +169,10 @@ export default function SupplierRegistry({ onViewSupplier }) {
       <div className="flex gap-3 flex-wrap">
         <input type="text" placeholder="Search suppliers…" value={search}
           onChange={e => setSearch(e.target.value)}
-          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-400/50 w-64"
+          className="rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-400/50 w-64"
         />
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50">
+          className="rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50">
           <option value="">All Statuses</option>
           {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
@@ -180,9 +180,9 @@ export default function SupplierRegistry({ onViewSupplier }) {
 
       {error && <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">{error}</div>}
 
-      <div className="overflow-x-auto rounded-2xl border border-white/10">
+      <div className="overflow-x-auto rounded-2xl border border-border-soft">
         <table className="w-full text-sm text-slate-300">
-          <thead className="border-b border-white/10 text-xs uppercase tracking-widest text-slate-500">
+          <thead className="border-b border-border-soft text-xs uppercase tracking-widest text-slate-500">
             <tr>
               {['Name','Type','TIN','WHT Rate','Contact','Status',''].map(h => (
                 <th key={h} className="px-4 py-3 text-left">{h}</th>
@@ -195,7 +195,7 @@ export default function SupplierRegistry({ onViewSupplier }) {
             ) : paginated.length === 0 ? (
               <tr><td colSpan={7} className="px-4 py-8 text-center text-slate-500">No suppliers found.</td></tr>
             ) : paginated.map(s => (
-              <tr key={s.id} className="border-b border-white/5 hover:bg-white/5 transition">
+              <tr key={s.id} className="border-b border-border-soft hover:bg-white/5 transition">
                 <td className="px-4 py-3 font-medium text-white">{s.name}</td>
                 <td className="px-4 py-3">{s.supplier_type}</td>
                 <td className="px-4 py-3">{s.tin ?? '—'}</td>
@@ -209,18 +209,18 @@ export default function SupplierRegistry({ onViewSupplier }) {
                 <td className="px-4 py-3 flex gap-2">
                   {onViewSupplier ? (
                     <button type="button" onClick={() => onViewSupplier(s.id)}
-                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">
+                      className="rounded-lg border border-border-soft bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">
                       View
                     </button>
                   ) : (
                     <Link to={`/suppliers/${s.id}`}
-                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">
+                      className="rounded-lg border border-border-soft bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">
                       View
                     </Link>
                   )}
                   {canEdit && (
                     <button onClick={() => openEdit(s)}
-                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">
+                      className="rounded-lg border border-border-soft bg-white/5 px-3 py-1 text-xs hover:bg-white/10 transition">
                       Edit
                     </button>
                   )}
@@ -234,16 +234,16 @@ export default function SupplierRegistry({ onViewSupplier }) {
       {totalPages > 1 && (
         <div className="flex gap-2 items-center text-sm text-slate-400">
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-            className="rounded-lg border border-white/10 px-3 py-1 disabled:opacity-40 hover:bg-white/5 transition">Prev</button>
+            className="rounded-lg border border-border-soft px-3 py-1 disabled:opacity-40 hover:bg-white/5 transition">Prev</button>
           <span>Page {page} of {totalPages}</span>
           <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-            className="rounded-lg border border-white/10 px-3 py-1 disabled:opacity-40 hover:bg-white/5 transition">Next</button>
+            className="rounded-lg border border-border-soft px-3 py-1 disabled:opacity-40 hover:bg-white/5 transition">Next</button>
         </div>
       )}
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-slate-900 p-6 space-y-4 overflow-y-auto max-h-[90vh]">
+          <div className="w-full max-w-2xl rounded-2xl border border-border-soft bg-slate-900 p-6 space-y-4 overflow-y-auto max-h-[90vh]">
             <h2 className="text-lg font-semibold text-white">{editing ? 'Edit Supplier' : 'New Supplier'}</h2>
             {formError && <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{formError}</div>}
 
@@ -268,7 +268,7 @@ export default function SupplierRegistry({ onViewSupplier }) {
                   <span className="uppercase tracking-widest">{label}</span>
                   <input type={type} value={form[key]}
                     onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
+                    className="w-full rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
                   />
                 </label>
               ))}
@@ -276,7 +276,7 @@ export default function SupplierRegistry({ onViewSupplier }) {
               <label className="space-y-1 text-xs text-slate-400">
                 <span className="uppercase tracking-widest">Supplier Type</span>
                 <select value={form.supplier_type} onChange={e => handleTypeChange(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50">
+                  className="w-full rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50">
                   {SUPPLIER_TYPE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
               </label>
@@ -285,14 +285,14 @@ export default function SupplierRegistry({ onViewSupplier }) {
                 <span className="uppercase tracking-widest">WHT Rate (%)</span>
                 <input type="number" step="0.01" value={form.wht_rate}
                   onChange={e => setForm(f => ({ ...f, wht_rate: e.target.value }))}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
+                  className="w-full rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
                 />
               </label>
 
               <label className="space-y-1 text-xs text-slate-400">
                 <span className="uppercase tracking-widest">Currency</span>
                 <select value={form.currency} onChange={e => setForm(f => ({ ...f, currency: e.target.value }))}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50">
+                  className="w-full rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50">
                   {CURRENCY_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
               </label>
@@ -300,7 +300,7 @@ export default function SupplierRegistry({ onViewSupplier }) {
               <label className="space-y-1 text-xs text-slate-400">
                 <span className="uppercase tracking-widest">Status</span>
                 <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50">
+                  className="w-full rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50">
                   {STATUS_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
               </label>
@@ -323,12 +323,12 @@ export default function SupplierRegistry({ onViewSupplier }) {
             <label className="block space-y-1 text-xs text-slate-400">
               <span className="uppercase tracking-widest">Notes</span>
               <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50" />
+                className="w-full rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50" />
             </label>
 
             <div className="flex justify-end gap-3 pt-2">
               <button onClick={() => setModalOpen(false)}
-                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 hover:bg-white/10 transition">
+                className="rounded-xl border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-300 hover:bg-white/10 transition">
                 Cancel
               </button>
               <button onClick={handleSave} disabled={saving}

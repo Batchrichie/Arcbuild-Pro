@@ -12,7 +12,6 @@ import DivisionPerformanceCards from '../../components/ceo/DivisionPerformanceCa
 import ProjectHealthTable from '../../components/ceo/ProjectHealthTable'
 import TaxDueAlerts from '../../components/ceo/TaxDueAlerts'
 import TaxCentre from '../../components/tax/TaxCentre'
-import IssueLog from '../../components/pm/IssueLog'
 import ManualJournalList from '../../components/accounting/ManualJournalList'
 import DebtorsLedger from '../../components/accounting/DebtorsLedger'
 import AlertLog from '../../components/alerts/AlertLog'
@@ -126,7 +125,6 @@ export default function CeoPortal() {
   const [projectHealth, setProjectHealth] = useState([])
   const [taxBalances, setTaxBalances] = useState({})
   const [slideOverProjectId, setSlideOverProjectId] = useState(null)
-  const [projectsSubview, setProjectsSubview] = useState('health')
   const [selectedClientId, setSelectedClientId] = useState(null)
   const [selectedSupplierId, setSelectedSupplierId] = useState(null)
   const [bankAccounts, setBankAccounts] = useState([])
@@ -320,13 +318,13 @@ export default function CeoPortal() {
   }, [loadDashboardData])
 
   return (
-    <div className="portal-shell overflow-x-hidden">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-8 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+    <div className="portal-shell min-h-screen w-full overflow-x-hidden">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-8 lg:px-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
           {/* Desktop sidebar */}
-          <aside className="portal-sidebar hidden rounded-4xl border border-white/10 p-5 shadow-2xl shadow-black/20 lg:block">
-            <div className="mb-6">
-              <div className="inline-flex items-center gap-3 rounded-3xl bg-[rgba(245,166,35,0.12)] px-4 py-3 text-sm font-semibold text-amber-200">
+          <aside className="portal-sidebar hidden lg:flex lg:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl shadow-black/20">
+            <div className="mb-6 shrink-0">
+              <div className="inline-flex items-center gap-3 rounded-3xl bg-amber-bg px-4 py-3 text-sm font-semibold text-amber-200">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500 text-slate-950">AB</span>
                 <span>{COMPANY.name}</span>
               </div>
@@ -338,7 +336,7 @@ export default function CeoPortal() {
             </p>
             <p className="mt-1 text-sm text-slate-400">{profile?.email ?? ''}</p>
 
-            <nav className="mt-8 space-y-2">
+            <nav className="flex-1 overflow-y-auto space-y-2 max-h-[calc(100vh-16rem)] mt-8">
               {TABS.map((tab) => (
                 <button
                   key={tab.id}
@@ -346,8 +344,8 @@ export default function CeoPortal() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`min-touch w-full rounded-2xl border px-4 py-3 text-left text-sm font-medium transition ${
                     activeTab === tab.id
-                      ? 'border-amber-400/40 bg-[rgba(245,166,35,0.12)] text-amber-100'
-                      : 'border-white/10 bg-white/5 text-slate-300 hover:border-amber-400/20'
+                      ? 'border-amber-400/40 bg-amber-bg text-amber-100'
+                      : 'border-border-soft bg-white/5 text-slate-300 hover:border-amber-400/20'
                   }`}
                 >
                   {tab.label}
@@ -358,31 +356,31 @@ export default function CeoPortal() {
             <button
               type="button"
               onClick={signOut}
-              className="min-touch mt-8 w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white transition hover:border-amber-400/40"
+              className="min-touch mt-auto w-full rounded-full border border-border-soft bg-white/5 px-4 py-3 text-sm text-white transition hover:border-amber-400/40"
             >
               Sign Out
             </button>
           </aside>
 
           {/* Main */}
-          <main className="portal-main portal-main-with-tabs min-w-0 overflow-x-hidden space-y-6 lg:space-y-8">
+          <main className="portal-main portal-main-with-tabs min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0 space-y-6 lg:space-y-8">
             {/* Mobile header */}
-            <div className="flex items-center justify-between gap-4 lg:hidden">
-              <div>
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3 lg:hidden">
+              <div className="flex-1 min-w-0">
                 <p className="portal-eyebrow uppercase tracking-[0.2em] text-slate-500">CEO Command Centre</p>
-                <h1 className="text-xl font-semibold text-white">
+                <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-white truncate">
                   {TABS.find((t) => t.id === activeTab)?.label ?? 'Dashboard'}
                 </h1>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <ThemeToggle className="self-start" />
                 <button
-                type="button"
-                onClick={signOut}
-                className="min-touch shrink-0 rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300"
-              >
-                Sign out
-              </button>
+                  type="button"
+                  onClick={signOut}
+                  className="min-touch rounded-full border border-border-soft px-4 py-2 text-sm text-slate-300"
+                >
+                  Sign out
+                </button>
               </div>
             </div>
 
@@ -393,7 +391,7 @@ export default function CeoPortal() {
                 {/* Approvals: desktop only on dashboard scroll; mobile uses tab */}
                 <section id="pending-approvals" className="hidden lg:block" aria-hidden={activeTab !== 'dashboard'}>
                   <SectionHeader title="Pending approvals" subtitle="Executive queue" />
-                  <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                  <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                     <ApprovalQueue />
                   </div>
                 </section>
@@ -422,7 +420,7 @@ export default function CeoPortal() {
             {activeTab === 'approvals' && (
               <section>
                 <SectionHeader title="Pending approvals" subtitle="Review and approve invoices" />
-                <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                   <ApprovalQueue />
                 </div>
               </section>
@@ -435,35 +433,35 @@ export default function CeoPortal() {
             )}
 
             {activeTab === 'financials' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="General ledger" subtitle="Read-only view" />
                 <GeneralLedger readOnly />
               </section>
             )}
 
             {activeTab === 'payments-received' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <PaymentsReceived />
               </section>
             )}
 
             {activeTab === 'chart-of-accounts' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <ChartOfAccounts />
               </section>
             )}
 
             {activeTab === 'revenue' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <RevenueRecognitionDashboard />
               </section>
             )}
 
             {activeTab === 'banking' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="Banking" subtitle="Bank accounts (read-only)" />
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-slate-200">
+                <div className="w-full overflow-x-auto">
+                  <table className="w-full min-w-[720px] text-sm text-slate-200">
                     <thead className="text-slate-400">
                       <tr>
                         <th className="px-3 py-3 text-left">Account</th>
@@ -479,7 +477,7 @@ export default function CeoPortal() {
                         <tr><td colSpan="6" className="p-4 text-center text-slate-400">No bank accounts registered.</td></tr>
                       ) : (
                         bankAccounts.map((a) => (
-                          <tr key={a.id} className="border-t border-white/5">
+                          <tr key={a.id} className="border-t border-border-soft">
                             <td className="px-3 py-3 text-slate-200">{a.account_name}</td>
                             <td className="px-3 py-3 text-slate-200">{a.bank_name}</td>
                             <td className="px-3 py-3 text-slate-200">{(a.account_number || '').slice(-4).padStart((a.account_number||'').length, '*')}</td>
@@ -496,41 +494,41 @@ export default function CeoPortal() {
             )}
 
             {activeTab === 'journal-history' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="Journal history" subtitle="Manual journal postings" />
                 <ManualJournalList readOnly />
               </section>
             )}
 
             {activeTab === 'debtors-ledger' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="Debtors Ledger" subtitle="Aged receivables" />
                 <DebtorsLedger readOnly />
               </section>
             )}
 
             {activeTab === 'alerts' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="Alerts" subtitle="Smart Alert System log" />
                 <AlertLog readOnly />
               </section>
             )}
 
             {activeTab === 'tax-centre' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <TaxCentre readOnly />
               </section>
             )}
 
             {activeTab === 'clients' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="Clients" subtitle="Client registry" />
                 <ClientRegistry onViewClient={openClientDetail} />
               </section>
             )}
 
             {activeTab === 'client-detail' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <ClientDetail
                   clientId={selectedClientId}
                   onBack={() => {
@@ -543,14 +541,14 @@ export default function CeoPortal() {
             )}
 
             {activeTab === 'suppliers' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="Suppliers" subtitle="Supplier registry" />
                 <SupplierRegistry onViewSupplier={openSupplierDetail} />
               </section>
             )}
 
             {activeTab === 'supplier-detail' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SupplierDetail
                   supplierId={selectedSupplierId}
                   onBack={() => {
@@ -563,7 +561,7 @@ export default function CeoPortal() {
             )}
 
             {activeTab === 'reports' && (
-              <section className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <ManagementReports />
               </section>
             )}
@@ -579,7 +577,7 @@ export default function CeoPortal() {
               key={tab.id}
               type="button"
               onClick={() => handleMobileTab(tab.id)}
-              className={`flex min-h-11 min-w-12 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-sm font-medium transition ${
+              className={`flex flex-1 flex-col items-center justify-center min-h-[3rem] py-2 text-xs font-medium transition ${
                 activeTab === tab.id ? 'text-amber-300' : 'text-slate-500'
               }`}
             >
@@ -632,7 +630,7 @@ export default function CeoPortal() {
                     setActiveTab(tab.id)
                     setMoreOpen(false)
                   }}
-                  className="min-touch flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-slate-200"
+                  className="min-touch flex items-center gap-3 rounded-2xl border border-border-soft bg-white/5 px-4 py-3 text-left text-sm text-slate-200"
                 >
                   <span aria-hidden>{tab.icon}</span>
                   {tab.label}
@@ -658,7 +656,7 @@ export default function CeoPortal() {
               <button
                 type="button"
                 onClick={() => setSlideOverProjectId(null)}
-                className="min-touch rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300"
+                className="min-touch rounded-full border border-border-soft px-4 py-2 text-sm text-slate-300"
               >
                 Close
               </button>

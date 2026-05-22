@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
 const EMPTY_FORM = {
@@ -165,7 +165,7 @@ export default function SubcontractorRegistry({ readOnly = false }) {
       {showAddForm && !readOnly && (
         <form
           onSubmit={handleAddSubmit}
-          className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 space-y-4"
+          className="rounded-3xl panel-surface p-6 space-y-4"
         >
           <h3 className="text-lg font-semibold text-white">New Subcontractor</h3>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -284,10 +284,10 @@ export default function SubcontractorRegistry({ readOnly = false }) {
         </form>
       )}
 
-      <div className="overflow-x-auto rounded-3xl border border-white/10">
+      <div className="overflow-x-auto rounded-3xl border border-border-soft">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-white/10 bg-white/5">
+            <tr className="border-b border-border-soft bg-white/5">
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Name</th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">TIN</th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Trade</th>
@@ -313,7 +313,7 @@ export default function SubcontractorRegistry({ readOnly = false }) {
               </tr>
             ) : (
               subcontractors.map((sub) => (
-                <tr key={sub.id} className="border-b border-white/5 hover:bg-white/5">
+                <tr key={sub.id} className="border-b border-border-soft hover:bg-white/5">
                   <td className="px-4 py-3 text-sm font-medium text-white">{sub.name}</td>
                   <td className="px-4 py-3 text-sm text-slate-300">{sub.tin || '—'}</td>
                   <td className="px-4 py-3 text-sm text-slate-300">{sub.trade_type || '—'}</td>
@@ -347,7 +347,7 @@ export default function SubcontractorRegistry({ readOnly = false }) {
       </div>
 
       {historySub && (
-        <div className="rounded-3xl border border-teal-400/30 bg-[rgba(20,184,166,0.08)] p-6">
+        <div className="rounded-3xl border border-teal-400/30 bg-success-bg p-6">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
               <h3 className="text-lg font-semibold text-white">Payment History — {historySub.name}</h3>
@@ -370,7 +370,7 @@ export default function SubcontractorRegistry({ readOnly = false }) {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-border-soft">
                     <th className="px-3 py-2 text-left text-xs uppercase text-slate-500">Date</th>
                     <th className="px-3 py-2 text-left text-xs uppercase text-slate-500">Project</th>
                     <th className="px-3 py-2 text-left text-xs uppercase text-slate-500">Description</th>
@@ -380,7 +380,7 @@ export default function SubcontractorRegistry({ readOnly = false }) {
                 </thead>
                 <tbody>
                   {historyRows.map((row) => (
-                    <tr key={row.cost_id} className="border-b border-white/5">
+                    <tr key={row.cost_id} className="border-b border-border-soft">
                       <td className="px-3 py-2 text-slate-300">
                         {row.payment_date
                           ? new Date(row.payment_date).toLocaleDateString('en-GH')

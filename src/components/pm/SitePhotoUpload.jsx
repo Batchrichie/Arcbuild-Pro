@@ -100,7 +100,7 @@ export default function SitePhotoUpload() {
         Visible to client ✓
       </p>
 
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
         <label className="min-touch inline-flex cursor-pointer items-center justify-center rounded-full border border-cyan-400/30 bg-cyan-500/15 px-4 py-2.5 text-sm font-semibold text-cyan-100">
           Upload site photo
           <input type="file" accept="image/*" className="hidden" onChange={onFilePick} />
@@ -114,13 +114,13 @@ export default function SitePhotoUpload() {
               placeholder="Description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+              className="w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
             />
             <input
               type="date"
               value={photoDate}
               onChange={(e) => setPhotoDate(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+              className="w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
             />
             <div className="flex gap-2">
               <button
@@ -137,7 +137,7 @@ export default function SitePhotoUpload() {
                   setPreview(null)
                   setPendingFile(null)
                 }}
-                className="min-touch rounded-full border border-white/10 px-4 py-2.5 text-sm text-slate-300"
+                className="min-touch rounded-full border border-border-soft px-4 py-2.5 text-sm text-slate-300"
               >
                 Cancel
               </button>
@@ -158,7 +158,7 @@ export default function SitePhotoUpload() {
               key={photo.id}
               type="button"
               onClick={() => setFullscreen(photo)}
-              className="mb-3 block w-full break-inside-avoid overflow-hidden rounded-xl border border-white/10 text-left"
+              className="mb-3 block w-full break-inside-avoid overflow-hidden rounded-xl border border-border-soft text-left"
             >
               <img src={photo.file_url} alt={photo.description || photo.file_name} className="w-full object-cover" />
               <div className="bg-black/60 px-2 py-2 text-xs text-slate-200">

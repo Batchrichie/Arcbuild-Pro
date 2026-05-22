@@ -82,7 +82,7 @@ export default function AlertLog({ readOnly = false }) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+      <div className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Smart Alert System</p>
@@ -92,7 +92,7 @@ export default function AlertLog({ readOnly = false }) {
             <button
               type="button"
               onClick={loadLogs}
-              className="min-touch rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200"
+              className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200"
             >
               Refresh
             </button>
@@ -100,7 +100,7 @@ export default function AlertLog({ readOnly = false }) {
               type="button"
               onClick={runAlertsNow}
               disabled={readOnly || running}
-              className="min-touch rounded-full border border-white/10 bg-amber-500/10 px-4 py-2 text-sm text-amber-200 disabled:opacity-50"
+              className="min-touch rounded-full border border-border-soft bg-amber-500/10 px-4 py-2 text-sm text-amber-200 disabled:opacity-50"
             >
               {running ? 'Running...' : 'Run Alerts Now'}
             </button>
@@ -112,7 +112,7 @@ export default function AlertLog({ readOnly = false }) {
         <div className="mt-6 grid gap-4 lg:grid-cols-4">
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Alert type</span>
-            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white">
+            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white">
               {ALERT_TYPES.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
@@ -120,16 +120,16 @@ export default function AlertLog({ readOnly = false }) {
           </label>
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-[0.2em] text-slate-400">From</span>
-            <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white" />
+            <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white" />
           </label>
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-[0.2em] text-slate-400">To</span>
-            <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white" />
+            <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white" />
           </label>
         </div>
       </div>
 
-      <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-4 shadow-xl shadow-black/10">
+      <div className="rounded-4xl border border-border-soft bg-slate-950/80 p-4 shadow-xl shadow-black/10">
         <div className="overflow-x-auto rounded-3xl">
           <table className="min-w-full text-sm">
             <thead>
@@ -149,7 +149,7 @@ export default function AlertLog({ readOnly = false }) {
                 <tr><td colSpan={6} className="p-4 text-slate-400">No alert logs found.</td></tr>
               ) : (
                 logs.map((log) => (
-                  <tr key={log.id} className="border-t border-white/10 hover:bg-white/5">
+                  <tr key={log.id} className="border-t border-border-soft hover:bg-white/5">
                     <td className="px-3 py-3 text-slate-200">{formatDate(log.sent_at)}</td>
                     <td className="px-3 py-3 text-slate-200">{log.alert_type}</td>
                     <td className="px-3 py-3 text-slate-200">{log.subject}</td>

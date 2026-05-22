@@ -10,7 +10,7 @@ const STATUS_BADGE = {
   rejected: 'bg-red-500/20 text-red-300',
 }
 
-const inputCls = 'w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white'
+const inputCls = 'w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2.5 text-sm text-white'
 
 export default function EmployeeLeave() {
   const { employee } = useEmployee()
@@ -116,14 +116,14 @@ export default function EmployeeLeave() {
           { label: 'Remaining', value: balance.remaining },
           { label: 'Pending', value: balance.pending },
         ].map((c) => (
-          <div key={c.label} className="rounded-2xl border border-white/10 bg-white/5 p-3 text-center">
+          <div key={c.label} className="rounded-2xl border border-border-soft bg-white/5 p-3 text-center">
             <p className="text-xs uppercase text-slate-500">{c.label}</p>
             <p className="mt-1 text-xl font-semibold text-orange-200">{loading ? '—' : c.value}</p>
           </div>
         ))}
       </div>
 
-      <form onSubmit={submit} className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+      <form onSubmit={submit} className="space-y-3 rounded-2xl border border-border-soft bg-white/5 p-4">
         <h3 className="font-semibold text-white">Apply for leave</h3>
         <select className={inputCls} value={form.leave_type} onChange={(e) => setForm({ ...form, leave_type: e.target.value })}>
           {EMPLOYEE_LEAVE_TYPES.map((t) => (
@@ -156,10 +156,10 @@ export default function EmployeeLeave() {
         ) : history.length === 0 ? (
           <p className="text-sm text-slate-500">No leave requests yet.</p>
         ) : (
-          <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-white/10">
+          <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-border-soft">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-xs uppercase text-slate-500">
+                <tr className="border-b border-border-soft text-left text-xs uppercase text-slate-500">
                   <th className="px-3 py-3">Type</th>
                   <th className="px-3 py-3">From</th>
                   <th className="px-3 py-3">To</th>
@@ -170,7 +170,7 @@ export default function EmployeeLeave() {
               </thead>
               <tbody>
                 {history.map((row) => (
-                  <tr key={row.id} className="border-b border-white/5">
+                  <tr key={row.id} className="border-b border-border-soft">
                     <td className="px-3 py-3 capitalize text-white">{row.leave_type}</td>
                     <td className="px-3 py-3 text-slate-400">{row.start_date}</td>
                     <td className="px-3 py-3 text-slate-400">{row.end_date}</td>

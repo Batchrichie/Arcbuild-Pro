@@ -10,7 +10,7 @@ const TAX_ACCOUNTS = [
 
 export default function TaxDueAlerts({ balances, loading }) {
   if (loading) {
-    return <div className="h-24 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
+    return <div className="h-24 animate-pulse rounded-2xl border border-border-soft bg-white/5" />
   }
 
   return (

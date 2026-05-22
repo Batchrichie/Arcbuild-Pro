@@ -57,7 +57,7 @@ export default function BankAccountRegistry() {
           .in('account_code', [...new Set(codes)])
           .order('entry_date', { ascending: false })
 
-        const grouped = {}
+        const grouped = {};
         (balanceRows || []).forEach((row) => {
           if (!grouped[row.account_code]) grouped[row.account_code] = row.running_balance
         })
@@ -126,7 +126,7 @@ export default function BankAccountRegistry() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-4xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-xl shadow-black/10">
+      <div className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Bank account registry</p>
@@ -142,7 +142,7 @@ export default function BankAccountRegistry() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
           <div className="space-y-4">
-            <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-950 pb-2">
+            <div className="overflow-hidden rounded-3xl border border-border-soft bg-slate-950 pb-2">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-slate-900 text-slate-400">
@@ -163,7 +163,7 @@ export default function BankAccountRegistry() {
                       <tr><td colSpan="7" className="p-4 text-center text-slate-400">No bank accounts registered yet.</td></tr>
                     ) : (
                       accountRows.map((account) => (
-                        <tr key={account.id} className="border-t border-white/5">
+                        <tr key={account.id} className="border-t border-border-soft">
                           <td className="px-3 py-3 text-slate-200">{account.account_name}</td>
                           <td className="px-3 py-3 text-slate-200">{account.bank_name}</td>
                           <td className="px-3 py-3 text-slate-200">{maskAccountNumber(account.account_number)}</td>
@@ -184,7 +184,7 @@ export default function BankAccountRegistry() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-slate-950 p-6">
+          <div className="rounded-3xl border border-border-soft bg-slate-950 p-6">
             <h3 className="text-lg font-semibold text-white">Add Bank Account</h3>
             <form className="space-y-4" onSubmit={handleSubmit}>
               <label className="block text-sm text-slate-300">
@@ -193,7 +193,7 @@ export default function BankAccountRegistry() {
                   type="text"
                   value={form.account_name}
                   onChange={(e) => handleChange('account_name', e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+                  className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
                 />
               </label>
               <label className="block text-sm text-slate-300">
@@ -202,7 +202,7 @@ export default function BankAccountRegistry() {
                   type="text"
                   value={form.bank_name}
                   onChange={(e) => handleChange('bank_name', e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+                  className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
                 />
               </label>
               <label className="block text-sm text-slate-300">
@@ -211,7 +211,7 @@ export default function BankAccountRegistry() {
                   type="text"
                   value={form.account_number}
                   onChange={(e) => handleChange('account_number', e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+                  className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
                 />
               </label>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -220,7 +220,7 @@ export default function BankAccountRegistry() {
                   <select
                     value={form.currency}
                     onChange={(e) => handleChange('currency', e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+                    className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
                   >
                     {CURRENCIES.map((currency) => (
                       <option key={currency} value={currency}>{currency}</option>
@@ -232,7 +232,7 @@ export default function BankAccountRegistry() {
                   <select
                     value={form.gl_account_code}
                     onChange={(e) => handleChange('gl_account_code', e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+                    className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
                   >
                     <option value="">Select cash account</option>
                     {cashAccounts.map((account) => (
@@ -250,7 +250,7 @@ export default function BankAccountRegistry() {
                   step="0.01"
                   value={form.opening_balance}
                   onChange={(e) => handleChange('opening_balance', e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+                  className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
                 />
               </label>
               <button

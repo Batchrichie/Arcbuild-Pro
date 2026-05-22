@@ -23,11 +23,11 @@ function milestoneStatusStyle(status, dueDate) {
   if (overdue) return 'border-red-400/50 bg-red-500/10 text-red-200'
   if (status === 'completed' || status === 'invoiced') return 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200'
   if (status === 'in_progress') return 'border-amber-400/40 bg-amber-500/10 text-amber-200'
-  return 'border-white/10 bg-white/5 text-slate-300'
+  return 'border-border-soft bg-white/5 text-slate-300'
 }
 
 export default function PmDashboard({ onLogCost, onMarkMilestone, onPaymentCert, onOpenCostLedger }) {
-  const { selectedProjectId, selectedProject } = usePmProject()
+  const { selectedProjectId } = usePmProject()
   const [finance, setFinance] = useState(null)
   const [contractEnd, setContractEnd] = useState(null)
   const [milestones, setMilestones] = useState([])
@@ -57,11 +57,6 @@ export default function PmDashboard({ onLogCost, onMarkMilestone, onPaymentCert,
   }, [load])
 
   const budgetRows = COST_CATEGORIES.map((category) => {
-    const key = category.toLowerCase().replace(/ /g, '_')
-    const budget = finance?.[`${key}_budget_ghs`] ?? finance?.[`${key.replace(' ', '_')}_budget_ghs`]
-    const spent =
-      finance?.[`${key}_cost_ghs`] ??
-      finance?.[`materials_cost_ghs` && category === 'Materials' ? 'materials_cost_ghs' : null]
     const budgetVal =
       category === 'Materials'
         ? finance?.materials_budget_ghs
@@ -147,7 +142,7 @@ export default function PmDashboard({ onLogCost, onMarkMilestone, onPaymentCert,
 
           <section>
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Budget vs actual</h3>
-            <div className="portal-table-scroll rounded-2xl border border-white/10">
+            <div className="portal-table-scroll rounded-2xl border border-border-soft">
               <table className="dark-table min-w-[520px] w-full text-sm">
                 <thead>
                   <tr>
@@ -194,7 +189,7 @@ export default function PmDashboard({ onLogCost, onMarkMilestone, onPaymentCert,
 
 function SummaryCard({ label, value, valueClass = 'text-white', progress, raw }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+    <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
       <p className="text-xs uppercase tracking-wide text-slate-500">{label}</p>
       {progress != null ? (
         <>

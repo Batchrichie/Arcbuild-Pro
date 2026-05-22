@@ -76,10 +76,10 @@ export default function EmployeeLoans() {
                   {open ? 'Hide schedule' : 'View repayment schedule'}
                 </button>
                 {open && schedule.length > 0 && (
-                  <div className="portal-table-scroll mt-3 overflow-x-auto rounded-xl border border-white/10">
+                  <div className="portal-table-scroll mt-3 overflow-x-auto rounded-xl border border-border-soft">
                     <table className="w-full min-w-[400px] text-xs">
                       <thead>
-                        <tr className="border-b border-white/10 text-left text-slate-500">
+                        <tr className="border-b border-border-soft text-left text-slate-500">
                           <th className="px-3 py-2">Month</th>
                           <th className="px-3 py-2">Opening</th>
                           <th className="px-3 py-2">Deduction</th>
@@ -88,7 +88,7 @@ export default function EmployeeLoans() {
                       </thead>
                       <tbody>
                         {schedule.map((row, i) => (
-                          <tr key={i} className="border-b border-white/5">
+                          <tr key={i} className="border-b border-border-soft">
                             <td className="px-3 py-2 text-slate-300">{row.month}</td>
                             <td className="px-3 py-2">{formatGhs(row.opening)}</td>
                             <td className="px-3 py-2">{formatGhs(row.deduction)}</td>
@@ -108,7 +108,7 @@ export default function EmployeeLoans() {
               <h3 className="mb-3 text-sm font-semibold uppercase text-slate-500">Settled loans</h3>
               <ul className="space-y-2 opacity-60">
                 {settled.map((loan) => (
-                  <li key={loan.id} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
+                  <li key={loan.id} className="rounded-xl border border-border-soft bg-white/5 px-4 py-3 text-sm text-slate-400">
                     {formatGhs(loan.loan_amount)} · {loan.status} · started {loan.start_date}
                   </li>
                 ))}

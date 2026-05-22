@@ -9,7 +9,7 @@ const BRACKETS = [
 
 function PanelShell({ title, subtitle, children }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-5">
+    <div className="rounded-3xl panel-surface p-5">
       <p className="text-sm font-semibold text-white">{title}</p>
       {subtitle && <p className="mt-0.5 text-sm text-slate-500">{subtitle}</p>}
       <div className="mt-4">{children}</div>

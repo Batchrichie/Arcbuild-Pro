@@ -149,10 +149,10 @@ export default function HrDashboard({ onNavigate }) {
         ) : expiring.length === 0 ? (
           <p className="text-sm text-slate-500">No contracts ending in the next 60 days.</p>
         ) : (
-          <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-white/10">
+          <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-border-soft">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-xs uppercase text-slate-500">
+                <tr className="border-b border-border-soft text-left text-xs uppercase text-slate-500">
                   <th className="px-4 py-3">Employee</th>
                   <th className="px-4 py-3">Job title</th>
                   <th className="px-4 py-3">Department</th>
@@ -164,7 +164,7 @@ export default function HrDashboard({ onNavigate }) {
                 {expiring.map((row) => {
                   const days = daysUntil(row.termination_date)
                   return (
-                    <tr key={row.id} className="border-b border-white/5 hover:bg-white/5">
+                    <tr key={row.id} className="border-b border-border-soft hover:bg-white/5">
                       <td className="px-4 py-3 text-white">{row.profiles?.full_name ?? row.employee_number}</td>
                       <td className="px-4 py-3 text-slate-400">{row.job_title ?? '—'}</td>
                       <td className="px-4 py-3 text-slate-400">{row.department ?? row.division?.name ?? '—'}</td>
@@ -186,10 +186,10 @@ export default function HrDashboard({ onNavigate }) {
         ) : recentLeave.length === 0 ? (
           <p className="text-sm text-slate-500">No leave requests yet.</p>
         ) : (
-          <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-white/10">
+          <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-border-soft">
             <table className="w-full min-w-[720px] text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-xs uppercase text-slate-500">
+                <tr className="border-b border-border-soft text-left text-xs uppercase text-slate-500">
                   <th className="px-4 py-3">Employee</th>
                   <th className="px-4 py-3">Type</th>
                   <th className="px-4 py-3">From</th>
@@ -201,7 +201,7 @@ export default function HrDashboard({ onNavigate }) {
               </thead>
               <tbody>
                 {recentLeave.map((row) => (
-                  <tr key={row.id} className="border-b border-white/5 hover:bg-white/5">
+                  <tr key={row.id} className="border-b border-border-soft hover:bg-white/5">
                     <td className="px-4 py-3 text-white">
                       {row.employees?.profiles?.full_name ?? row.employees?.employee_number ?? '—'}
                     </td>

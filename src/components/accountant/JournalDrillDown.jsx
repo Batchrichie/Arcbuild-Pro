@@ -46,7 +46,7 @@ export default function JournalDrillDown({ journalId, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="min-touch rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300"
+            className="min-touch rounded-full border border-border-soft px-4 py-2 text-sm text-slate-300"
           >
             Close
           </button>
@@ -57,7 +57,7 @@ export default function JournalDrillDown({ journalId, onClose }) {
           <>
             <p className="text-sm text-slate-400">{header?.entry_date} — {header?.description}</p>
             <p className="mt-1 text-sm font-semibold text-teal-200">Total: GHS {formatGhs(totalDebit)}</p>
-            <div className="portal-table-scroll mt-4 rounded-2xl border border-white/10">
+            <div className="portal-table-scroll mt-4 rounded-2xl border border-border-soft">
               <table className="dark-table min-w-[480px] text-sm">
                 <thead>
                   <tr>

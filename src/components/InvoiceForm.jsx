@@ -12,7 +12,7 @@
  *   • Draft/Submit workflow
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { TAX_RATES, Currency } from '../lib/tax-constants';
 import { recordRetentionWithheld } from '../services/retentionService';
@@ -580,8 +580,8 @@ export default function InvoiceForm({ onSave, initialData = null }) {
   return (
     <div className="py-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950/95 shadow-2xl shadow-black/30">
-          <div className="bg-slate-900/80 px-6 py-5 border-b border-white/10">
+        <div className="overflow-hidden rounded-[1.75rem] border border-border-soft bg-slate-950/95 shadow-2xl shadow-black/30">
+          <div className="bg-slate-900/80 px-6 py-5 border-b border-border-soft">
             <h1 className="text-3xl font-semibold text-white">Create invoice</h1>
             <p className="mt-2 text-sm text-slate-400">
               Build an invoice with client, project, line items, and tax calculation in one flow.
@@ -610,7 +610,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                   <select
                     value={formData.client_id}
                     onChange={(e) => handleFormChange('client_id', e.target.value)}
-                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   >
                     <option value="">Select a client...</option>
                     {clients.map((client) => (
@@ -627,7 +627,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     value={formData.project_id}
                     onChange={(e) => handleFormChange('project_id', e.target.value)}
                     disabled={!formData.client_id}
-                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:bg-slate-800 disabled:text-slate-500"
+                      className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:bg-slate-800 disabled:text-slate-500"
                   >
                     <option value="">Select a project...</option>
                     {projects.map((project) => (
@@ -644,7 +644,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     type="text"
                     value={formData.division_name}
                     readOnly
-                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-base text-slate-300"
+                    className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base text-slate-300"
                   />
                 </div>
 
@@ -654,7 +654,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     <select
                       value={formData.currency}
                       onChange={(e) => handleFormChange('currency', e.target.value)}
-                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                     >
                       {Object.values(Currency).map((curr) => (
                         <option key={curr} value={curr}>
@@ -673,7 +673,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                       step="0.01"
                       value={formData.retention_rate}
                       onChange={(e) => handleFormChange('retention_rate', Number(e.target.value))}
-                      className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                     />
                   </div>
                 </div>
@@ -688,7 +688,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                         value={formData.fx_rate_to_ghs}
                         onChange={handleOverrideFxRate}
                         disabled={formData.currency === Currency.GHS}
-                        className="flex-1 rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:bg-slate-800"
+                        className="flex-1 rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:bg-slate-800"
                       />
                       <button
                         onClick={() =>
@@ -722,7 +722,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                   </div>
                 </div>
 
-                <div className="rounded-3xl border border-white/10 bg-slate-900/90 p-4">
+                <div className="rounded-3xl border border-border-soft bg-slate-900/90 p-4">
                   <div className="flex justify-between text-sm text-slate-400 mb-3">
                     <span>Retention withheld</span>
                     <span>{formatCurrency(taxes.gross_total * (Number(formData.retention_rate || 0) / 100))}</span>
@@ -744,7 +744,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     </button>
                   </div>
 
-                  <div className="space-y-3 rounded-3xl border border-white/10 bg-slate-950/80 p-4">
+                  <div className="space-y-3 rounded-3xl border border-border-soft bg-slate-950/80 p-4">
                     {lineItems.map((item, index) => (
                       <div key={index} className="grid grid-cols-12 gap-2 items-end">
                         <input
@@ -754,7 +754,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           onChange={(e) =>
                             handleLineItemChange(index, 'description', e.target.value)
                           }
-                          className="col-span-4 lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900 px-3 py-3 text-base text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                          className="col-span-4 lg:col-span-3 rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="number"
@@ -764,7 +764,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           onChange={(e) =>
                             handleLineItemChange(index, 'quantity', parseFloat(e.target.value))
                           }
-                          className="col-span-2 lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900 px-3 py-3 text-base text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                          className="col-span-2 lg:col-span-3 rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="number"
@@ -774,13 +774,13 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           onChange={(e) =>
                             handleLineItemChange(index, 'unit_price', parseFloat(e.target.value))
                           }
-                          className="col-span-2 lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900 px-3 py-3 text-base text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                          className="col-span-2 lg:col-span-3 rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="text"
                           readOnly
                           value={formatCurrency(item.quantity * item.unit_price)}
-                          className="col-span-2 rounded-2xl border border-white/10 bg-slate-900 px-3 py-3 text-base text-slate-300"
+                          className="col-span-2 rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base text-slate-300"
                         />
                         <button
                           onClick={() => removeLineItem(index)}
@@ -799,13 +799,13 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     value={formData.notes}
                     onChange={(e) => handleFormChange('notes', e.target.value)}
                     rows="3"
-                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-4 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   />
                 </div>
               </div>
 
               <div className="lg:col-span-1">
-                <div className="sticky top-6 rounded-3xl border border-white/10 bg-slate-900/90 p-6 shadow-lg shadow-black/20">
+                <div className="sticky top-6 rounded-3xl border border-border-soft bg-slate-900/90 p-6 shadow-lg shadow-black/20">
                   <h3 className="text-lg font-semibold text-white mb-4">Tax Breakdown</h3>
 
                   <div className="space-y-3 text-sm text-slate-200">
@@ -851,7 +851,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                       </div>
                     )}
 
-                    <div className="border-t border-white/10 my-2"></div>
+                    <div className="border-t border-border-soft my-2"></div>
 
                     <div className="flex justify-between font-bold text-base text-white">
                       <span>Gross Total:</span>
@@ -873,7 +873,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                       </div>
                     )}
 
-                    <div className="border-t border-white/10 my-2"></div>
+                    <div className="border-t border-border-soft my-2"></div>
 
                     <div className="flex justify-between font-bold text-base text-emerald-300">
                       <span>Expected Receipt:</span>
@@ -885,7 +885,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     </div>
 
                     {formData.currency !== Currency.GHS && (
-                      <div className="mt-4 pt-4 border-t border-white/10 text-xs text-slate-400">
+                      <div className="mt-4 pt-4 border-t border-border-soft text-xs text-slate-400">
                         <div className="flex justify-between mb-2">
                           <span>Gross (GHS):</span>
                           <span className="font-medium text-white">{formatGHS(taxes.gross_total_ghs)}</span>
@@ -901,11 +901,11 @@ export default function InvoiceForm({ onSave, initialData = null }) {
               </div>
             </div>
 
-            <div className="mt-8 flex flex-col gap-3 justify-end border-t border-white/10 pt-6 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 justify-end border-t border-border-soft pt-6 sm:flex-row">
               <button
                 onClick={handleSaveAsDraft}
                 disabled={loading}
-                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/10 disabled:opacity-50"
+                className="rounded-2xl border border-border-soft bg-white/5 px-5 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/10 disabled:opacity-50"
               >
                 {loading ? 'Saving...' : 'Save as Draft'}
               </button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import PayslipPdf from './pdf/PayslipPdf';
 import { COMPANY } from '../lib/company-config';

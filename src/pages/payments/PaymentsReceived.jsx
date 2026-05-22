@@ -15,8 +15,8 @@ const STATUS_BADGES = {
   paid: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
 }
 
-const PAYMENT_ACCOUNT_SELECT_CLASS = 'text-white bg-slate-800 border border-white/10 rounded-xl px-3 py-2 outline-none'
-const AMOUNT_INPUT_CLASS = 'text-white bg-slate-800 border border-white/10 rounded-xl px-3 py-2 outline-none w-full'
+const PAYMENT_ACCOUNT_SELECT_CLASS = 'text-white bg-slate-800 border border-border-soft rounded-xl px-3 py-2 outline-none'
+const AMOUNT_INPUT_CLASS = 'text-white bg-slate-800 border border-border-soft rounded-xl px-3 py-2 outline-none w-full'
 
 export default function PaymentsReceived() {
   const { profile } = useAuth()
@@ -283,7 +283,7 @@ export default function PaymentsReceived() {
         )}
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
+      <div className="rounded-2xl border border-border-soft bg-slate-900/80 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold text-white">Debtor List</h2>
@@ -295,9 +295,9 @@ export default function PaymentsReceived() {
           <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">{debtorsError}</div>
         )}
 
-        <div className="mt-6 overflow-x-auto rounded-3xl border border-white/10 bg-slate-950/40">
+        <div className="mt-6 overflow-x-auto rounded-3xl border border-border-soft bg-slate-950/40">
           <table className="min-w-full text-sm text-slate-300">
-            <thead className="border-b border-white/10 bg-slate-900/80 text-left text-xs uppercase tracking-[0.24em] text-slate-500">
+            <thead className="border-b border-border-soft bg-slate-900/80 text-left text-xs uppercase tracking-[0.24em] text-slate-500">
               <tr>
                 <th className="px-4 py-3">Client Name</th>
                 <th className="px-4 py-3">Total Outstanding Balance (GHS)</th>
@@ -315,7 +315,7 @@ export default function PaymentsReceived() {
                 </tr>
               ) : (
                 debtors.map((debtor) => (
-                  <tr key={debtor.id} className="border-b border-white/10 hover:bg-white/5 transition">
+                  <tr key={debtor.id} className="border-b border-border-soft hover:bg-white/5 transition">
                     <td className="px-4 py-4 font-medium text-white">{debtor.name ?? 'Unknown'}</td>
                     <td className="px-4 py-4">{new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(Number(debtor.total_outstanding_balance || 0))}</td>
                     <td className="px-4 py-4 flex flex-wrap gap-2">
@@ -331,7 +331,7 @@ export default function PaymentsReceived() {
                       <button
                         type="button"
                         onClick={() => openStatement(debtor)}
-                        className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 hover:bg-white/10 transition"
+                        className="rounded-xl border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 hover:bg-white/10 transition"
                       >
                         View Statement
                       </button>
@@ -346,8 +346,8 @@ export default function PaymentsReceived() {
 
       {paymentModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-slate-900/95 shadow-2xl shadow-black/40">
-            <div className="flex items-start justify-between gap-4 border-b border-white/10 px-6 py-5">
+          <div className="w-full max-w-4xl overflow-hidden rounded-3xl border border-border-soft bg-slate-900/95 shadow-2xl shadow-black/40">
+            <div className="flex items-start justify-between gap-4 border-b border-border-soft px-6 py-5">
               <div>
                 <h2 className="text-xl font-semibold text-white">Record Payment</h2>
                 <p className="text-sm text-slate-400">Allocate payment to outstanding invoices for {selectedClient?.name}.</p>
@@ -355,7 +355,7 @@ export default function PaymentsReceived() {
               <button
                 type="button"
                 onClick={closePaymentModal}
-                className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10 transition"
+                className="rounded-full border border-border-soft bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10 transition"
               >
                 Close
               </button>
@@ -369,7 +369,7 @@ export default function PaymentsReceived() {
                     type="date"
                     value={paymentDate}
                     onChange={(event) => setPaymentDate(event.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                    className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-slate-200 md:col-span-2">
@@ -379,7 +379,7 @@ export default function PaymentsReceived() {
                     value={paymentReference}
                     onChange={(event) => setPaymentReference(event.target.value)}
                     placeholder="Enter payment reference"
-                    className="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white outline-none"
+                    className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
                   />
                 </label>
               </div>
@@ -401,7 +401,7 @@ export default function PaymentsReceived() {
                 </label>
                 <div className="space-y-2 text-sm text-slate-200">
                   <span>Total Allocated</span>
-                  <div className="rounded-xl border border-white/10 bg-slate-800 px-3 py-2 text-white">
+                  <div className="rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white">
                     {new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(totalAllocated)}
                   </div>
                 </div>
@@ -411,9 +411,9 @@ export default function PaymentsReceived() {
                 <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{paymentError}</div>
               )}
 
-              <div className="overflow-x-auto rounded-3xl border border-white/10 bg-slate-950/40">
+              <div className="overflow-x-auto rounded-3xl border border-border-soft bg-slate-950/40">
                 <table className="min-w-full text-sm text-slate-300">
-                  <thead className="border-b border-white/10 bg-slate-900/80 text-left text-xs uppercase tracking-[0.24em] text-slate-500">
+                  <thead className="border-b border-border-soft bg-slate-900/80 text-left text-xs uppercase tracking-[0.24em] text-slate-500">
                     <tr>
                       <th className="px-4 py-3">Invoice Number</th>
                       <th className="px-4 py-3">Project</th>
@@ -433,10 +433,10 @@ export default function PaymentsReceived() {
                       </tr>
                     ) : (
                       outstandingInvoices.map((invoice) => (
-                        <tr key={invoice.id} className="border-b border-white/10 hover:bg-white/5 transition">
+                        <tr key={invoice.id} className="border-b border-border-soft hover:bg-white/5 transition">
                           <td className="px-4 py-4">
                             <div className="font-medium text-white">{invoice.invoice_number}</div>
-                            <div className={`mt-2 inline-flex items-center gap-2 rounded-full border px-2 py-1 text-[11px] uppercase tracking-[0.18em] ${STATUS_BADGES[invoice.status] ?? 'border-white/10 bg-white/5 text-slate-300'}`}>
+                            <div className={`mt-2 inline-flex items-center gap-2 rounded-full border px-2 py-1 text-[11px] uppercase tracking-[0.18em] ${STATUS_BADGES[invoice.status] ?? 'border-border-soft bg-white/5 text-slate-300'}`}>
                               <span>{invoice.status}</span>
                             </div>
                           </td>
@@ -464,7 +464,7 @@ export default function PaymentsReceived() {
                 <button
                   type="button"
                   onClick={closePaymentModal}
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 hover:bg-white/10 transition"
+                  className="rounded-xl border border-border-soft bg-white/5 px-4 py-3 text-sm text-slate-200 hover:bg-white/10 transition"
                 >
                   Cancel
                 </button>
@@ -484,8 +484,8 @@ export default function PaymentsReceived() {
 
       {statementOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-slate-900/95 shadow-2xl shadow-black/40">
-            <div className="flex flex-col gap-4 border-b border-white/10 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-border-soft bg-slate-900/95 shadow-2xl shadow-black/40">
+            <div className="flex flex-col gap-4 border-b border-border-soft px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-xl font-semibold text-white">Client Statement</h2>
                 <p className="text-sm text-slate-400">{statementClient?.name ?? 'Client details will appear here.'}</p>
@@ -496,7 +496,7 @@ export default function PaymentsReceived() {
               <button
                 type="button"
                 onClick={closeStatement}
-                className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10 transition"
+                className="rounded-full border border-border-soft bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10 transition"
               >
                 Close
               </button>
@@ -507,9 +507,9 @@ export default function PaymentsReceived() {
                 <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{statementError}</div>
               )}
 
-              <div className="overflow-x-auto rounded-3xl border border-white/10 bg-slate-950/40">
+              <div className="overflow-x-auto rounded-3xl border border-border-soft bg-slate-950/40">
                 <table className="min-w-full text-sm text-slate-300">
-                  <thead className="border-b border-white/10 bg-slate-900/80 text-left text-xs uppercase tracking-[0.24em] text-slate-500">
+                  <thead className="border-b border-border-soft bg-slate-900/80 text-left text-xs uppercase tracking-[0.24em] text-slate-500">
                     <tr>
                       <th className="px-4 py-3">Date</th>
                       <th className="px-4 py-3">Description</th>
@@ -530,7 +530,7 @@ export default function PaymentsReceived() {
                       </tr>
                     ) : (
                       statementRows.map((row, index) => (
-                        <tr key={`${row.type}-${index}`} className="border-b border-white/10 hover:bg-white/5 transition">
+                        <tr key={`${row.type}-${index}`} className="border-b border-border-soft hover:bg-white/5 transition">
                           <td className="px-4 py-4">{row.date}</td>
                           <td className="px-4 py-4">{row.description}</td>
                           <td className="px-4 py-4">{row.invoiceNumber}</td>
@@ -544,7 +544,7 @@ export default function PaymentsReceived() {
                 </table>
               </div>
 
-              <div className="flex items-center justify-end gap-3 rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-4 text-sm text-slate-300">
+              <div className="flex items-center justify-end gap-3 rounded-3xl border border-border-soft bg-slate-900/80 px-4 py-4 text-sm text-slate-300">
                 <span className="font-semibold text-white">Total Outstanding Balance:</span>
                 <span>{new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(statementBalance)}</span>
               </div>

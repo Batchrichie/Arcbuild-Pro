@@ -3,12 +3,6 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { LEAVE_TYPE_COLORS } from '../../lib/hr-config'
 
-const STATUS_BADGE = {
-  pending: 'bg-amber-500/20 text-amber-200',
-  approved: 'bg-emerald-500/20 text-emerald-200',
-  rejected: 'bg-red-500/20 text-red-300',
-}
-
 export default function LeaveApprovals() {
   const { profile } = useAuth()
   const [rows, setRows] = useState([])
@@ -76,10 +70,10 @@ export default function LeaveApprovals() {
       ) : rows.length === 0 ? (
         <p className="text-sm text-slate-500">No pending leave requests.</p>
       ) : (
-        <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-white/10">
+        <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-border-soft">
           <table className="w-full min-w-[800px] text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-left text-xs uppercase text-slate-500">
+              <tr className="border-b border-border-soft text-left text-xs uppercase text-slate-500">
                 <th className="px-4 py-3">Employee</th>
                 <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">From</th>
@@ -91,7 +85,7 @@ export default function LeaveApprovals() {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className="border-b border-white/5">
+                <tr key={row.id} className="border-b border-border-soft">
                   <td className="px-4 py-3 text-white">
                     {row.employees?.profiles?.full_name ?? row.employees?.employee_number}
                   </td>
@@ -122,19 +116,19 @@ export default function LeaveApprovals() {
       )}
 
       {rejectId && (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
           <h4 className="font-semibold text-white">Rejection reason</h4>
           <textarea
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
-            className="mt-2 w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white"
+            className="mt-2 w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
             rows={3}
           />
           <div className="mt-3 flex gap-2">
             <button type="button" onClick={confirmReject} className="rounded-full bg-red-500 px-4 py-2 text-sm text-white">
               Confirm reject
             </button>
-            <button type="button" onClick={() => setRejectId(null)} className="rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300">
+            <button type="button" onClick={() => setRejectId(null)} className="rounded-full border border-border-soft px-4 py-2 text-sm text-slate-300">
               Cancel
             </button>
           </div>

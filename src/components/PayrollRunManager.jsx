@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 
-export default function PayrollRunManager({ userRole, userId, readOnly = false }) {
+export default function PayrollRunManager({ userId, readOnly = false }) {
   const [activeRun, setActiveRun] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [payrollLines, setPayrollLines] = useState([]);
@@ -32,7 +32,6 @@ export default function PayrollRunManager({ userRole, userId, readOnly = false }
         return;
       }
 
-      const startDate = new Date(periodStart);
       const endDate = new Date(periodEnd);
 
       const { data, error: err } = await supabase
@@ -235,7 +234,7 @@ export default function PayrollRunManager({ userRole, userId, readOnly = false }
       )}
 
       {/* Section 1: Create Payroll Run */}
-      <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6">
+      <div className="rounded-3xl panel-surface p-6">
         <h2 className="text-xl font-bold text-white mb-4">Create Payroll Run</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
@@ -260,7 +259,7 @@ export default function PayrollRunManager({ userRole, userId, readOnly = false }
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">Period Metrics</label>
-            <div className="p-2 bg-white/5 rounded border border-white/10 text-sm text-slate-300">
+            <div className="p-2 bg-white/5 rounded border border-border-soft text-sm text-slate-300">
               {metrics ? (
                 <>
                   <p>Days: {metrics.days}</p>
@@ -295,12 +294,12 @@ export default function PayrollRunManager({ userRole, userId, readOnly = false }
 
       {/* Section 2: Variable Pay Input */}
       {activeRun && !payrollLines.length && (
-        <div className="rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-6">
+        <div className="rounded-3xl panel-surface p-6">
           <h2 className="text-xl font-bold text-white mb-4">Variable Pay Input</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b border-border-soft">
                   <th className="px-3 py-3 text-left text-xs font-semibold uppercase text-slate-400">Name</th>
                   <th className="px-3 py-3 text-left text-xs font-semibold uppercase text-slate-400">Emp #</th>
                   <th className="px-3 py-3 text-right text-xs font-semibold uppercase text-slate-400">Basic</th>
@@ -317,7 +316,7 @@ export default function PayrollRunManager({ userRole, userId, readOnly = false }
                 {employees.map((emp) => {
                   const inp = variableInputs[emp.id] || {};
                   return (
-                    <tr key={emp.id} className="border-b border-white/5 hover:bg-white/5">
+                    <tr key={emp.id} className="border-b border-border-soft hover:bg-white/5">
                       <td className="px-3 py-3 text-sm text-white">{emp.employee_number}</td>
                       <td className="px-3 py-3 text-sm text-slate-300">{emp.job_title}</td>
                       <td className="px-3 py-3 text-right text-sm text-slate-300">

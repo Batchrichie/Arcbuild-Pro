@@ -81,7 +81,7 @@ export default function DailyProgressReport() {
 
   return (
     <div className="space-y-6 pb-24 lg:pb-4">
-      <form onSubmit={submit} className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+      <form onSubmit={submit} className="space-y-3 rounded-2xl border border-border-soft bg-white/5 p-4">
         <h3 className="font-semibold text-white">Daily progress log</h3>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block text-sm text-slate-400">
@@ -91,7 +91,7 @@ export default function DailyProgressReport() {
               required
               value={form.report_date}
               onChange={(e) => setForm({ ...form, report_date: e.target.value })}
-              className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-white"
+              className="mt-1 w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-white"
             />
           </label>
           <label className="block text-sm text-slate-400">
@@ -99,7 +99,7 @@ export default function DailyProgressReport() {
             <select
               value={form.weather}
               onChange={(e) => setForm({ ...form, weather: e.target.value })}
-              className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-white"
+              className="mt-1 w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-white"
             >
               {WEATHER_OPTIONS.map((w) => (
                 <option key={w} value={w}>
@@ -116,7 +116,7 @@ export default function DailyProgressReport() {
             min="0"
             value={form.workers_on_site}
             onChange={(e) => setForm({ ...form, workers_on_site: e.target.value })}
-            className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-white"
+            className="mt-1 w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-white"
           />
         </label>
         {[
@@ -130,7 +130,7 @@ export default function DailyProgressReport() {
               value={form[key]}
               onChange={(e) => setForm({ ...form, [key]: e.target.value })}
               rows={3}
-              className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-white"
+              className="mt-1 w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-white"
             />
           </label>
         ))}
@@ -153,7 +153,7 @@ export default function DailyProgressReport() {
               const open = expanded[r.id]
               const c = r.content || {}
               return (
-                <li key={r.id} className="rounded-xl border border-white/10 bg-white/5">
+                <li key={r.id} className="rounded-xl border border-border-soft bg-white/5">
                   <button
                     type="button"
                     onClick={() => setExpanded((prev) => ({ ...prev, [r.id]: !prev[r.id] }))}
@@ -163,7 +163,7 @@ export default function DailyProgressReport() {
                     <span className="text-slate-400">{open ? '−' : '+'}</span>
                   </button>
                   {open && (
-                    <div className="border-t border-white/10 px-4 py-3 text-sm text-slate-300 space-y-2">
+                    <div className="border-t border-border-soft px-4 py-3 text-sm text-slate-300 space-y-2">
                       <p>Weather: {c.weather}</p>
                       <p>Workers: {c.workers_on_site}</p>
                       <p>Work: {c.work_completed}</p>
