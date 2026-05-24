@@ -485,70 +485,71 @@ export default function MilestoneManager({
         </div>
       )}
 
-      {/* Confirmation Modal */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Complete Milestone?</h3>
-
-            <div className="space-y-3 mb-6 text-sm">
+      <Modal
+        open={Boolean(showConfirmModal)}
+        onClose={() => setShowConfirmModal(null)}
+        title="Complete milestone?"
+        size="md"
+        footer={
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => handleCompleteMilestone(showConfirmModal)}
+              className="min-touch flex-1 rounded-full bg-success px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+            >
+              Confirm complete
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowConfirmModal(null)}
+              className="min-touch flex-1 rounded-full border border-border-soft bg-panel px-4 py-2.5 text-sm font-medium text-text-muted-strong"
+            >
+              Cancel
+            </button>
+          </div>
+        }
+      >
+        {showConfirmModal && (
+          <div className="space-y-3 text-sm text-text-muted-strong">
+            <div>
+              <p className="portal-label">Milestone</p>
+              <p className="font-semibold text-text-primary">{showConfirmModal.title}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 border-t border-border-soft pt-4">
               <div>
-                <p className="text-gray-600">Milestone</p>
-                <p className="font-semibold text-gray-900">{showConfirmModal.title}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-                <div>
-                  <p className="text-gray-600 text-xs">Billing Amount</p>
-                  <p className="font-bold text-lg text-gray-900">
-                    GHS{' '}
-                    {showConfirmModal.billing_amount.toLocaleString('en-GH', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-xs">Retention ({contract?.retention_percentage || 0}%)</p>
-                  <p className="font-bold text-lg text-amber-600">
-                    GHS{' '}
-                    {(showConfirmModal.billing_amount * (contract?.retention_percentage || 0) / 100).toLocaleString('en-GH', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <p className="text-xs text-green-700">Net Billing (for Invoice)</p>
-                <p className="font-bold text-xl text-green-700">
+                <p className="text-xs text-text-muted">Billing amount</p>
+                <p className="portal-h3">
                   GHS{' '}
-                  {(showConfirmModal.billing_amount * (1 - (contract?.retention_percentage || 0) / 100)).toLocaleString('en-GH', {
+                  {showConfirmModal.billing_amount.toLocaleString('en-GH', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-text-muted">Retention ({contract?.retention_percentage || 0}%)</p>
+                <p className="portal-h3 text-amber">
+                  GHS{' '}
+                  {(showConfirmModal.billing_amount * (contract?.retention_percentage || 0) / 100).toLocaleString('en-GH', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
                 </p>
               </div>
             </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleCompleteMilestone(showConfirmModal)}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
-              >
-                Confirm Complete
-              </button>
-              <button
-                onClick={() => setShowConfirmModal(null)}
-                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors font-medium"
-              >
-                Cancel
-              </button>
+            <div className="rounded-lg border border-success-border bg-success-bg p-3">
+              <p className="text-xs text-success">Net billing (for invoice)</p>
+              <p className="text-xl font-bold text-success">
+                GHS{' '}
+                {(showConfirmModal.billing_amount * (1 - (contract?.retention_percentage || 0) / 100)).toLocaleString('en-GH', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   );
 }

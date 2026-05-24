@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { formatGhs } from '../../lib/formatGhs'
 import Modal from '../ui/Modal'
+import { inputClsRounded as cls } from '../../lib/portal-classes'
 
 const EMPTY = {
   full_name: '', email: '', phone: '', employee_number: '', job_title: '', department: '',
@@ -9,8 +10,6 @@ const EMPTY = {
   basic_salary: '', monthly_allowances: '', tin: '', ssnit_number: '', bank_name: '',
   bank_account: '', is_ssnit_exempt: false, is_paye_exempt: false, send_invite: true,
 }
-
-const cls = 'w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white'
 
 export default function EmployeeRegistry() {
   const [rows, setRows] = useState([])

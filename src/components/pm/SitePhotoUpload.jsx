@@ -174,7 +174,7 @@ export default function SitePhotoUpload() {
         <>
           <button
             type="button"
-            className="fixed inset-0 z-[80] bg-black/90"
+            className="fixed inset-0 z-portal-toast bg-black/90"
             aria-label="Close"
             onClick={() => setFullscreen(null)}
           />

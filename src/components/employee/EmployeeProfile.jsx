@@ -4,7 +4,7 @@ import { useEmployee } from '../../context/EmployeeContext'
 import { useAuth } from '../../context/AuthContext'
 import { maskAccount, maskSsnit, maskTin } from '../../lib/employee-utils'
 
-const inputCls = 'w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2.5 text-sm text-white'
+import { inputClsRounded as inputCls } from '../../lib/portal-classes'
 
 const UPDATE_FIELDS = [
   'Full name',

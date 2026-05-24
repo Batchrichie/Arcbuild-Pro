@@ -14,10 +14,10 @@ function TrendBadge({ trend }) {
 function KpiCard({ label, value, subLabel, colorClass, trend, alert }) {
   return (
     <div className={`kpi-card relative overflow-hidden ${alert ? 'ring-1 ring-red-400/40' : ''}`}>
-      <p className="portal-kpi-label uppercase tracking-[0.2em] text-slate-500">{label}</p>
+      <p className="portal-kpi-label">{label}</p>
       <p className={`mt-3 text-2xl font-bold sm:text-3xl ${colorClass}`}>{value}</p>
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        {subLabel && <span className="text-sm text-slate-400">{subLabel}</span>}
+        {subLabel && <span className="text-sm text-text-muted">{subLabel}</span>}
         <TrendBadge trend={trend} />
       </div>
     </div>
@@ -30,8 +30,8 @@ export default function KpiStrip({ metrics, loading }) {
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="kpi-card animate-pulse">
-            <div className="h-4 w-24 rounded bg-white/10" />
-            <div className="mt-4 h-8 w-32 rounded bg-white/10" />
+            <div className="h-4 w-24 rounded bg-surface-overlay" />
+            <div className="mt-4 h-8 w-32 rounded bg-surface-overlay" />
           </div>
         ))}
       </section>
@@ -50,7 +50,7 @@ export default function KpiStrip({ metrics, loading }) {
       label: 'Outstanding Receivables',
       value: formatGhsCompact(metrics.outstandingReceivables),
       subLabel: metrics.receivablesOverdue ? 'Over 30 days overdue' : 'Sent invoices',
-      colorClass: metrics.receivablesOverdue ? 'text-red-400' : 'text-slate-100',
+      colorClass: metrics.receivablesOverdue ? 'text-red-400' : 'text-text-primary',
       trend: metrics.receivablesTrend,
       alert: metrics.receivablesOverdue,
     },

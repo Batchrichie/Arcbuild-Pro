@@ -7,7 +7,7 @@ export default function ThemeToggle({ className = '' }) {
     <button
       type="button"
       onClick={toggleTheme}
-      className={`inline-flex items-center justify-center rounded-full border border-border-soft bg-white/5 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/10 ${className}`}
+      className={`inline-flex items-center justify-center rounded-full border border-border-soft bg-panel px-3 py-2 text-sm font-medium text-text-primary transition hover:bg-surface-overlay ${className}`}
     >
       {theme === 'dark' ? 'Switch to light' : 'Switch to dark'}
     </button>

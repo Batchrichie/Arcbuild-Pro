@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import JournalDrillDown from '../accountant/JournalDrillDown'
-
-const clsInput = 'w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white'
+import SlideOver from '../ui/SlideOver'
+import { inputCls as clsInput } from '../../lib/portal-classes'
 
 export default function ManualJournalList({ readOnly = false }) {
   const { user } = useAuth()
@@ -299,60 +299,51 @@ export default function ManualJournalList({ readOnly = false }) {
         )}
       </div>
 
-      {reverseTarget && (
-        <>
-          <button type="button" className="portal-slide-over-backdrop" aria-label="Close" onClick={() => setReverseTarget(null)} />
-          <aside className="portal-slide-over-panel p-4 sm:p-6" role="dialog" aria-modal="true">
-            <div className="mb-4 flex items-center justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold text-white">Reverse journal {reverseTarget.entry_number}</h3>
-                <p className="text-sm text-slate-400">Provide a reversal date and reason.</p>
-              </div>
-              <button type="button" onClick={() => setReverseTarget(null)} className="min-touch rounded-full border border-border-soft px-4 py-2 text-sm text-slate-300">
-                Close
-              </button>
-            </div>
-            <div className="space-y-4">
-              <label className="space-y-2">
-                <span className="text-sm font-medium text-slate-200">Reversal date</span>
-                <input
-                  type="date"
-                  value={reverseDate}
-                  onChange={(e) => setReverseDate(e.target.value)}
-                  className={clsInput}
-                />
-              </label>
-              <label className="space-y-2">
-                <span className="text-sm font-medium text-slate-200">Reason</span>
-                <textarea
-                  rows={4}
-                  value={reverseReason}
-                  onChange={(e) => setReverseReason(e.target.value)}
-                  className={clsInput}
-                  placeholder="Enter at least 20 characters to explain why this journal is being reversed."
-                />
-              </label>
-              {reverseError && <p className="text-sm text-rose-300">{reverseError}</p>}
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={confirmReverse}
-                  className="min-touch rounded-full border border-rose-400/40 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-100"
-                >
-                  Confirm reversal
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setReverseTarget(null)}
-                  className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </aside>
-        </>
-      )}
+      <SlideOver
+        open={Boolean(reverseTarget)}
+        onClose={() => setReverseTarget(null)}
+        title={reverseTarget ? `Reverse journal ${reverseTarget.entry_number}` : 'Reverse journal'}
+        width="lg"
+        footer={
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={confirmReverse}
+              className="min-touch rounded-full border border-rose-400/40 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-100"
+            >
+              Confirm reversal
+            </button>
+            <button
+              type="button"
+              onClick={() => setReverseTarget(null)}
+              className="min-touch rounded-full border border-border-soft bg-panel px-4 py-2 text-sm text-text-muted-strong"
+            >
+              Cancel
+            </button>
+          </div>
+        }
+      >
+        {reverseTarget && (
+          <>
+            <p className="text-sm text-text-muted">Provide a reversal date and reason.</p>
+            <label className="portal-label block space-y-2">
+              <span>Reversal date</span>
+              <input type="date" value={reverseDate} onChange={(e) => setReverseDate(e.target.value)} className={clsInput} />
+            </label>
+            <label className="portal-label block space-y-2">
+              <span>Reason</span>
+              <textarea
+                rows={4}
+                value={reverseReason}
+                onChange={(e) => setReverseReason(e.target.value)}
+                className={clsInput}
+                placeholder="Enter at least 20 characters to explain why this journal is being reversed."
+              />
+            </label>
+            {reverseError && <p className="text-sm text-rose-300">{reverseError}</p>}
+          </>
+        )}
+      </SlideOver>
 
       {selectedJournal && (
         <JournalDrillDown journalId={selectedJournal} onClose={() => setSelectedJournal(null)} />

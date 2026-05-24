@@ -49,6 +49,16 @@ export default defineConfig({
         'info-border': 'var(--color-info-border)',
         teal: 'var(--color-teal)',
         'amber-text': 'var(--color-amber-text)',
+        input: 'var(--color-input-bg)',
+        elevated: 'var(--color-elevated)',
+        inset: 'var(--color-inset)',
+      },
+      zIndex: {
+        'portal-nav': 'var(--z-portal-nav)',
+        'portal-backdrop': 'var(--z-portal-backdrop)',
+        'portal-slide': 'var(--z-portal-slide-over)',
+        'portal-modal': 'var(--z-portal-modal)',
+        'portal-toast': 'var(--z-portal-toast)',
       },
       boxShadow: {
         card: 'var(--shadow-card)',

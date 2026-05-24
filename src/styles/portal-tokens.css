@@ -1,0 +1,160 @@
+/**
+ * ARCBUILD PRO — Portal semantic tokens & utilities
+ * Prefer these over raw slate-* / white/* in portal components.
+ */
+
+:root {
+  --color-muted: var(--color-text-muted);
+  --color-muted-strong: var(--color-text-muted-strong);
+  --color-input-bg: var(--color-surface-2);
+  --color-elevated: var(--color-surface);
+  --color-inset: var(--color-panel);
+  --color-hover: var(--color-surface-3);
+  --z-portal-nav: 50;
+  --z-portal-backdrop: 60;
+  --z-portal-slide-over: 70;
+  --z-portal-modal: 80;
+  --z-portal-toast: 90;
+
+  /* Typography scale */
+  --type-eyebrow-size: 0.875rem;
+  --type-eyebrow-tracking: 0.2em;
+  --type-label-size: 0.875rem;
+  --type-body-size: 1rem;
+  --type-body-line: 1.5;
+  --type-h3-size: 1.125rem;
+  --type-h2-size: 1.5rem;
+  --type-h1-size: 1.875rem;
+  --type-kpi-size: 1.875rem;
+}
+
+/* —— Color utilities —— */
+.bg-portal-page {
+  background-color: var(--color-bg);
+}
+.bg-portal-surface {
+  background-color: var(--color-surface);
+}
+.bg-portal-surface-2 {
+  background-color: var(--color-surface-2);
+}
+.bg-portal-elevated {
+  background-color: var(--color-elevated);
+}
+.bg-portal-inset {
+  background-color: var(--color-inset);
+}
+.bg-portal-input {
+  background-color: var(--color-input-bg);
+}
+.bg-portal-overlay {
+  background-color: var(--color-surface-overlay);
+}
+
+.text-portal-primary {
+  color: var(--color-text-primary);
+}
+.text-portal-secondary {
+  color: var(--color-text-secondary);
+}
+.text-portal-muted {
+  color: var(--color-text-muted);
+}
+.text-portal-muted-strong {
+  color: var(--color-text-muted-strong);
+}
+
+.border-portal {
+  border-color: var(--color-border);
+}
+.border-portal-soft {
+  border-color: var(--color-border-soft);
+}
+
+/* —— Typography utilities —— */
+.portal-eyebrow,
+.portal-kpi-label {
+  font-size: var(--type-eyebrow-size);
+  letter-spacing: var(--type-eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+.portal-section-eyebrow {
+  font-size: var(--type-eyebrow-size);
+  letter-spacing: var(--type-eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--color-text-muted-strong);
+  line-height: 1.4;
+}
+
+.portal-label {
+  font-size: var(--type-label-size);
+  font-weight: 500;
+  color: var(--color-text-muted-strong);
+  line-height: 1.4;
+}
+
+.portal-body {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-line);
+  color: var(--color-text-primary);
+}
+
+.portal-h1 {
+  font-size: var(--type-h1-size);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-text-primary);
+}
+
+.portal-h2 {
+  font-size: var(--type-h2-size);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+}
+
+.portal-h3 {
+  font-size: var(--type-h3-size);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-text-primary);
+}
+
+.portal-kpi-value {
+  font-size: var(--type-kpi-size);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+}
+
+@media (min-width: 640px) {
+  .portal-h1 {
+    font-size: 2rem;
+  }
+  .portal-kpi-value {
+    font-size: 1.875rem;
+  }
+}
+
+/* —— Layout: tables —— */
+.portal-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+/* —— Layout: modals & slide-overs (see globals for panel chrome) —— */
+.portal-modal-host {
+  z-index: var(--z-portal-modal);
+}
+
+.portal-slide-host {
+  z-index: var(--z-portal-slide-over);
+}
+
+.portal-nav-host {
+  z-index: var(--z-portal-nav);
+}
