@@ -1,13 +1,34 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { supabase } from '../lib/supabase'
+import { formatGhs } from '../lib/formatGhs'
+
+function formatAmount(value) {
+  if (value == null || value === '') return '—'
+  return formatGhs(value)
+}
 
 export default function AccountStatement({ accountCode, onClose }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
+  const open = Boolean(accountCode)
 
   useEffect(() => {
-    if (!accountCode) return
+    if (!accountCode) return undefined
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onClose?.()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
     fetchStatement()
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = prevOverflow
+    }
   }, [accountCode])
 
   async function fetchStatement() {
@@ -22,60 +43,128 @@ export default function AccountStatement({ accountCode, onClose }) {
     if (error) {
       console.error('account statement fetch', error)
       setRows([])
-    } else setRows(data || [])
+    } else {
+      setRows(data || [])
+    }
     setLoading(false)
   }
 
-  const opening = rows.length ? (rows[0].running_balance - (rows[0].amount || 0)) : 0
-  const closing = rows.length ? rows[rows.length - 1].running_balance : 0
+  const opening = rows.length ? Number(rows[0].running_balance || 0) - Number(rows[0].amount || 0) : 0
+  const closing = rows.length ? Number(rows[rows.length - 1].running_balance || 0) : 0
+  const sparkData = rows.map((r) => Number(r.running_balance || 0))
+  const trendMin = sparkData.length ? Math.min(...sparkData) : 0
+  const trendMax = sparkData.length ? Math.max(...sparkData) : 0
+  const hasTrendVariance = sparkData.length > 1 && trendMax !== trendMin
+  const showSparkChart = hasTrendVariance
 
-  const sparkData = rows.map(r => Number(r.running_balance || 0))
+  if (!open) return null
 
-  return (
-    <div className="fixed inset-0 z-50 flex">
-      <div className="ml-auto w-full max-w-2xl bg-white shadow-lg">
-        <div className="p-4 border-b flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold">Account Statement — {accountCode}</h3>
-            <div className="text-sm text-slate-600">Opening: {opening} · Closing: {closing}</div>
+  return createPortal(
+    <>
+      <button
+        type="button"
+        className="portal-slide-over-backdrop"
+        aria-label="Close account statement"
+        onClick={onClose}
+      />
+      <aside
+        className="portal-slide-over-panel portal-slide-over-panel--structured p-0"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="account-statement-title"
+      >
+        <header className="shrink-0 border-b border-border-soft px-5 py-4 sm:px-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="portal-eyebrow text-text-muted">General ledger</p>
+              <h2 id="account-statement-title" className="portal-h2 mt-1 truncate">
+                Account {accountCode}
+              </h2>
+              <p className="mt-2 text-sm text-text-muted">
+                Opening <span className="font-semibold text-text-primary">{formatAmount(opening)}</span>
+                {' · '}
+                Closing <span className="font-semibold text-text-primary">{formatAmount(closing)}</span>
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="min-touch shrink-0 rounded-full border border-border-soft bg-surface-2 px-4 py-2 text-sm font-semibold text-text-muted-strong transition hover:bg-surface-overlay"
+            >
+              Close
+            </button>
           </div>
-          <div className="flex gap-2">
-            <button onClick={onClose} className="btn">Close</button>
-          </div>
+        </header>
+
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden px-5 py-4 sm:px-6">
+          {showSparkChart && (
+            <div className="shrink-0 rounded-xl border border-border-soft bg-surface-2 px-3 py-2">
+              <p className="mb-1 text-xs font-medium uppercase tracking-wider text-text-muted">Balance trend</p>
+              <svg width="100%" height={40} className="block text-teal-600 dark:text-teal-400" aria-hidden>
+                {(() => {
+                  const range = trendMax - trendMin || 1
+                  const stepX = 100 / (sparkData.length - 1)
+                  return sparkData.map((v, i) => {
+                    const x = i * stepX
+                    const y = 34 - ((v - trendMin) / range) * 30
+                    return <circle key={i} cx={`${x}%`} cy={y} r="2" fill="currentColor" />
+                  })
+                })()}
+              </svg>
+            </div>
+          )}
+          {!showSparkChart && sparkData.length > 0 && !loading && (
+            <p className="shrink-0 text-xs text-text-muted">
+              Balance trend:{' '}
+              <span className="font-medium text-text-primary">{formatAmount(closing)}</span>
+              {sparkData.length === 1 ? ' (single entry)' : ' (unchanged across period)'}
+            </p>
+          )}
+
+          {loading ? (
+            <p className="text-sm text-text-muted">Loading statement…</p>
+          ) : rows.length === 0 ? (
+            <p className="rounded-2xl border border-border-soft bg-surface-2 px-4 py-8 text-center text-sm text-text-muted">
+              No transactions for this account.
+            </p>
+          ) : (
+            <div className="min-h-0 flex-1 overflow-auto rounded-2xl border border-border-soft bg-surface-2">
+              <table className="dark-table w-full min-w-[640px] text-sm">
+                <thead className="sticky top-0 z-10 bg-surface-2">
+                  <tr>
+                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-text-muted">Date</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-text-muted">JE</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-text-muted">Description</th>
+                    <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-text-muted">Debit</th>
+                    <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-text-muted">Credit</th>
+                    <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-text-muted">Running</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r.ledger_id} className="border-t border-border-soft hover:bg-surface-overlay/50">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-text-primary">{r.entry_date?.split('T')[0]}</td>
+                      <td className="whitespace-nowrap px-3 py-2.5 font-medium text-amber-700 dark:text-amber-300">{r.entry_number}</td>
+                      <td className="max-w-[12rem] truncate px-3 py-2.5 text-text-primary sm:max-w-none sm:whitespace-normal">{r.description}</td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-right text-text-primary">{formatAmount(r.debit_amount)}</td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-right text-text-primary">{formatAmount(r.credit_amount)}</td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-right font-semibold text-text-primary">{formatAmount(r.running_balance)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
-        <div className="p-4">
-          <div className="mb-4">
-            <svg width="100%" height="48">
-              {sparkData.length > 1 && (() => {
-                const min = Math.min(...sparkData)
-                const max = Math.max(...sparkData)
-                const range = max - min || 1
-                const stepX = 100 / (sparkData.length - 1)
-                return sparkData.map((v, i) => {
-                  const x = i * stepX
-                  const y = 40 - ((v - min) / range) * 36
-                  return <circle key={i} cx={`${x}%`} cy={y} r="1.5" fill="#0f172a" />
-                })
-              })()}
-            </svg>
+        <footer className="shrink-0 border-t border-border-soft bg-surface-2 px-5 py-4 sm:px-6">
+          <div className="flex items-center justify-between gap-3 text-sm">
+            <span className="font-medium text-text-muted">Closing balance</span>
+            <span className="text-lg font-bold text-text-primary">{formatAmount(closing)}</span>
           </div>
-
-          {loading && <div>Loading...</div>}
-
-          <div className="overflow-y-auto max-h-96 border rounded">
-            <table className="w-full text-sm">
-              <thead className="text-slate-600"><tr><th className="p-2">Date</th><th className="p-2">JE</th><th className="p-2">Desc</th><th className="p-2 text-right">Debit</th><th className="p-2 text-right">Credit</th><th className="p-2 text-right">Running</th></tr></thead>
-              <tbody>
-                {rows.map(r => (
-                  <tr key={r.ledger_id} className="border-t"><td className="p-2">{r.entry_date?.split('T')[0]}</td><td className="p-2">{r.entry_number}</td><td className="p-2">{r.description}</td><td className="p-2 text-right">{r.debit_amount}</td><td className="p-2 text-right">{r.credit_amount}</td><td className="p-2 text-right">{r.running_balance}</td></tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div className="flex-1" onClick={onClose} />
-    </div>
+        </footer>
+      </aside>
+    </>,
+    document.body
   )
 }

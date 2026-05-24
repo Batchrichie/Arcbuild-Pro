@@ -12,7 +12,10 @@ const INVOICE_PDF_SELECT = `
   division:divisions(name)
 `
 
-export default function InvoicePdfLink({ invoiceId, filename }) {
+const defaultBtnCls =
+  'inline-flex items-center justify-center rounded-lg border border-amber-600/40 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-950/50 dark:text-amber-200 dark:hover:bg-amber-950/70'
+
+export default function InvoicePdfLink({ invoiceId, filename, className = defaultBtnCls }) {
   const [invoiceData, setInvoiceData] = useState(null)
   const [lineItems, setLineItems] = useState([])
   const [loading, setLoading] = useState(false)
@@ -64,7 +67,7 @@ export default function InvoicePdfLink({ invoiceId, filename }) {
       <button
         type="button"
         disabled
-        className="rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1 text-xs font-semibold text-slate-100 opacity-70"
+        className={`${className} opacity-70`}
       >
         Loading PDF…
       </button>
@@ -76,7 +79,7 @@ export default function InvoicePdfLink({ invoiceId, filename }) {
       <button
         type="button"
         onClick={fetchPdfData}
-        className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200 hover:bg-amber-500/20"
+        className={className}
       >
         Retry PDF
       </button>
@@ -88,7 +91,7 @@ export default function InvoicePdfLink({ invoiceId, filename }) {
       <button
         type="button"
         onClick={fetchPdfData}
-        className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200 hover:bg-amber-500/20"
+        className={className}
       >
         Download PDF
       </button>
@@ -107,7 +110,7 @@ export default function InvoicePdfLink({ invoiceId, filename }) {
         />
       }
       fileName={resolvedFilename}
-      className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200 hover:bg-amber-500/20"
+      className={className}
     >
       {({ loading: pdfLoading }) => (pdfLoading ? 'Preparing PDF…' : 'Download PDF')}
     </PDFDownloadLink>

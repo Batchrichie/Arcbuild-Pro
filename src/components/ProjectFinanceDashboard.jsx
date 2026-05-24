@@ -366,10 +366,10 @@ export default function ProjectFinanceDashboard({
                       {row.variance >= 0 ? formatCurrency(row.variance) : `(${formatCurrency(Math.abs(row.variance))})`}
                     </td>
                     <td className="text-center py-3 px-4">
-                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                        row.status === 'On Track' ? 'bg-emerald-400/20 text-emerald-300' :
-                        row.status === 'At Risk' ? 'bg-amber-400/20 text-amber-300' :
-                        'bg-red-400/20 text-red-300'
+                      <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                        row.status === 'On Track' ? 'border border-emerald-600/35 bg-emerald-100 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-200' :
+                        row.status === 'At Risk' ? 'border border-amber-600/35 bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200' :
+                        'border border-red-600/35 bg-red-100 text-red-900 dark:bg-red-950/60 dark:text-red-200'
                       }`}>
                         {row.status}
                       </span>
@@ -385,9 +385,10 @@ export default function ProjectFinanceDashboard({
                     {finance.budget_remaining_ghs >= 0 ? formatCurrency(finance.budget_remaining_ghs) : `(${formatCurrency(Math.abs(finance.budget_remaining_ghs))})`}
                   </td>
                   <td className="text-center py-3 px-4">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                      finance.budget_remaining_ghs >= 0 ? 'bg-emerald-400/20 text-emerald-300' :
-                      'bg-red-400/20 text-red-300'
+                    <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                      finance.budget_remaining_ghs >= 0
+                        ? 'border border-emerald-600/35 bg-emerald-100 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-200'
+                        : 'border border-red-600/35 bg-red-100 text-red-900 dark:bg-red-950/60 dark:text-red-200'
                     }`}>
                       {finance.budget_remaining_ghs >= 0 ? 'On Track' : 'Over Budget'}
                     </span>

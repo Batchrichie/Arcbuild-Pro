@@ -781,12 +781,20 @@ body.theme-light .portal-main div.rounded-4xl.border > *:not(:first-child) optio
   right: 0;
   z-index: var(--z-portal-slide-over, 70);
   height: 100%;
+  max-height: 100dvh;
   width: min(100%, 42rem);
   overflow-y: auto;
   background: var(--color-surface);
   color: var(--color-text);
   border-left: 1px solid var(--color-border);
   box-shadow: var(--shadow-elevated);
+}
+
+/* Structured slide-overs: fixed header/footer, scrollable body */
+.portal-slide-over-panel--structured {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 @media (max-width: 1023px) {

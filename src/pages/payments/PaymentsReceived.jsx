@@ -500,8 +500,8 @@ export default function PaymentsReceived() {
 
       {statementOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-border-soft bg-slate-900/95 shadow-2xl shadow-black/40">
-            <div className="flex flex-col gap-4 border-b border-border-soft px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex max-h-[min(92vh,900px)] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-border-soft bg-slate-900/95 shadow-2xl shadow-black/40">
+            <div className="shrink-0 flex flex-col gap-4 border-b border-border-soft px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-xl font-semibold text-white">Client Statement</h2>
                 <p className="text-sm text-slate-400">{statementClient?.name ?? 'Client details will appear here.'}</p>
@@ -518,12 +518,12 @@ export default function PaymentsReceived() {
               </button>
             </div>
 
-            <div className="space-y-6 px-6 py-6">
+            <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden px-6 py-6">
               {statementError && (
-                <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{statementError}</div>
+                <div className="shrink-0 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{statementError}</div>
               )}
 
-              <div className="overflow-x-auto rounded-3xl border border-border-soft bg-slate-950/40">
+              <div className="min-h-0 flex-1 overflow-auto rounded-3xl border border-border-soft bg-slate-950/40">
                 <table className="min-w-full text-sm text-slate-300">
                   <thead className="border-b border-border-soft bg-slate-900/80 text-left text-xs uppercase tracking-[0.24em] text-slate-500">
                     <tr>
@@ -560,7 +560,7 @@ export default function PaymentsReceived() {
                 </table>
               </div>
 
-              <div className="flex items-center justify-end gap-3 rounded-3xl border border-border-soft bg-slate-900/80 px-4 py-4 text-sm text-slate-300">
+              <div className="shrink-0 flex items-center justify-end gap-3 rounded-3xl border border-border-soft bg-slate-900/80 px-4 py-4 text-sm text-slate-300">
                 <span className="font-semibold text-white">Total Outstanding Balance:</span>
                 <span>{new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(statementBalance)}</span>
               </div>

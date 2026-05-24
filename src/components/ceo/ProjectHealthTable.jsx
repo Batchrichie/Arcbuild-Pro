@@ -1,13 +1,5 @@
 import { formatGhsCompact } from '../../lib/formatGhs'
-
-function budgetStatus(totalCosts, totalBudget) {
-  const costs = Number(totalCosts) || 0
-  const budget = Number(totalBudget) || 0
-  if (budget <= 0) return { label: 'On Track', className: 'bg-emerald-500/20 text-emerald-300' }
-  if (costs > budget) return { label: 'Over Budget', className: 'bg-red-500/20 text-red-300' }
-  if (costs > budget * 0.9) return { label: 'At Risk', className: 'bg-amber-500/20 text-amber-300' }
-  return { label: 'On Track', className: 'bg-emerald-500/20 text-emerald-300' }
-}
+import { budgetTrackStatus } from '../../lib/status-classes'
 
 export default function ProjectHealthTable({ projects, loading, onSelectProject }) {
   if (loading) {
@@ -36,7 +28,7 @@ export default function ProjectHealthTable({ projects, loading, onSelectProject 
         </thead>
         <tbody>
           {projects.map((row) => {
-            const status = budgetStatus(row.total_costs_ghs, row.total_budget_ghs)
+            const status = budgetTrackStatus(row.total_costs_ghs, row.total_budget_ghs)
             const pct = Math.min(100, Math.max(0, Number(row.financial_completion_pct) || 0))
             return (
               <tr

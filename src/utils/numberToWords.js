@@ -55,14 +55,21 @@ export function numberToWords(amount, currency = 'GHS') {
     integerWords = parts.filter(Boolean).join(' ')
   }
 
-  const centsStr = String(cents).padStart(2, '0')
-
   let currencyName = 'Ghana Cedis'
   if (currency === 'USD') currencyName = 'US Dollars'
   else if (currency === 'GBP') currencyName = 'Pounds Sterling'
   else if (currency === 'EUR') currencyName = 'Euros'
 
-  return `${integerWords} ${currencyName} and ${centsStr}/100`
+  if (cents === 0) {
+    return `${integerWords} ${currencyName} Only`
+  }
+
+  const fractionalWords = convertHundreds(cents)
+  let fractionalLabel = 'Cents'
+  if (currency === 'GHS') fractionalLabel = cents === 1 ? 'Pesewa' : 'Pesewas'
+  else if (currency === 'GBP') fractionalLabel = cents === 1 ? 'Penny' : 'Pence'
+
+  return `${integerWords} ${currencyName} and ${fractionalWords} ${fractionalLabel}`
 }
 
 export default numberToWords

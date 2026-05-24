@@ -21,3 +21,19 @@ export const btnGhostCls =
 export const textPrimary = 'text-text-primary'
 export const textMuted = 'text-text-muted'
 export const textMutedStrong = 'text-text-muted-strong'
+
+/** Invoice list row actions — order: View → PDF → workflow */
+export const invoiceActionViewCls =
+  'inline-flex items-center justify-center rounded-lg border border-border-soft bg-surface-2 px-3 py-1.5 text-xs font-semibold text-text-primary transition hover:bg-surface-overlay'
+
+export const invoiceActionPdfCls =
+  'inline-flex items-center justify-center rounded-lg border border-amber-600/40 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-950/50 dark:text-amber-200 dark:hover:bg-amber-950/70'
+
+export const invoiceActionPrimaryCls =
+  'inline-flex items-center justify-center rounded-lg border border-indigo-600/40 bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-indigo-700'
+
+export const invoiceActionSubmitCls =
+  'inline-flex items-center justify-center rounded-lg border border-sky-600/40 bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-sky-700'
+
+export const invoiceActionMutedCls =
+  'inline-flex items-center justify-center rounded-lg border border-border-soft bg-surface-3 px-3 py-1.5 text-xs font-semibold text-text-muted-strong transition hover:bg-surface-overlay'

@@ -30,6 +30,7 @@ import ManualJournalForm from '../../components/accounting/ManualJournalForm'
 import ManualJournalList from '../../components/accounting/ManualJournalList'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 import { COMPANY } from '../../lib/company-config'
+import logo from '../../assets/ModuloDevLogo.png'
 import DebtorsLedger from '../../components/accounting/DebtorsLedger'
 import AlertLog from '../../components/alerts/AlertLog'
 import ManagementReports from '../../components/reports/ManagementReports'
@@ -401,7 +402,7 @@ export default function AccountantPortal() {
           <aside className="portal-sidebar hidden lg:flex lg:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl shadow-black/20 hover-animate panel-surface soft-gradient-overlay">
             <div className="mb-6">
               <div className="inline-flex items-center gap-3 rounded-3xl bg-success-bg px-4 py-3 text-sm font-semibold text-teal-200">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-500 text-slate-950">AB</span>
+                <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
                 <span>{COMPANY.name}</span>
               </div>
             </div>
