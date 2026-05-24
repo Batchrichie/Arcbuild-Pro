@@ -4,6 +4,8 @@ import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
 import { formatGhs } from '../../lib/formatGhs'
 import WhtCertificatePdf from '../pdf/WhtCertificatePdf'
+import Modal from '../ui/Modal'
+import { inputCls } from '../../lib/portal-classes'
 
 const TAX_TYPES = ['All', 'VAT', 'NHIL', 'GetFUND', 'PAYE', 'SSNIT', 'WHT', 'CIT']
 const STATUS_STYLES = {
@@ -719,81 +721,67 @@ export default function TaxCentre({ readOnly = false }) {
         </section>
       )}
 
-      {modalOpen && selectedCalendarRow && (
-        <>
-          <div className="fixed inset-0 z-40 bg-black/70" />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-2xl overflow-hidden rounded-4xl border border-border-soft bg-slate-950 p-6 shadow-2xl shadow-black/40">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Mark as filed</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-white">{selectedCalendarRow.tax_type} — {formatDate(selectedCalendarRow.period_start)}</h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={closeMarkModal}
-                  className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-amber-400/30"
-                >
-                  Close
-                </button>
-              </div>
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <label className="space-y-2 text-sm text-slate-300">
-                  <span>GRA reference</span>
-                  <input
-                    type="text"
-                    value={markForm.gra_reference}
-                    onChange={(event) => setMarkForm({ ...markForm, gra_reference: event.target.value })}
-                    className="w-full rounded-2xl border border-border-soft bg-slate-900/80 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-slate-300">
-                  <span>Amount paid</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={markForm.amount_paid}
-                    onChange={(event) => setMarkForm({ ...markForm, amount_paid: event.target.value })}
-                    className="w-full rounded-2xl border border-border-soft bg-slate-900/80 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
-                  />
-                </label>
-              </div>
-
-              <label className="mt-4 block space-y-2 text-sm text-slate-300">
-                <span>Notes</span>
-                <textarea
-                  rows="4"
-                  value={markForm.notes}
-                  onChange={(event) => setMarkForm({ ...markForm, notes: event.target.value })}
-                  className="w-full rounded-3xl border border-border-soft bg-slate-900/80 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
+      <Modal
+        open={modalOpen && Boolean(selectedCalendarRow)}
+        onClose={closeMarkModal}
+        title={selectedCalendarRow ? `${selectedCalendarRow.tax_type} — ${formatDate(selectedCalendarRow.period_start)}` : 'Mark as filed'}
+        size="md"
+        footer={
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleMarkFiled}
+              className="min-touch rounded-full border border-amber-400/30 bg-amber-500/10 px-5 py-3 text-sm font-semibold text-amber-100 transition hover:bg-amber-500/20"
+            >
+              Save filing
+            </button>
+            <button
+              type="button"
+              onClick={closeMarkModal}
+              className="min-touch rounded-full border border-border-soft bg-panel px-5 py-3 text-sm font-semibold text-text-muted-strong"
+            >
+              Cancel
+            </button>
+          </div>
+        }
+      >
+        <p className="portal-section-eyebrow mb-4">Mark as filed</p>
+        {selectedCalendarRow && (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="portal-label block space-y-2">
+                <span>GRA reference</span>
+                <input
+                  type="text"
+                  value={markForm.gra_reference}
+                  onChange={(event) => setMarkForm({ ...markForm, gra_reference: event.target.value })}
+                  className={inputCls}
                 />
               </label>
-
-              {actionMessage && (
-                <p className="mt-4 text-sm text-amber-200">{actionMessage}</p>
-              )}
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={handleMarkFiled}
-                  className="min-touch rounded-full border border-amber-400/30 bg-amber-500/10 px-5 py-3 text-sm font-semibold text-amber-100 transition hover:bg-amber-500/20"
-                >
-                  Save filing
-                </button>
-                <button
-                  type="button"
-                  onClick={closeMarkModal}
-                  className="min-touch rounded-full border border-border-soft bg-white/5 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-amber-400/30"
-                >
-                  Cancel
-                </button>
-              </div>
+              <label className="portal-label block space-y-2">
+                <span>Amount paid</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={markForm.amount_paid}
+                  onChange={(event) => setMarkForm({ ...markForm, amount_paid: event.target.value })}
+                  className={inputCls}
+                />
+              </label>
             </div>
-          </div>
-        </>
-      )}
+            <label className="portal-label mt-4 block space-y-2">
+              <span>Notes</span>
+              <textarea
+                rows="4"
+                value={markForm.notes}
+                onChange={(event) => setMarkForm({ ...markForm, notes: event.target.value })}
+                className={inputCls}
+              />
+            </label>
+            {actionMessage && <p className="mt-4 text-sm text-amber-200">{actionMessage}</p>}
+          </>
+        )}
+      </Modal>
     </div>
   )
 }

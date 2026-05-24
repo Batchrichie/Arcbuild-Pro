@@ -3,6 +3,13 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import StatusBadge from './ui/StatusBadge'
 import Modal from './ui/Modal'
+import {
+  invoiceActionMutedCls,
+  invoiceActionPdfCls,
+  invoiceActionPrimaryCls,
+  invoiceActionSubmitCls,
+  invoiceActionViewCls,
+} from '../lib/portal-classes'
 import InvoicePdfLink from './pdf/InvoicePdfLink'
 
 const STATUS_OPTIONS = [
@@ -313,17 +320,17 @@ export default function InvoiceList() {
 
       <div className="overflow-hidden rounded-4xl panel-surface shadow-xl shadow-black/10">
         <div className="portal-table-scroll">
-          <table className="min-w-full dark-table text-sm text-slate-200">
+          <table className="min-w-full dark-table text-sm">
             <thead>
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Invoice</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Client</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Project</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Division</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Amount</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Status</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Submitted by</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">Invoice</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">Client</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">Project</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">Division</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">Amount</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">Submitted by</th>
+                <th className="min-w-[220px] px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -341,25 +348,35 @@ export default function InvoiceList() {
                 </tr>
               ) : (
                 invoices.map((invoice) => (
-                  <tr key={invoice.id} className="border-t border-border-soft hover:bg-white/5">
-                    <td className="px-6 py-4 text-sm text-slate-100">{invoice.invoice_number}</td>
-                    <td className="px-6 py-4 text-sm text-slate-100">{invoice.client?.name || 'Unknown'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-100">{invoice.project?.name || 'Unassigned'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-100">{invoice.division?.name || 'Unknown'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-100">
+                  <tr key={invoice.id} className="border-t border-border-soft hover:bg-surface-overlay/50">
+                    <td className="px-6 py-4 text-sm text-text-primary">{invoice.invoice_number}</td>
+                    <td className="px-6 py-4 text-sm text-text-primary">{invoice.client?.name || 'Unknown'}</td>
+                    <td className="px-6 py-4 text-sm text-text-primary">{invoice.project?.name || 'Unassigned'}</td>
+                    <td className="px-6 py-4 text-sm text-text-primary">{invoice.division?.name || 'Unknown'}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-text-primary">
                       {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'GHS', minimumFractionDigits: 2 }).format(Number(invoice.gross_total_ghs ?? 0))}
                     </td>
                     <td className="px-6 py-4">
                       <StatusBadge status={invoice.status} />
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-100">{invoice.submitted_by}</td>
-                    <td className="px-6 py-4 text-sm text-slate-100">
-                      <div className="flex flex-wrap gap-2">
+                    <td className="px-6 py-4 text-sm text-text-muted-strong">{invoice.submitted_by}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center">
+                        <button
+                          type="button"
+                          onClick={() => handleView(invoice)}
+                          className={invoiceActionViewCls}
+                          title="View invoice details"
+                        >
+                          View
+                        </button>
+                        <InvoicePdfLink invoiceId={invoice.id} className={invoiceActionPdfCls} />
                         {invoice.status === 'draft' && (
                           <button
                             type="button"
                             onClick={() => handleSubmitInvoice(invoice)}
-                            className="rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-700"
+                            className={invoiceActionSubmitCls}
+                            title="Submit for approval"
                           >
                             Submit
                           </button>
@@ -368,28 +385,22 @@ export default function InvoiceList() {
                           <button
                             type="button"
                             onClick={() => handleMarkSent(invoice)}
-                            className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white hover:bg-indigo-700"
+                            className={invoiceActionPrimaryCls}
+                            title="Mark invoice as sent to client"
                           >
-                            Mark Sent
+                            Send
                           </button>
                         )}
                         {invoice.status === 'rejected' && (
                           <button
                             type="button"
                             onClick={() => handleRevise(invoice)}
-                            className="rounded-full bg-slate-600 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700"
+                            className={invoiceActionMutedCls}
+                            title="Revise and resubmit"
                           >
                             Revise
                           </button>
                         )}
-                        <InvoicePdfLink invoiceId={invoice.id} filename={`invoice-${invoice.invoice_number}.pdf`} />
-                        <button
-                          type="button"
-                          onClick={() => handleView(invoice)}
-                          className="rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1 text-xs font-semibold text-slate-100 hover:bg-slate-800"
-                        >
-                          View
-                        </button>
                       </div>
                     </td>
                   </tr>

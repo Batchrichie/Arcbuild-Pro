@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { formatGhs } from '../../lib/formatGhs'
+import { budgetVarianceStatus } from '../../lib/status-classes'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts'
 import DebtorsLedger from '../accounting/DebtorsLedger'
 import TimesheetReport from './TimesheetReport'
@@ -265,7 +266,7 @@ export default function ManagementReports() {
           <div>
             <div className="rounded-2xl bg-slate-950 p-4">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-slate-200"><thead className="text-slate-400"><tr><th>Cost Category</th><th className="text-right">Total Budget</th><th className="text-right">Total Actual</th><th className="text-right">Variance</th><th className="text-right">Variance %</th><th>Status</th></tr></thead><tbody>{(budgetRows||[]).map((b,idx)=>{const status = b.variance_pct>0? 'On Track': Math.abs(b.variance_pct)>10? 'Over Budget':'At Risk'; return (<tr key={idx}><td>{b.cost_category}</td><td className="text-right">{formatGhs(b.total_budget)}</td><td className="text-right">{formatGhs(b.total_actual)}</td><td className="text-right">{formatGhs(b.variance)}</td><td className="text-right">{b.variance_pct.toFixed(1)}%</td><td>{status}</td></tr>)})}</tbody></table>
+                <table className="w-full text-sm text-text-primary"><thead className="text-text-muted"><tr><th className="py-2 text-left">Cost Category</th><th className="py-2 text-right">Total Budget</th><th className="py-2 text-right">Total Actual</th><th className="py-2 text-right">Variance</th><th className="py-2 text-right">Variance %</th><th className="py-2 text-left">Status</th></tr></thead><tbody>{(budgetRows||[]).map((b,idx)=>{const { label, className } = budgetVarianceStatus(b.variance_pct); return (<tr key={idx} className="border-t border-border-soft"><td className="py-2">{b.cost_category}</td><td className="py-2 text-right">{formatGhs(b.total_budget)}</td><td className="py-2 text-right">{formatGhs(b.total_actual)}</td><td className="py-2 text-right">{formatGhs(b.variance)}</td><td className="py-2 text-right">{b.variance_pct.toFixed(1)}%</td><td className="py-2"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${className}`}>{label}</span></td></tr>)})}</tbody></table>
                 <div className="mt-3"><button onClick={()=>downloadCsv('budget_vs_actual.csv', budgetRows||[])} className="rounded bg-emerald-500 px-3 py-2">Export CSV</button></div>
               </div>
             </div>

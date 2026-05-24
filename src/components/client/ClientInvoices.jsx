@@ -70,7 +70,7 @@ export default function ClientInvoices() {
                   </td>
                   <td className="px-4 py-3 text-slate-600">{row.due_date ?? '—'}</td>
                   <td className="px-4 py-3">
-                    <InvoicePdfLink invoiceId={row.id} filename={`invoice-${row.invoice_number}.pdf`} />
+                    <InvoicePdfLink invoiceId={row.id} />
                   </td>
                 </tr>
               ))}

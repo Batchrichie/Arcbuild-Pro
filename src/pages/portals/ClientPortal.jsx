@@ -44,10 +44,13 @@ function ClientPortalContent() {
 
   useEffect(() => {
     try {
-      // Client portal defaults to light theme
-      setTheme('light')
-      return () => { setTheme('dark') }
-    } catch { /* best effort */ }
+      const stored = window.localStorage.getItem('arcbuild_theme')
+      if (stored !== 'light' && stored !== 'dark') {
+        setTheme('light')
+      }
+    } catch {
+      /* best effort */
+    }
   }, [setTheme])
 
   useEffect(() => {
@@ -86,7 +89,7 @@ function ClientPortalContent() {
               <p className="text-sm font-medium text-slate-900">{displayName}</p>
               <p className="text-xs text-slate-500">{email}</p>
             </div>
-            <ThemeToggle className="hidden md:inline-flex" />
+            <ThemeToggle className="inline-flex" />
             <button type="button" onClick={signOut} className="hidden rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 sm:block">
               Sign out
             </button>
@@ -113,6 +116,9 @@ function ClientPortalContent() {
               <button type="button" onClick={() => setMenuOpen(false)} className="text-slate-500">Close</button>
             </div>
             <p className="mb-4 text-sm font-medium text-slate-900">{displayName}</p>
+            <div className="mb-4">
+              <ThemeToggle className="w-full justify-center" />
+            </div>
             <nav className="flex flex-col gap-2">
               {NAV.map((item) => (
                 <button

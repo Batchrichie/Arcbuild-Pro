@@ -1,34 +1,34 @@
 const STATUS_MAP = {
   draft: {
     label: 'Draft',
-    className: 'bg-slate-800/90 text-slate-100 border border-slate-700',
+    className: 'bg-surface-2 text-text-muted-strong border border-border',
   },
   pending_approval: {
     label: 'Pending approval',
-    className: 'bg-amber-900/15 text-amber-200 border border-amber-700',
+    className: 'bg-warning-bg text-amber-200 border border-warning-border',
   },
   approved: {
     label: 'Approved',
-    className: 'bg-teal-900/15 text-teal-200 border border-teal-700',
+    className: 'bg-success-bg text-teal-200 border border-success-border',
   },
   sent: {
     label: 'Sent',
-    className: 'bg-blue-900/15 text-blue-200 border border-blue-700',
+    className: 'bg-info-bg text-blue-200 border border-info-border',
   },
   paid: {
     label: 'Paid',
-    className: 'bg-cyan-900/15 text-cyan-200 border border-cyan-700',
+    className: 'bg-info-bg text-cyan-200 border border-info-border',
   },
   rejected: {
     label: 'Rejected',
-    className: 'bg-red-900/15 text-red-200 border border-red-700',
+    className: 'bg-danger-bg text-red-200 border border-danger-border',
   },
 }
 
 export default function StatusBadge({ status, className = '' }) {
   const config = STATUS_MAP[status] || {
     label: status?.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()) || 'Unknown',
-    className: 'bg-slate-800 text-slate-100 border border-slate-700',
+    className: 'bg-surface-2 text-text-muted-strong border border-border',
   }
 
   return (

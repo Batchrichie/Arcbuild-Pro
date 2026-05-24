@@ -23,6 +23,7 @@ import ProjectRegistry from '../../pages/projects/ProjectRegistry'
 import PaymentsReceived from '../payments/PaymentsReceived'
 import ChartOfAccounts from '../accounts/ChartOfAccounts'
 import { COMPANY } from '../../lib/company-config'
+import logo from '../../assets/ModuloDevLogo.png'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 
 const TABS = [
@@ -325,7 +326,7 @@ export default function CeoPortal() {
           <aside className="portal-sidebar hidden lg:flex lg:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl shadow-black/20">
             <div className="mb-6 shrink-0">
               <div className="inline-flex items-center gap-3 rounded-3xl bg-amber-bg px-4 py-3 text-sm font-semibold text-amber-200">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500 text-slate-950">AB</span>
+                <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
                 <span>{COMPANY.name}</span>
               </div>
             </div>

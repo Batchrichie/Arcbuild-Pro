@@ -1,60 +1,52 @@
 import { formatGhsCompact } from '../../lib/formatGhs'
-
-function budgetStatus(totalCosts, totalBudget) {
-  const costs = Number(totalCosts) || 0
-  const budget = Number(totalBudget) || 0
-  if (budget <= 0) return { label: 'On Track', className: 'bg-emerald-500/20 text-emerald-300' }
-  if (costs > budget) return { label: 'Over Budget', className: 'bg-red-500/20 text-red-300' }
-  if (costs > budget * 0.9) return { label: 'At Risk', className: 'bg-amber-500/20 text-amber-300' }
-  return { label: 'On Track', className: 'bg-emerald-500/20 text-emerald-300' }
-}
+import { budgetTrackStatus } from '../../lib/status-classes'
 
 export default function ProjectHealthTable({ projects, loading, onSelectProject }) {
   if (loading) {
-    return <div className="h-48 animate-pulse rounded-2xl border border-border-soft bg-white/5" />
+    return <div className="h-48 animate-pulse rounded-2xl border border-border-soft bg-panel" />
   }
 
   if (!projects?.length) {
     return (
-      <p className="rounded-2xl border border-border-soft bg-white/5 px-4 py-8 text-center text-sm text-slate-400">
+      <p className="rounded-2xl border border-border-soft bg-panel px-4 py-8 text-center text-sm text-text-muted">
         No active project finance data to display.
       </p>
     )
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border-soft">
-      <table className="dark-table w-full text-sm">
+    <div className="portal-table-scroll portal-table-wrap overflow-hidden rounded-2xl border border-border-soft">
+      <table className="dark-table w-full min-w-[640px] text-sm">
         <thead>
           <tr>
-            <th className="px-4 py-3 text-left text-sm font-semibold uppercase text-slate-400">Project</th>
-            <th className="hidden px-4 py-3 text-left text-sm font-semibold uppercase text-slate-400 sm:table-cell">Division</th>
-            <th className="px-4 py-3 text-left text-sm font-semibold uppercase text-slate-400">Completion</th>
-            <th className="hidden px-4 py-3 text-left text-sm font-semibold uppercase text-slate-400 md:table-cell">Budget</th>
-            <th className="px-4 py-3 text-right text-sm font-semibold uppercase text-slate-400">Outstanding</th>
+            <th className="px-4 py-3 text-left text-sm font-semibold uppercase text-text-muted">Project</th>
+            <th className="hidden px-4 py-3 text-left text-sm font-semibold uppercase text-text-muted sm:table-cell">Division</th>
+            <th className="px-4 py-3 text-left text-sm font-semibold uppercase text-text-muted">Completion</th>
+            <th className="hidden px-4 py-3 text-left text-sm font-semibold uppercase text-text-muted md:table-cell">Budget</th>
+            <th className="px-4 py-3 text-right text-sm font-semibold uppercase text-text-muted">Outstanding</th>
           </tr>
         </thead>
         <tbody>
           {projects.map((row) => {
-            const status = budgetStatus(row.total_costs_ghs, row.total_budget_ghs)
+            const status = budgetTrackStatus(row.total_costs_ghs, row.total_budget_ghs)
             const pct = Math.min(100, Math.max(0, Number(row.financial_completion_pct) || 0))
             return (
               <tr
                 key={row.project_id}
                 onClick={() => onSelectProject(row.project_id)}
-                className="cursor-pointer transition hover:bg-white/5"
+                className="cursor-pointer transition hover:bg-surface-overlay"
               >
-                <td className="px-4 py-3 font-medium text-white">{row.project_name}</td>
-                <td className="hidden px-4 py-3 text-slate-300 sm:table-cell">{row.division_name || '—'}</td>
+                <td className="px-4 py-3 font-medium text-text-primary">{row.project_name}</td>
+                <td className="hidden px-4 py-3 text-text-muted-strong sm:table-cell">{row.division_name || '—'}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <div className="h-1.5 flex-1 min-w-[4rem] max-w-[6rem] overflow-hidden rounded-full bg-white/10">
+                    <div className="h-1.5 flex-1 min-w-[4rem] max-w-[6rem] overflow-hidden rounded-full bg-surface-overlay">
                       <div
                         className="h-full rounded-full bg-blue-400"
                         style={{ width: `${pct}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm text-slate-400">{pct.toFixed(0)}%</span>
+                    <span className="text-sm text-text-muted">{pct.toFixed(0)}%</span>
                   </div>
                 </td>
                 <td className="hidden px-4 py-3 md:table-cell">

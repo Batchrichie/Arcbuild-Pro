@@ -271,15 +271,15 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
 
         {/* Cost Type */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Cost Type <span className="text-red-500">*</span>
+          <label className="portal-label mb-2 block">
+            Cost Type <span className="text-danger">*</span>
           </label>
           <select
             name="costType"
             value={formData.costType}
             onChange={handleInputChange}
             required
-            className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full rounded-2xl border border-border-soft bg-surface-2 px-4 py-3 text-sm text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20"
           >
             <option value="">Select cost type</option>
             {COST_TYPES.map((type) => (
@@ -293,15 +293,15 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
         {/* Subcontractor (conditionally shown) */}
         {formData.costType === 'Subcontractors' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Subcontractor <span className="text-red-500">*</span>
+            <label className="portal-label mb-2 block">
+              Subcontractor <span className="text-danger">*</span>
             </label>
             <select
               name="subcontractorId"
               value={formData.subcontractorId}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-2xl border border-border-soft bg-surface-2 px-4 py-3 text-sm text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20"
             >
               <option value="">Select a subcontractor</option>
               {subcontractors.map((sub) => (
@@ -325,15 +325,15 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
             required
             rows="3"
             placeholder="Enter cost description"
-            className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full rounded-2xl border border-border-soft bg-surface-2 px-4 py-3 text-sm text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20"
           />
         </div>
 
         {/* Amount & Currency */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Amount <span className="text-red-500">*</span>
+            <label className="portal-label mb-2 block">
+              Amount <span className="text-danger">*</span>
             </label>
             <input
               type="number"
@@ -344,16 +344,16 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
               step="0.01"
               min="0"
               placeholder="0.00"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-2xl border border-border-soft bg-surface-2 px-4 py-3 text-sm text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+            <label className="portal-label mb-2 block">Currency</label>
             <select
               name="currency"
               value={formData.currency}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-2xl border border-border-soft bg-surface-2 px-4 py-3 text-sm text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20"
             >
               {CURRENCIES.map((curr) => (
                 <option key={curr} value={curr}>
@@ -366,26 +366,26 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
 
         {/* Date Incurred */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Date Incurred</label>
+          <label className="portal-label mb-2 block">Date Incurred</label>
           <input
             type="date"
             name="dateIncurred"
             value={formData.dateIncurred}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full rounded-2xl border border-border-soft bg-surface-2 px-4 py-3 text-sm text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20"
           />
         </div>
 
         {/* Receipt URL (Optional) */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Receipt URL (Optional)</label>
+          <label className="portal-label mb-2 block">Receipt URL (Optional)</label>
           <input
             type="url"
             name="receiptUrl"
             value={formData.receiptUrl}
             onChange={handleInputChange}
             placeholder="https://example.com/receipt.pdf"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full rounded-2xl border border-border-soft bg-surface-2 px-4 py-3 text-sm text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20"
           />
         </div>
 

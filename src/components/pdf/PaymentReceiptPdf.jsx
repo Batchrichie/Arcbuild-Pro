@@ -1,4 +1,5 @@
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import { COMPANY } from '../../lib/company-config'
 import { numberToWords } from '../../utils/numberToWords'
 
 const colors = {
@@ -71,9 +72,11 @@ export default function PaymentReceiptPdf({ receiptData = {}, amountPaid = 0, pa
       <Page size="A4" style={styles.page}>
         <View style={styles.headerRow}>
           <View>
-            <Text style={styles.company}>ARCBUILD PRO</Text>
+            <Text style={styles.company}>{COMPANY.name.toUpperCase()}</Text>
             <Text style={styles.tagline}>Construction · Architecture · Real Estate · Logistics</Text>
-            <Text style={styles.contact}>Accra, Ghana | info@arcbuildpro.com | +233 000 000 000</Text>
+            <Text style={styles.contact}>
+              {COMPANY.city} | {COMPANY.email} | {COMPANY.phone}
+            </Text>
           </View>
 
           <View style={styles.receiptBlock}>
@@ -189,8 +192,8 @@ export default function PaymentReceiptPdf({ receiptData = {}, amountPaid = 0, pa
         )}
 
         <View style={styles.footerHr} />
-        <Text style={styles.footerText}>This is an official payment receipt issued by ARCBUILD PRO.</Text>
-        <Text style={styles.footerText}>For queries, contact accounts@arcbuildpro.com</Text>
+        <Text style={styles.footerText}>This is an official payment receipt issued by {COMPANY.name}.</Text>
+        <Text style={styles.footerText}>For queries, contact {COMPANY.email}</Text>
         <Text style={styles.generated}>{`Generated on: ${createdOn}`}</Text>
       </Page>
     </Document>

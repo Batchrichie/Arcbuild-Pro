@@ -3,14 +3,13 @@ import { supabase } from '../../lib/supabase'
 import { useEmployee } from '../../context/EmployeeContext'
 import { fetchAnnualLeaveEntitlement } from '../../lib/hr-config'
 import { countWeekdays, EMPLOYEE_LEAVE_TYPES } from '../../lib/employee-utils'
+import { inputClsRounded as inputCls } from '../../lib/portal-classes'
 
 const STATUS_BADGE = {
   pending: 'bg-amber-500/20 text-amber-200',
   approved: 'bg-emerald-500/20 text-emerald-200',
   rejected: 'bg-red-500/20 text-red-300',
 }
-
-const inputCls = 'w-full rounded-xl border border-border-soft bg-slate-900 px-3 py-2.5 text-sm text-white'
 
 export default function EmployeeLeave() {
   const { employee } = useEmployee()

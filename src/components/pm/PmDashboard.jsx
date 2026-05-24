@@ -1,19 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { formatGhsCompact } from '../../lib/formatGhs'
+import { budgetTrackStatus } from '../../lib/status-classes'
 import { usePmProject } from '../../context/PmProjectContext'
 import ProjectSwitcher from './ProjectSwitcher'
 
 const COST_CATEGORIES = ['Materials', 'Labour', 'Subcontractors', 'Equipment Hire', 'Other']
-
-function budgetStatus(budget, spent) {
-  const b = Number(budget) || 0
-  const s = Number(spent) || 0
-  if (b <= 0) return { label: 'On Track', className: 'bg-emerald-500/20 text-emerald-300' }
-  if (s > b) return { label: 'Over Budget', className: 'bg-red-500/20 text-red-300' }
-  if (s > b * 0.9) return { label: 'At Risk', className: 'bg-amber-500/20 text-amber-300' }
-  return { label: 'On Track', className: 'bg-emerald-500/20 text-emerald-300' }
-}
 
 function milestoneStatusStyle(status, dueDate) {
   const overdue =
@@ -79,7 +71,7 @@ export default function PmDashboard({ onLogCost, onMarkMilestone, onPaymentCert,
               : finance?.other_cost_ghs
     const b = Number(budgetVal) || 0
     const s = Number(spentVal) || 0
-    return { category, budget: b, spent: s, remaining: b - s, status: budgetStatus(b, s) }
+    return { category, budget: b, spent: s, remaining: b - s, status: budgetTrackStatus(s, b) }
   })
 
   const remaining = Number(finance?.budget_remaining_ghs) || 0

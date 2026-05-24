@@ -1,17 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { ACCOUNT_STATUS_BADGE } from '../../lib/status-classes'
 import {
   getAccountsByCategory,
   getAccountCategories,
   createAccount,
   updateAccount,
 } from '../../services/chartOfAccountsService'
-
-const STATUS_BADGE = {
-  Active: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
-  Inactive: 'border-slate-500/30 bg-slate-500/10 text-slate-300',
-}
 
 const STATUS_TOGGLES = [
   { value: 'all', label: 'All Accounts' },
@@ -321,11 +317,11 @@ export default function ChartOfAccounts() {
                   <p className="text-sm text-slate-400">{accounts.length} account{accounts.length === 1 ? '' : 's'}</p>
                 </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-slate-300">
-                  <thead className="border-b border-border-soft text-xs uppercase tracking-widest text-slate-500">
+              <div className="portal-table-scroll overflow-x-auto">
+                <table className="w-full min-w-[720px] text-sm text-text-primary">
+                  <thead className="border-b border-border-soft bg-surface-2 text-xs uppercase tracking-widest text-text-muted">
                     <tr>
-                              <th className="px-4 py-3 text-left">Code</th>
+                      <th className="px-4 py-3 text-left">Code</th>
                       <th className="px-4 py-3 text-left">Name</th>
                       <th className="px-4 py-3 text-left">Type</th>
                       <th className="px-4 py-3 text-left hidden lg:table-cell">Sub-Element</th>
@@ -336,8 +332,8 @@ export default function ChartOfAccounts() {
                   </thead>
                   <tbody>
                     {accounts.map((account) => (
-                      <tr key={account.account_code} className="border-b border-border-soft hover:bg-white/5 transition">
-                        <td className="px-4 py-3 font-medium text-white">
+                      <tr key={account.account_code} className="border-b border-border-soft hover:bg-surface-overlay/50 transition">
+                        <td className="px-4 py-3 font-medium text-text-primary">
                           <div className="flex items-center gap-2">
                             <span>{account.account_code}</span>
                             {account.is_system && (
@@ -350,7 +346,7 @@ export default function ChartOfAccounts() {
                         <td className="px-4 py-3 hidden lg:table-cell">{account.sub_element || '-'}</td>
                         <td className="px-4 py-3 hidden lg:table-cell">{account.nature || '-'}</td>
                         <td className="px-4 py-3">
-                          <span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[account.status] ?? ''}`}>
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${ACCOUNT_STATUS_BADGE[account.status] ?? ACCOUNT_STATUS_BADGE.Inactive}`}>
                             {account.status}
                           </span>
                         </td>

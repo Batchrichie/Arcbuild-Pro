@@ -19,11 +19,10 @@ export default function ProtectedRoute({ allowedRoles, children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-stone-950 flex items-center justify-center">
+      <div className="min-h-screen bg-bg flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          {/* Spinner */}
-          <div className="w-10 h-10 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-stone-400 text-sm tracking-widest uppercase">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-amber border-t-transparent" />
+          <span className="portal-eyebrow text-text-muted">
             Authenticating
           </span>
         </div>

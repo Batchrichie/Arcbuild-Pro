@@ -8,7 +8,7 @@ import RecentJournalEntries from './RecentJournalEntries'
 function ActionCard({ title, count, actionLabel, onAction, accent }) {
   return (
     <div className="rounded-3xl panel-surface p-5 shadow-lg shadow-black/10">
-      <p className="text-sm font-medium text-slate-400">{title}</p>
+      <p className="text-sm font-medium text-text-muted">{title}</p>
       <p className={`mt-2 text-3xl font-bold ${accent}`}>{count}</p>
       <button
         type="button"
@@ -145,7 +145,7 @@ export default function AccountantDashboard({ onNavigate, onJournalSelect }) {
     <div className="space-y-8">
       <div>
         <p className="portal-section-eyebrow uppercase tracking-[0.24em]">Today&apos;s work</p>
-        <h2 className="mt-1 text-xl font-semibold text-white sm:text-2xl">Action dashboard</h2>
+        <h2 className="portal-h2 mt-1">Action dashboard</h2>
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">

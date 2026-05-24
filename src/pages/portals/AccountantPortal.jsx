@@ -30,6 +30,7 @@ import ManualJournalForm from '../../components/accounting/ManualJournalForm'
 import ManualJournalList from '../../components/accounting/ManualJournalList'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 import { COMPANY } from '../../lib/company-config'
+import logo from '../../assets/ModuloDevLogo.png'
 import DebtorsLedger from '../../components/accounting/DebtorsLedger'
 import AlertLog from '../../components/alerts/AlertLog'
 import ManagementReports from '../../components/reports/ManagementReports'
@@ -122,6 +123,7 @@ const MOBILE_SUB_NAV = {
     { id: 'invoice-list', label: 'List' },
     { id: 'create-invoice', label: 'Create' },
     { id: 'milestone-queue', label: 'Milestone' },
+    { id: 'payments-received', label: 'Payments' },
   ],
   ledger: [
     { id: 'general-ledger', label: 'GL' },
@@ -158,6 +160,7 @@ const VIEW_TITLES = {
   'invoice-list': 'Invoice List',
   'create-invoice': 'Create Invoice',
   'milestone-queue': 'Milestone Queue',
+  'payments-received': 'Payments Received',
   'new-journal': 'New Journal',
   'journal-history': 'Journal History',
   'debtors-ledger': 'Debtors Ledger',
@@ -196,7 +199,7 @@ function viewFromMobileTab(tab, currentView) {
 
 function mobileTabForView(view) {
   if (view === 'dashboard') return 'dashboard'
-  if (['invoice-list', 'create-invoice', 'milestone-queue'].includes(view)) return 'invoices'
+  if (['invoice-list', 'create-invoice', 'milestone-queue', 'payments-received'].includes(view)) return 'invoices'
   if (['general-ledger', 'journal-history', 'new-journal', 'financial-statements', 'trial-balance', 'bank-accounts', 'import-statement', 'reconciliation'].includes(view))
     return 'ledger'
   if (['payroll-runs', 'paye-schedule', 'ssnit-schedule'].includes(view)) return 'payroll'
@@ -399,7 +402,7 @@ export default function AccountantPortal() {
           <aside className="portal-sidebar hidden lg:flex lg:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl shadow-black/20 hover-animate panel-surface soft-gradient-overlay">
             <div className="mb-6">
               <div className="inline-flex items-center gap-3 rounded-3xl bg-success-bg px-4 py-3 text-sm font-semibold text-teal-200">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-500 text-slate-950">AB</span>
+                <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
                 <span>{COMPANY.name}</span>
               </div>
             </div>

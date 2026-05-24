@@ -58,8 +58,8 @@ export default function CeoBankAccountsView() {
     <div className="rounded-4xl border border-border-soft bg-surface-overlay p-6 shadow-xl shadow-black/10">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Bank overview</p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">Bank account balances</h2>
+          <p className="portal-section-eyebrow">Bank overview</p>
+          <h2 className="portal-h2 mt-2">Bank account balances</h2>
         </div>
         <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-200">
           {accounts.length} accounts
@@ -67,8 +67,8 @@ export default function CeoBankAccountsView() {
       </div>
       {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
       <div className="mt-6 overflow-x-auto">
-        <table className="w-full text-sm text-slate-200">
-          <thead className="text-slate-400">
+        <table className="w-full text-sm text-text-muted-strong">
+          <thead className="text-text-muted">
             <tr>
               <th className="px-3 py-3 text-left">Account</th>
               <th className="px-3 py-3 text-left">Bank</th>

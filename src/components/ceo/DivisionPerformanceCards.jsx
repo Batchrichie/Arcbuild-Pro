@@ -2,10 +2,10 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 import { formatGhsCompact } from '../../lib/formatGhs'
 
 const DIVISIONS = [
-  { name: 'Construction', icon: '🏗️', color: '#F5A623' },
-  { name: 'Architecture', icon: '📐', color: '#378ADD' },
-  { name: 'Real Estate', icon: '🏢', color: '#1D9E75' },
-  { name: 'Logistics', icon: '🚚', color: '#14B8A6' },
+  { name: 'Construction', icon: '🏗️', color: 'var(--color-amber)' },
+  { name: 'Architecture', icon: '📐', color: 'var(--color-info)' },
+  { name: 'Real Estate', icon: '🏢', color: 'var(--color-success)' },
+  { name: 'Logistics', icon: '🚚', color: 'var(--color-teal)' },
 ]
 
 export default function DivisionPerformanceCards({ divisionData, loading }) {
@@ -13,7 +13,7 @@ export default function DivisionPerformanceCards({ divisionData, loading }) {
     return (
       <div className="grid gap-4 lg:grid-cols-2">
         {DIVISIONS.map((d) => (
-          <div key={d.name} className="h-64 animate-pulse rounded-3xl border border-border-soft bg-white/5" />
+          <div key={d.name} className="h-64 animate-pulse rounded-3xl border border-border-soft bg-panel" />
         ))}
       </div>
     )
@@ -35,24 +35,24 @@ export default function DivisionPerformanceCards({ divisionData, loading }) {
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-xl" aria-hidden>
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-surface-overlay text-xl" aria-hidden>
                   {div.icon}
                 </span>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">{div.name}</h3>
-                  <p className="text-sm text-slate-400">{stats.activeProjects} active projects</p>
+                  <h3 className="portal-h3">{div.name}</h3>
+                  <p className="text-sm text-text-muted">{stats.activeProjects} active projects</p>
                 </div>
               </div>
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div>
-                <p className="text-sm text-slate-500">Revenue this month</p>
+                <p className="text-sm text-text-muted">Revenue this month</p>
                 <p className="mt-1 text-lg font-semibold text-amber-200">{formatGhsCompact(stats.revenueMonth)}</p>
               </div>
               <div>
-                <p className="text-sm text-slate-500">Revenue YTD</p>
-                <p className="mt-1 text-lg font-semibold text-white">{formatGhsCompact(stats.revenueYtd)}</p>
+                <p className="text-sm text-text-muted">Revenue YTD</p>
+                <p className="mt-1 text-lg font-semibold text-text-primary">{formatGhsCompact(stats.revenueYtd)}</p>
               </div>
             </div>
 
@@ -70,7 +70,7 @@ export default function DivisionPerformanceCards({ divisionData, loading }) {
                     <Tooltip
                       contentStyle={{
                         background: '#0f172a',
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        border: '1px solid var(--color-border-soft)',
                         borderRadius: '0.75rem',
                         fontSize: '0.875rem',
                       }}

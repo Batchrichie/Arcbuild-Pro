@@ -335,9 +335,9 @@ body.theme-light .rounded-4xl.border {
 }
 
 .dark-table th {
-  color: var(--color-muted);
+  color: var(--color-text-muted);
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: var(--type-label-size, 0.875rem);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -493,33 +493,9 @@ button {
   cursor: not-allowed;
 }
 
-.panel-surface {
-  background: rgba(15, 23, 42, 0.96);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-.dark-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.dark-table thead {
-  background: rgba(255,255,255,0.05);
-}
-
-.dark-table th,
-.dark-table td {
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  padding: 1rem 0.75rem;
-}
-
-.dark-table tbody tr:hover {
-  background: rgba(255,255,255,0.04);
-}
-
 .dark-panel {
-  background: rgba(15,23,42,0.96);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
 
 .input-group {
@@ -533,7 +509,7 @@ button {
   transform: translateY(-50%);
   border: none;
   background: transparent;
-  color: var(--color-muted);
+  color: var(--color-text-muted);
   font-size: 0.85rem;
   font-weight: 700;
 }
@@ -544,13 +520,14 @@ button {
 
 .portal-shell {
   min-height: 100vh;
-  background: radial-gradient(circle at top left, rgba(245,166,35,0.08), transparent 30%), linear-gradient(180deg, #090c12 0%, #0d131f 100%);
+  background: radial-gradient(circle at top left, var(--color-amber-bg), transparent 30%),
+    linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface-2) 100%);
 }
 
 .portal-sidebar {
   min-height: calc(100vh - 4rem);
-  background: rgba(7, 12, 19, 0.96);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
 
 .portal-main {
@@ -558,8 +535,8 @@ button {
 }
 
 .kpi-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
   padding: 1.5rem;
   border-radius: 1.75rem;
 }
@@ -567,20 +544,12 @@ button {
 .kpi-card strong {
   display: block;
   margin-top: 0.5rem;
-  color: var(--color-muted-strong);
-}
-
-/* Section labels in portals (Execution Tracking, Cost Tracking, etc.) */
-.portal-section-eyebrow {
-  color: var(--color-muted-strong);
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.24em;
+  color: var(--color-text-muted-strong);
 }
 
 .portal-main section.rounded-4xl > div:first-child .text-slate-500,
 .portal-main div.rounded-4xl.border > div:first-child .text-slate-500 {
-  color: var(--color-muted-strong) !important;
+  color: var(--color-text-muted-strong) !important;
 }
 
 /*
@@ -626,7 +595,7 @@ button {
 .portal-main section.rounded-4xl > *:not(:first-child) .text-gray-600,
 .portal-main div.rounded-4xl.border > *:not(:first-child) .text-gray-700,
 .portal-main div.rounded-4xl.border > *:not(:first-child) .text-gray-600 {
-  color: var(--color-muted-strong) !important;
+  color: var(--color-text-muted-strong) !important;
 }
 
 .portal-main section.rounded-4xl > *:not(:first-child) input,
@@ -669,7 +638,7 @@ body.theme-light .portal-main div.rounded-4xl.border > *:not(:first-child) optio
 .portal-main div.rounded-4xl.border > *:not(:first-child) input:disabled,
 .portal-main div.rounded-4xl.border > *:not(:first-child) select:disabled {
   background: rgba(255, 255, 255, 0.08) !important;
-  color: var(--color-muted) !important;
+  color: var(--color-text-muted) !important;
 }
 
 .portal-main section.rounded-4xl > *:not(:first-child) option,
@@ -694,7 +663,7 @@ body.theme-light .portal-main div.rounded-4xl.border > *:not(:first-child) optio
 
 .portal-main section.rounded-4xl > *:not(:first-child) th,
 .portal-main div.rounded-4xl.border > *:not(:first-child) th {
-  color: var(--color-muted) !important;
+  color: var(--color-text-muted) !important;
 }
 
 .portal-main section.rounded-4xl > *:not(:first-child) td,
@@ -772,23 +741,15 @@ body.theme-light .portal-main div.rounded-4xl.border > *:not(:first-child) optio
   color: #6ee7b7 !important;
 }
 
-/* ---------------------------------------------------------------------------
- * Portal typography — minimum 14px labels, 16px body (boardroom + mobile)
- * --------------------------------------------------------------------------- */
+/* Portal typography base — scale defined in portal-tokens.css */
 .portal-shell {
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.portal-shell .portal-eyebrow,
-.portal-shell .portal-sidebar .text-xs,
-.portal-shell .portal-kpi-label {
-  font-size: 0.875rem;
+  font-size: var(--type-body-size, 1rem);
+  line-height: var(--type-body-line, 1.5);
 }
 
 .portal-shell .portal-main th.text-xs,
 .portal-shell .dark-table th.text-xs {
-  font-size: 0.875rem;
+  font-size: var(--type-label-size, 0.875rem);
 }
 
 .portal-shell .min-touch {
@@ -800,17 +761,17 @@ body.theme-light .portal-main div.rounded-4xl.border > *:not(:first-child) optio
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 50;
+  z-index: var(--z-portal-nav, 50);
   padding-bottom: env(safe-area-inset-bottom, 0);
-  background: rgba(7, 12, 19, 0.98);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
   backdrop-filter: blur(12px);
 }
 
 .portal-slide-over-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: var(--z-portal-backdrop, 60);
   background: rgba(0, 0, 0, 0.6);
 }
 
@@ -818,13 +779,22 @@ body.theme-light .portal-main div.rounded-4xl.border > *:not(:first-child) optio
   position: fixed;
   top: 0;
   right: 0;
-  z-index: 70;
+  z-index: var(--z-portal-slide-over, 70);
   height: 100%;
+  max-height: 100dvh;
   width: min(100%, 42rem);
   overflow-y: auto;
-  background: #0d131f;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-left: 1px solid var(--color-border);
+  box-shadow: var(--shadow-elevated);
+}
+
+/* Structured slide-overs: fixed header/footer, scrollable body */
+.portal-slide-over-panel--structured {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 @media (max-width: 1023px) {
@@ -879,10 +849,11 @@ body.theme-light .portal-main div.rounded-4xl.border > *:not(:first-child) optio
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 65;
+  z-index: calc(var(--z-portal-backdrop, 60) + 5);
   border-radius: 1.5rem 1.5rem 0 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  background: #0d131f;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
   padding: 1.25rem 1rem calc(5.5rem + env(safe-area-inset-bottom, 0));
 }
 
@@ -891,12 +862,13 @@ body.theme-light .portal-main div.rounded-4xl.border > *:not(:first-child) optio
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 56;
+  z-index: calc(var(--z-portal-backdrop, 60) - 4);
   max-height: 70vh;
   overflow-y: auto;
   border-radius: 1.5rem 1.5rem 0 0;
-  background: #0d131f;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-top: 1px solid var(--color-border);
   padding: 1.25rem 1rem calc(1.25rem + env(safe-area-inset-bottom, 0));
 }
 

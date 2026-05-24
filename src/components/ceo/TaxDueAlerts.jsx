@@ -10,7 +10,7 @@ const TAX_ACCOUNTS = [
 
 export default function TaxDueAlerts({ balances, loading }) {
   if (loading) {
-    return <div className="h-24 animate-pulse rounded-2xl border border-border-soft bg-white/5" />
+    return <div className="h-24 animate-pulse rounded-2xl border border-border-soft bg-panel" />
   }
 
   return (
@@ -23,14 +23,14 @@ export default function TaxDueAlerts({ balances, loading }) {
           return (
             <li
               key={code}
-              className={`text-sm ${warn ? 'font-semibold text-amber-200' : 'text-slate-400'}`}
+              className={`text-sm ${warn ? 'font-semibold text-amber-200' : 'text-text-muted'}`}
             >
               {label}: GHS {formatGhs(amount)}
             </li>
           )
         })}
       </ul>
-      <p className="mt-4 text-sm text-slate-500">Contact your accountant to file returns.</p>
+      <p className="mt-4 text-sm text-text-muted">Contact your accountant to file returns.</p>
     </div>
   )
 }

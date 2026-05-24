@@ -27,7 +27,7 @@ export default function Modal({ open, onClose, title, size = 'md', children, foo
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+    <div className="portal-modal-host fixed inset-0 z-portal-modal flex items-center justify-center p-4 sm:p-6">
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
@@ -36,17 +36,17 @@ export default function Modal({ open, onClose, title, size = 'md', children, foo
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative z-10 w-full ${SIZE_CLASSES[size] || SIZE_CLASSES.md} max-h-[95vh] overflow-y-auto rounded-[2rem] border border-border-soft bg-slate-950 shadow-2xl shadow-black/40 ${className}`}
+        className={`relative z-10 w-full ${SIZE_CLASSES[size] || SIZE_CLASSES.md} max-h-[95vh] overflow-y-auto rounded-[2rem] border border-border-soft bg-surface text-text-primary shadow-elevated ${className}`}
       >
         <div className="flex flex-col gap-4 p-6 sm:p-8">
           <div className="flex items-start justify-between gap-4">
             <div>
-              {title && <h2 className="text-xl font-semibold text-white">{title}</h2>}
+              {title && <h2 className="portal-h2">{title}</h2>}
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full border border-border-soft bg-white/5 px-3 py-2 text-sm text-slate-200 transition hover:bg-white/10"
+              className="rounded-full border border-border-soft bg-panel px-3 py-2 text-sm text-text-muted-strong transition hover:bg-surface-overlay"
             >
               Close
             </button>

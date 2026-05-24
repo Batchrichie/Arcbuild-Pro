@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { formatGhs } from '../../lib/formatGhs'
+import { inputCls as clsInput } from '../../lib/portal-classes'
 
 const createEmptyLine = () => ({
   id: `${Date.now()}-${Math.random()}`,
@@ -51,8 +52,6 @@ const TEMPLATES = [
     ],
   },
 ]
-
-const clsInput = 'w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white'
 
 export default function ManualJournalForm({ initialDescription = '', initialReference = '', initialJournalDate = '', initialLines = [] }) {
   const { user } = useAuth()

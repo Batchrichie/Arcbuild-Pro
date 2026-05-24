@@ -1,169 +1,277 @@
-import { Document, Page, Text, View, Image } from '@react-pdf/renderer'
-import { pdfStyles } from './PdfTheme'
+import { Document, Page, Text, View, Image, StyleSheet } from '@react-pdf/renderer'
 import { COMPANY } from '../../lib/company-config'
+import {
+  formatPdfDate,
+  formatPdfMoney,
+  getInvoiceDocumentTitle,
+  getServiceLine,
+  normalizePdfLineItems,
+} from '../../lib/invoice-pdf-utils'
+import { numberToWords } from '../../utils/numberToWords'
 import logo from '../../assets/ModuloDevLogo.png'
 
-function formatGhs(value) {
-  const amount = Number(value || 0)
-  return `GHS ${amount.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+const styles = StyleSheet.create({
+  page: {
+    fontFamily: 'Helvetica',
+    fontSize: 9,
+    color: '#0f172a',
+    paddingTop: 32,
+    paddingBottom: 48,
+    paddingHorizontal: 36,
+    backgroundColor: '#ffffff',
+  },
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  companyBlock: { flex: 1.2, paddingRight: 12 },
+  companyName: { fontSize: 14, fontFamily: 'Helvetica-Bold', color: '#0f172a', marginBottom: 4 },
+  companyLine: { fontSize: 8, color: '#475569', marginBottom: 2 },
+  metaBlock: { flex: 1, alignItems: 'flex-end' },
+  metaTable: { width: '100%' },
+  metaRow: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 3 },
+  metaLabel: { width: 72, fontSize: 8, color: '#64748b', textAlign: 'right', paddingRight: 6 },
+  metaValue: { width: 110, fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#0f172a', textAlign: 'right' },
+  invoiceBanner: {
+    marginTop: 8,
+    marginBottom: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    backgroundColor: '#0b1730',
+    borderRadius: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  bannerLogo: { width: 36, height: 36, marginRight: 10 },
+  bannerTitle: { fontSize: 16, fontFamily: 'Helvetica-Bold', color: '#f4bf4d', letterSpacing: 1 },
+  bannerSub: { fontSize: 8, color: '#e2e8f0', marginTop: 2 },
+  infoRow: { flexDirection: 'row', marginBottom: 10, gap: 12 },
+  infoCol: { flex: 1 },
+  infoLabel: { fontSize: 7, color: '#64748b', marginBottom: 2, textTransform: 'uppercase' },
+  infoValue: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#0f172a' },
+  table: { marginTop: 6, marginBottom: 12 },
+  tableHead: {
+    flexDirection: 'row',
+    backgroundColor: '#f4bf4d',
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+  },
+  thDesc: { flex: 3, fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#111827' },
+  thQty: { flex: 1, fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#111827', textAlign: 'center' },
+  thAmt: { flex: 1, fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#111827', textAlign: 'right' },
+  sectionRow: {
+    paddingVertical: 5,
+    paddingHorizontal: 4,
+    backgroundColor: '#f1f5f9',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  sectionText: { fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#0f172a', letterSpacing: 0.5 },
+  lineRow: {
+    flexDirection: 'row',
+    paddingVertical: 5,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  tdDesc: { flex: 3, fontSize: 8, color: '#0f172a' },
+  tdQty: { flex: 1, fontSize: 8, color: '#0f172a', textAlign: 'center' },
+  tdAmt: { flex: 1, fontSize: 8, color: '#0f172a', textAlign: 'right' },
+  totalsWrap: { marginTop: 8, alignItems: 'flex-end' },
+  totalsBox: { width: 240 },
+  totalRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
+  totalLabel: { fontSize: 8, color: '#475569' },
+  totalValue: { fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#0f172a' },
+  grandRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 6,
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: '#cbd5e1',
+  },
+  grandLabel: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#0f172a' },
+  grandValue: { fontSize: 10, fontFamily: 'Helvetica-Bold', color: '#0f172a' },
+  wordsBlock: { marginTop: 10, marginBottom: 12 },
+  wordsLabel: { fontSize: 7, color: '#64748b', marginBottom: 2 },
+  wordsValue: { fontSize: 8, fontStyle: 'italic', color: '#0f172a' },
+  footerBlock: { marginTop: 16, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#e2e8f0' },
+  footerTagline: { fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#0f172a', textAlign: 'center', marginBottom: 4 },
+  footerThanks: { fontSize: 8, color: '#475569', textAlign: 'center', marginBottom: 2 },
+  footerFx: { fontSize: 7, color: '#64748b', textAlign: 'center', marginTop: 6 },
+  footerLegal: {
+    position: 'absolute',
+    bottom: 24,
+    left: 36,
+    right: 36,
+    fontSize: 7,
+    color: '#94a3b8',
+    textAlign: 'center',
+  },
+})
+
+function MetaPair({ label, value }) {
+  return (
+    <View style={styles.metaRow}>
+      <Text style={styles.metaLabel}>{label}</Text>
+      <Text style={styles.metaValue}>{value}</Text>
+    </View>
+  )
 }
 
-function formatDate(value) {
-  if (!value) return '—'
-  return new Date(value).toLocaleDateString('en-GH', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
+function TotalLine({ label, value, bold }) {
+  return (
+    <View style={styles.totalRow}>
+      <Text style={bold ? styles.grandLabel : styles.totalLabel}>{label}</Text>
+      <Text style={bold ? styles.grandValue : styles.totalValue}>{value}</Text>
+    </View>
+  )
 }
 
-export default function InvoicePdf({ invoice, lineItems = [], client = {} }) {
-  const subtotal = lineItems.reduce((sum, item) => sum + Number(item.quantity || 0) * Number(item.unit_price || 0), 0)
-  const discountRate = Number(invoice?.discount_rate ?? invoice?.discount_percent ?? 0)
-  const discountAmount = Number(invoice?.discount_amount ?? (subtotal * discountRate) / 100)
-  const subtotalAfterDiscount = subtotal - discountAmount
-  const nhil = subtotalAfterDiscount * 0.025
-  const getfund = subtotalAfterDiscount * 0.025
-  const taxableAmount = subtotalAfterDiscount + nhil + getfund
-  const vat = taxableAmount * 0.15
-  const grossTotal = subtotalAfterDiscount + nhil + getfund + vat
-  const whtDeduction = Number(invoice?.expected_receipt_ghs) ? Math.max(0, grossTotal - Number(invoice.expected_receipt_ghs)) : 0
-  const expectedReceipt = Number(invoice?.expected_receipt_ghs) || grossTotal - whtDeduction
+export default function InvoicePdf({ invoice = {}, lineItems = [], client = {}, project = {}, division = {} }) {
+  const currency = invoice.currency || 'GHS'
+  const divisionName = division?.name || ''
+  const projectName = project?.name || ''
+  const clientName = client?.name || 'Client'
+  const location = client?.region || client?.country || 'GREATER ACCRA'
+
+  const documentTitle = getInvoiceDocumentTitle(divisionName, projectName, invoice.notes)
+  const serviceLine = getServiceLine(divisionName, projectName, invoice.notes)
+  const rows = normalizePdfLineItems(lineItems)
+
+  const subtotal = Number(invoice.subtotal ?? 0)
+  const nhil = Number(invoice.nhil_amount ?? 0)
+  const getfund = Number(invoice.getfund_amount ?? 0)
+  const taxableAmount = subtotal + nhil + getfund
+  const vat = Number(invoice.vat_amount ?? 0)
+  const grossTotal = Number(invoice.gross_total ?? 0)
+  const wht = Number(invoice.wht_amount ?? 0)
+  const expectedReceipt = Number(invoice.expected_receipt ?? grossTotal - wht)
+
+  const fmt = (n) => formatPdfMoney(n, currency)
 
   return (
     <Document>
-      <Page style={pdfStyles.page}>
-        <View style={pdfStyles.headerBar}>
-          <View style={pdfStyles.headerTop}>
-            <Image src={logo} style={pdfStyles.logoImage} />
-            <View style={pdfStyles.headerTextGroup}>
-              <Text style={pdfStyles.companyName}>{COMPANY.name}</Text>
-              <Text style={pdfStyles.companyTagline}>INVOICE</Text>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.topRow}>
+          <View style={styles.companyBlock}>
+            <Text style={styles.companyName}>{COMPANY.name.toUpperCase()}</Text>
+            <Text style={styles.companyLine}>{COMPANY.address}</Text>
+            <Text style={styles.companyLine}>{COMPANY.city}</Text>
+            <Text style={styles.companyLine}>Phone: {COMPANY.phone}</Text>
+            <Text style={styles.companyLine}>Email: {COMPANY.email}</Text>
+          </View>
+          <View style={styles.metaBlock}>
+            <View style={styles.metaTable}>
+              <MetaPair label="Date" value={formatPdfDate(invoice.created_at)} />
+              <MetaPair label="Due Date" value={formatPdfDate(invoice.due_date)} />
+              <MetaPair label="Invoice #" value={invoice.invoice_number || invoice.id} />
+              <MetaPair label="Location" value={location} />
             </View>
           </View>
         </View>
 
-        <View style={pdfStyles.sectionRow}>
-          <Text style={pdfStyles.sectionTitle}>Invoice</Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <View style={{ flex: 1, marginRight: 16 }}>
-              <Text style={pdfStyles.label}>Invoice #</Text>
-              <Text style={pdfStyles.value}>{invoice.invoice_number || invoice.id}</Text>
-            </View>
-            <View style={{ flex: 1, marginRight: 16 }}>
-              <Text style={pdfStyles.label}>Issue Date</Text>
-              <Text style={pdfStyles.value}>{formatDate(invoice.created_at)}</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={pdfStyles.label}>Due Date</Text>
-              <Text style={pdfStyles.value}>{formatDate(invoice.due_date)}</Text>
+        <View style={styles.invoiceBanner}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <Image src={logo} style={styles.bannerLogo} />
+            <View>
+              <Text style={styles.bannerTitle}>{documentTitle}</Text>
+              <Text style={styles.bannerSub}>{COMPANY.shortName}</Text>
             </View>
           </View>
         </View>
 
-        <View style={pdfStyles.sectionRow}>
-          <Text style={pdfStyles.sectionTitle}>Bill To</Text>
-          <Text style={pdfStyles.label}>Name</Text>
-          <Text style={pdfStyles.value}>{client.name || 'Client Name'}</Text>
-          <Text style={pdfStyles.label}>Address</Text>
-          <Text style={pdfStyles.value}>{client.address || 'No address on file'}</Text>
-          <Text style={pdfStyles.label}>TIN</Text>
-          <Text style={pdfStyles.value}>{client.tin || 'N/A'}</Text>
-          <Text style={pdfStyles.label}>Email</Text>
-          <Text style={pdfStyles.value}>{client.email || 'N/A'}</Text>
+        <View style={styles.infoRow}>
+          <View style={styles.infoCol}>
+            <Text style={styles.infoLabel}>For</Text>
+            <Text style={styles.infoValue}>{serviceLine}</Text>
+          </View>
         </View>
 
-        <View style={pdfStyles.sectionRow}>
-          <Text style={pdfStyles.sectionTitle}>From</Text>
-          <Text style={pdfStyles.label}>{COMPANY.name}</Text>
-          <Text style={pdfStyles.value}>{COMPANY.address}</Text>
-          <Text style={pdfStyles.value}>{COMPANY.city}</Text>
-          <Text style={pdfStyles.value}>Email: {COMPANY.email}</Text>
-          <Text style={pdfStyles.value}>Phone: {COMPANY.phone}</Text>
+        <View style={styles.infoRow}>
+          <View style={styles.infoCol}>
+            <Text style={styles.infoLabel}>Bill to</Text>
+            <Text style={styles.infoValue}>{clientName}</Text>
+            {client.address ? <Text style={{ fontSize: 8, color: '#475569', marginTop: 2 }}>{client.address}</Text> : null}
+            {client.tin ? <Text style={{ fontSize: 8, color: '#475569', marginTop: 2 }}>TIN: {client.tin}</Text> : null}
+          </View>
+          <View style={styles.infoCol}>
+            <Text style={styles.infoLabel}>Project</Text>
+            <Text style={styles.infoValue}>{projectName || '—'}</Text>
+            {divisionName ? (
+              <Text style={{ fontSize: 8, color: '#475569', marginTop: 2 }}>Division: {divisionName}</Text>
+            ) : null}
+          </View>
         </View>
 
-        <View style={pdfStyles.sectionRow}>
-          <Text style={pdfStyles.sectionTitle}>Line Items</Text>
-          <View style={pdfStyles.table}>
-            <View style={pdfStyles.tableHeader}>
-              <Text style={pdfStyles.tableHeaderCell}>Description</Text>
-              <Text style={pdfStyles.tableHeaderCell}>Quantity</Text>
-              <Text style={pdfStyles.tableHeaderCell}>Unit Price</Text>
-              <Text style={pdfStyles.tableHeaderCell}>Line Total</Text>
-            </View>
-            {lineItems.length ? (
-              lineItems.map((item, index) => (
-                <View style={pdfStyles.tableRow} key={`${item.description}-${index}`}>
-                  <Text style={pdfStyles.tableCell}>{item.description || 'Item'}</Text>
-                  <Text style={pdfStyles.tableCell}>{item.quantity ?? 0}</Text>
-                  <Text style={pdfStyles.tableCell}>{formatGhs(item.unit_price)}</Text>
-                  <Text style={pdfStyles.amountCell}>{formatGhs((item.quantity || 0) * (item.unit_price || 0))}</Text>
+        <View style={styles.table}>
+          <View style={styles.tableHead}>
+            <Text style={styles.thDesc}>DESCRIPTION</Text>
+            <Text style={styles.thQty}>UNIT QTY / DAYS</Text>
+            <Text style={styles.thAmt}>AMOUNT</Text>
+          </View>
+          {rows.length ? (
+            rows.map((row) =>
+              row.type === 'section' ? (
+                <View key={row.key} style={styles.sectionRow}>
+                  <Text style={styles.sectionText}>{row.title}:</Text>
                 </View>
-              ))
-            ) : (
-              <View style={pdfStyles.tableRow}>
-                <Text style={pdfStyles.tableCell}>No invoice items available</Text>
-              </View>
+              ) : (
+                <View key={row.key} style={styles.lineRow}>
+                  <Text style={styles.tdDesc}>{row.description}</Text>
+                  <Text style={styles.tdQty}>{row.quantity}</Text>
+                  <Text style={styles.tdAmt}>{fmt(row.lineTotal)}</Text>
+                </View>
+              )
+            )
+          ) : (
+            <View style={styles.lineRow}>
+              <Text style={styles.tdDesc}>No line items</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.totalsWrap}>
+          <View style={styles.totalsBox}>
+            <TotalLine label="SUB-TOTAL" value={fmt(subtotal)} />
+            {(nhil > 0 || getfund > 0) && (
+              <TotalLine label="NHIL & GETFUND" value={fmt(nhil + getfund)} />
+            )}
+            <TotalLine label="TAXABLE AMOUNT" value={fmt(taxableAmount)} />
+            <TotalLine label="VAT 15%" value={fmt(vat)} />
+            {wht > 0 && <TotalLine label="WHT DEDUCTION" value={fmt(wht)} />}
+            <View style={styles.grandRow}>
+              <Text style={styles.grandLabel}>GRAND TOTAL</Text>
+              <Text style={styles.grandValue}>{fmt(grossTotal)}</Text>
+            </View>
+            {expectedReceipt !== grossTotal && (
+              <TotalLine label="EXPECTED RECEIPT" value={fmt(expectedReceipt)} />
             )}
           </View>
         </View>
 
-        <View style={pdfStyles.sectionRow}>
-          <Text style={pdfStyles.sectionTitle}>Tax Breakdown</Text>
-          <View style={pdfStyles.table}>
-            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}> 
-              <Text style={pdfStyles.tableCell}>Subtotal</Text>
-              <Text style={pdfStyles.amountCell}>{formatGhs(subtotal)}</Text>
-            </View>
-            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}>
-              <Text style={pdfStyles.tableCell}>Discount</Text>
-              <Text style={pdfStyles.amountCell}>{formatGhs(discountAmount)}</Text>
-            </View>
-            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}> 
-              <Text style={pdfStyles.tableCell}>Subtotal after discount</Text>
-              <Text style={pdfStyles.amountCell}>{formatGhs(subtotalAfterDiscount)}</Text>
-            </View>
-            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}> 
-              <Text style={pdfStyles.tableCell}>NHIL (2.5%)</Text>
-              <Text style={pdfStyles.amountCell}>{formatGhs(nhil)}</Text>
-            </View>
-            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}> 
-              <Text style={pdfStyles.tableCell}>GetFUND (2.5%)</Text>
-              <Text style={pdfStyles.amountCell}>{formatGhs(getfund)}</Text>
-            </View>
-            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}> 
-              <Text style={pdfStyles.tableCell}>Taxable Amount</Text>
-              <Text style={pdfStyles.amountCell}>{formatGhs(taxableAmount)}</Text>
-            </View>
-            <View style={[pdfStyles.tableRow, { borderBottomWidth: 0 }]}> 
-              <Text style={pdfStyles.tableCell}>VAT (15%)</Text>
-              <Text style={pdfStyles.amountCell}>{formatGhs(vat)}</Text>
-            </View>
-            <View style={pdfStyles.totalRow}>
-              <Text style={pdfStyles.tableCell}>Gross Total</Text>
-              <Text style={pdfStyles.amountCell}>{formatGhs(grossTotal)}</Text>
-            </View>
-            <View style={pdfStyles.tableRow}>
-              <Text style={pdfStyles.tableCell}>WHT Deduction</Text>
-              <Text style={pdfStyles.amountCell}>{formatGhs(whtDeduction)}</Text>
-            </View>
-            <View style={pdfStyles.totalRow}>
-              <Text style={pdfStyles.tableCell}>Expected Receipt</Text>
-              <Text style={pdfStyles.amountCell}>{formatGhs(expectedReceipt)}</Text>
-            </View>
-          </View>
+        <View style={styles.wordsBlock}>
+          <Text style={styles.wordsLabel}>Amount in words</Text>
+          <Text style={styles.wordsValue}>{numberToWords(grossTotal, currency)}</Text>
         </View>
 
-        <View style={pdfStyles.sectionRow}>
-          <Text style={pdfStyles.sectionTitle}>Payment Terms</Text>
-          <Text style={pdfStyles.value}>Payment is due within 30 days of the invoice date. Please remit payment to the account below.</Text>
-          <Text style={pdfStyles.value}>Bank: Ghana Commercial Bank</Text>
-          <Text style={pdfStyles.value}>Account Name: {COMPANY.shortName}</Text>
-          <Text style={pdfStyles.value}>Account Number: 1234567890</Text>
-          <Text style={pdfStyles.value}>Branch: Accra Main Branch</Text>
+        <View style={styles.footerBlock}>
+          <Text style={styles.footerTagline}>{COMPANY.tagline.toUpperCase()}</Text>
+          <Text style={styles.footerThanks}>THANK YOU FOR ENTRUSTING TO US YOUR DREAMS</Text>
+          <Text style={styles.footerThanks}>WE WILL HELP MAKE IT A REALITY</Text>
+          {currency !== 'GHS' && (
+            <Text style={styles.footerFx}>
+              Exchange rate information: Payments are preferably made in {currency}. If settled in Ghana Cedis
+              (GHS), the reference exchange rate is {currency} 1 = GHS {Number(invoice.fx_rate_to_ghs || 1).toFixed(2)}.
+            </Text>
+          )}
         </View>
 
-        <Text style={pdfStyles.footer}>This is a computer-generated invoice — {COMPANY.name}</Text>
+        <Text style={styles.footerLegal}>
+          This is a computer-generated invoice — {COMPANY.name} | {documentTitle}
+        </Text>
       </Page>
     </Document>
   )
