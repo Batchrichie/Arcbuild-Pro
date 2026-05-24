@@ -122,6 +122,7 @@ const MOBILE_SUB_NAV = {
     { id: 'invoice-list', label: 'List' },
     { id: 'create-invoice', label: 'Create' },
     { id: 'milestone-queue', label: 'Milestone' },
+    { id: 'payments-received', label: 'Payments' },
   ],
   ledger: [
     { id: 'general-ledger', label: 'GL' },
@@ -158,6 +159,7 @@ const VIEW_TITLES = {
   'invoice-list': 'Invoice List',
   'create-invoice': 'Create Invoice',
   'milestone-queue': 'Milestone Queue',
+  'payments-received': 'Payments Received',
   'new-journal': 'New Journal',
   'journal-history': 'Journal History',
   'debtors-ledger': 'Debtors Ledger',
@@ -196,7 +198,7 @@ function viewFromMobileTab(tab, currentView) {
 
 function mobileTabForView(view) {
   if (view === 'dashboard') return 'dashboard'
-  if (['invoice-list', 'create-invoice', 'milestone-queue'].includes(view)) return 'invoices'
+  if (['invoice-list', 'create-invoice', 'milestone-queue', 'payments-received'].includes(view)) return 'invoices'
   if (['general-ledger', 'journal-history', 'new-journal', 'financial-statements', 'trial-balance', 'bank-accounts', 'import-statement', 'reconciliation'].includes(view))
     return 'ledger'
   if (['payroll-runs', 'paye-schedule', 'ssnit-schedule'].includes(view)) return 'payroll'

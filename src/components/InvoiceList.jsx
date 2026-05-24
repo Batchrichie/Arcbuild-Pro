@@ -382,7 +382,7 @@ export default function InvoiceList() {
                             Revise
                           </button>
                         )}
-                        <InvoicePdfLink invoiceId={invoice.id} filename={`invoice-${invoice.invoice_number}.pdf`} />
+                        <InvoicePdfLink invoiceId={invoice.id} />
                         <button
                           type="button"
                           onClick={() => handleView(invoice)}

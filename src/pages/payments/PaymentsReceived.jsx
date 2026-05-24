@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { usePaymentReceipt } from '../../hooks/usePaymentReceipt'
 import {
   getDebtorList,
   getClientOutstandingInvoices,
@@ -47,6 +48,8 @@ export default function PaymentsReceived() {
   const [statementBalance, setStatementBalance] = useState(0)
   const [statementLoading, setStatementLoading] = useState(false)
   const [statementError, setStatementError] = useState(null)
+
+  const { generateReceipt } = usePaymentReceipt()
 
   useEffect(() => {
     if (profile && !isAccountant && !isCeo) {
@@ -194,7 +197,20 @@ export default function PaymentsReceived() {
         recordedBy: profile.id,
       })
 
-      setSuccessMessage('Payment recorded successfully.')
+      for (const allocation of allocations) {
+        try {
+          await generateReceipt({
+            invoiceId: allocation.invoiceId,
+            amountPaid: allocation.amount,
+            paymentDate,
+            paymentReference: paymentReference.trim(),
+          })
+        } catch {
+          // Receipt download is best-effort; payment is already recorded.
+        }
+      }
+
+      setSuccessMessage('Payment recorded successfully. Receipt PDF(s) downloaded where applicable.')
       closePaymentModal()
       await loadDebtors()
     } catch (err) {

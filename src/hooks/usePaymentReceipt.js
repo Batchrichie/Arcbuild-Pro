@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { pdf } from '@react-pdf/renderer'
+import { buildReceiptPdfFilename } from '../lib/invoice-pdf-utils'
 import { getReceiptData } from '../services/receiptService'
 import PaymentReceiptPdf from '../components/pdf/PaymentReceiptPdf'
 
@@ -20,7 +21,10 @@ export function usePaymentReceipt() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `Receipt-${receiptData?.invoice_number || invoiceId}.pdf`
+      a.download = buildReceiptPdfFilename({
+        clientName: receiptData?.client?.name,
+        invoiceNumber: receiptData?.invoice_number || invoiceId,
+      })
       a.style.display = 'none'
       document.body.appendChild(a)
       a.click()
