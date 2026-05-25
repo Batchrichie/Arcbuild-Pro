@@ -4,10 +4,24 @@
  */
 
 export const inputCls =
-  'w-full rounded-lg border border-border-soft bg-surface-2 px-3 py-2 text-sm text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20'
+  'w-full min-w-0 rounded-lg border border-border-soft bg-surface-2 px-3 py-2 text-sm text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20'
+
+/** Touch-friendly fields for mobile forms (readable text, adequate tap height). */
+export const inputClsTouch =
+  'w-full min-w-0 min-h-11 rounded-xl border border-border-soft bg-surface-2 px-4 py-3 text-base text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20'
+
+export const selectClsTouch =
+  'w-full min-w-0 min-h-11 rounded-xl border border-border-soft bg-surface-2 px-4 py-3 text-base text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20'
+
+/** @deprecated Use ScrollableSelect instead of native <select> */
+export const selectCls = inputCls
+
+/** Currency / debit / credit — text input avoids clipped number spinners */
+export const amountInputCls =
+  'input-amount w-full min-w-0 rounded-lg border border-border-soft bg-surface-2 px-3 py-2 text-base tabular-nums text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20'
 
 export const inputClsRounded =
-  'w-full rounded-xl border border-border-soft bg-surface-2 px-3 py-2.5 text-sm text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20'
+  'w-full min-w-0 rounded-xl border border-border-soft bg-surface-2 px-3 py-2.5 text-sm text-text-primary focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20'
 
 export const cardInsetCls = 'rounded-2xl border border-border-soft bg-panel p-4'
 

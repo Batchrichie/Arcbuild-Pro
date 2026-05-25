@@ -25,6 +25,7 @@ import ChartOfAccounts from '../accounts/ChartOfAccounts'
 import { COMPANY } from '../../lib/company-config'
 import logo from '../../assets/ModuloDevLogo.png'
 import ThemeToggle from '../../components/ui/ThemeToggle'
+import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -354,13 +355,10 @@ export default function CeoPortal() {
               ))}
             </nav>
 
-            <button
-              type="button"
-              onClick={signOut}
-              className="min-touch mt-auto w-full rounded-full border border-border-soft bg-white/5 px-4 py-3 text-sm text-white transition hover:border-amber-400/40"
-            >
-              Sign Out
-            </button>
+            <PortalSidebarFooter
+              onSignOut={signOut}
+              signOutClassName="border-border-soft bg-white/5 text-white hover:border-amber-400/40"
+            />
           </aside>
 
           {/* Main */}
@@ -622,6 +620,7 @@ export default function CeoPortal() {
                 Close
               </button>
             </div>
+            <ThemeToggle className="mb-4 w-full justify-center" />
             <div className="grid gap-2">
               {overflowTabs.map((tab) => (
                 <button

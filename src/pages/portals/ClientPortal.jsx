@@ -89,7 +89,7 @@ function ClientPortalContent() {
               <p className="text-sm font-medium text-slate-900">{displayName}</p>
               <p className="text-xs text-slate-500">{email}</p>
             </div>
-            <ThemeToggle className="inline-flex" />
+            <ThemeToggle className="inline-flex shrink-0" />
             <button type="button" onClick={signOut} className="hidden rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 sm:block">
               Sign out
             </button>

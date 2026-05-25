@@ -10,6 +10,7 @@ import EmployeeProfile from '../../components/employee/EmployeeProfile'
 import TimesheetEntry from '../../components/TimesheetEntry'
 import Modal from '../../components/ui/Modal'
 import ThemeToggle from '../../components/ui/ThemeToggle'
+import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
 
 const TABS = [
   { id: 'home', label: 'Home', icon: '🏠' },
@@ -98,9 +99,11 @@ function EmployeePortalContent() {
                 </button>
               ))}
             </nav>
-            <button type="button" onClick={signOut} className="mt-6 w-full rounded-full border border-border-soft py-2.5 text-sm text-slate-400">
-              Sign out
-            </button>
+            <PortalSidebarFooter
+              onSignOut={signOut}
+              signOutLabel="Sign out"
+              signOutClassName="text-slate-400 hover:border-orange-400/40"
+            />
           </aside>
 
           <main className="portal-main portal-employee-main min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">

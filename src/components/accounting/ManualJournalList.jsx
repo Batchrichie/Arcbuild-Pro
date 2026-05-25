@@ -6,7 +6,7 @@ import SlideOver from '../ui/SlideOver'
 import { inputCls as clsInput } from '../../lib/portal-classes'
 
 export default function ManualJournalList({ readOnly = false }) {
-  const { user } = useAuth()
+  const { profile } = useAuth()
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
@@ -89,8 +89,8 @@ export default function ManualJournalList({ readOnly = false }) {
       setReverseError('Reason must be at least 20 characters.')
       return
     }
-    if (!user?.id) {
-      setReverseError('Unable to identify current user.')
+    if (!profile?.id) {
+      setReverseError('Unable to identify your profile. Please sign in again.')
       return
     }
 
@@ -100,7 +100,7 @@ export default function ManualJournalList({ readOnly = false }) {
         journal_id_param: reverseTarget.id,
         reversal_date_param: reverseDate,
         reason_param: reverseReason.trim(),
-        actor_uuid: user.id,
+        actor_uuid: profile.id,
       })
 
       if (error) throw error
