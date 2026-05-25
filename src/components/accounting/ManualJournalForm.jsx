@@ -2,7 +2,22 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { formatGhs } from '../../lib/formatGhs'
-import { inputCls as clsInput } from '../../lib/portal-classes'
+import { inputCls as clsInput, amountInputCls } from '../../lib/portal-classes'
+import ScrollableSelect from '../ui/ScrollableSelect'
+
+function AmountInput({ value, onChange, placeholder = '0.00', className = '' }) {
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      autoComplete="off"
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className={`${amountInputCls} ${className}`}
+    />
+  )
+}
 
 const createEmptyLine = () => ({
   id: `${Date.now()}-${Math.random()}`,
@@ -47,14 +62,14 @@ const TEMPLATES = [
   {
     label: 'Expense Accrual',
     lines: [
-      { account_code: '6000', side: 'debit', description: 'Operating Expenses' },
-      { account_code: '2108', side: 'credit', description: 'Accrued Expenses' },
+      { account_code: '6202', side: 'debit', description: 'Utilities expense' },
+      { account_code: '1101', side: 'credit', description: 'Cash' },
     ],
   },
 ]
 
 export default function ManualJournalForm({ initialDescription = '', initialReference = '', initialJournalDate = '', initialLines = [] }) {
-  const { user } = useAuth()
+  const { profile } = useAuth()
   const [accounts, setAccounts] = useState([])
   const [projects, setProjects] = useState([])
   const [divisions, setDivisions] = useState([])
@@ -103,15 +118,41 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
   const getAccountName = (code) => accounts.find((a) => a.account_code === code)?.account_name || ''
   const getProjectDivisionId = (projectId) => projects.find((p) => p.id === projectId)?.divisions?.id || ''
 
+  const accountOptions = useMemo(
+    () =>
+      accounts.map((account) => ({
+        value: account.account_code,
+        label: `${account.account_code} — ${account.account_name}`,
+      })),
+    [accounts]
+  )
+
+  const projectOptions = useMemo(
+    () => [
+      { value: '', label: 'None' },
+      ...projects.map((project) => ({ value: project.id, label: project.name })),
+    ],
+    [projects]
+  )
+
+  const divisionOptions = useMemo(
+    () => [
+      { value: '', label: 'None' },
+      ...divisions.map((division) => ({ value: division.id, label: division.name })),
+    ],
+    [divisions]
+  )
+
   const handleLineChange = (index, field, value) => {
     setLines((prev) => {
       const next = [...prev]
       const line = { ...next[index] }
 
       if (field === 'account_code') {
-        const code = String(value).split(' — ')[0].trim()
+        const raw = String(value).trim()
+        const code = raw.includes(' — ') ? raw.split(' — ')[0].trim() : raw
         line.account_code = code
-        line.account_name = getAccountName(code)
+        line.account_name = code ? getAccountName(code) : ''
       } else if (field === 'project_id') {
         line.project_id = value
         line.division_id = value ? getProjectDivisionId(value) : ''
@@ -167,27 +208,37 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
   const balanceDifference = useMemo(() => totalDebits - totalCredits, [totalDebits, totalCredits])
   const balanced = Math.abs(balanceDifference) < 0.01 && totalDebits > 0
 
+  const getActiveLines = () =>
+    lines.filter((line) => {
+      const debit = parseFloat(line.debit_amount) || 0
+      const credit = parseFloat(line.credit_amount) || 0
+      return line.account_code.trim() && (debit > 0 || credit > 0)
+    })
+
   const validateLines = () => {
     if (!description.trim()) {
       setError('Description is required.')
       return false
     }
 
-    if (lines.length < 2) {
-      setError('At least two journal lines are required.')
-      return false
-    }
-
     for (const [index, line] of lines.entries()) {
-      if (!line.account_code.trim()) {
-        setError(`Line ${index + 1} must have an account code.`)
+      const hasAccount = Boolean(line.account_code.trim())
+      const debit = parseFloat(line.debit_amount) || 0
+      const credit = parseFloat(line.credit_amount) || 0
+      const hasAmount = debit > 0 || credit > 0
+      const isBlank = !hasAccount && !hasAmount
+
+      if (isBlank) continue
+
+      if (!hasAccount) {
+        setError(`Line ${index + 1} must have an account when an amount is entered.`)
         return false
       }
-      if (!line.debit_amount && !line.credit_amount) {
-        setError(`Line ${index + 1} must have either debit or credit amount.`)
+      if (!hasAmount) {
+        setError(`Line ${index + 1} must have either a debit or credit amount.`)
         return false
       }
-      if (line.debit_amount && line.credit_amount) {
+      if (debit > 0 && credit > 0) {
         setError(`Line ${index + 1} cannot have both debit and credit amounts.`)
         return false
       }
@@ -195,6 +246,19 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
         setError(`Line ${index + 1} account code not found: ${line.account_code}`)
         return false
       }
+    }
+
+    const activeLines = getActiveLines()
+    if (activeLines.length < 2) {
+      setError('Enter at least two lines with accounts and amounts (one debit and one credit). Extra blank rows are ignored.')
+      return false
+    }
+
+    const hasDebit = activeLines.some((line) => (parseFloat(line.debit_amount) || 0) > 0)
+    const hasCredit = activeLines.some((line) => (parseFloat(line.credit_amount) || 0) > 0)
+    if (!hasDebit || !hasCredit) {
+      setError('Journal must include at least one debit line and one credit line.')
+      return false
     }
 
     if (!balanced) {
@@ -212,15 +276,15 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
     if (!validateLines()) {
       return
     }
-    if (!user?.id) {
-      setError('Unable to identify current user.')
+    if (!profile?.id) {
+      setError('Unable to identify your profile. Please sign in again.')
       return
     }
 
     setLoading(true)
     try {
-      const rpcLines = lines.map((line) => ({
-        account_code: line.account_code,
+      const rpcLines = getActiveLines().map((line) => ({
+        account_code: line.account_code.trim(),
         debit_amount: parseFloat(line.debit_amount) || 0,
         credit_amount: parseFloat(line.credit_amount) || 0,
         line_description: line.line_description || description,
@@ -233,7 +297,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
         entry_date_param: journalDate,
         reference_param: reference.trim() || null,
         lines_param: rpcLines,
-        actor_uuid: user.id,
+        actor_uuid: profile.id,
       })
 
       if (rpcError) {
@@ -335,15 +399,15 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
           <table className="min-w-full text-sm">
             <thead>
               <tr className="text-left text-xs uppercase tracking-[0.24em] text-slate-500">
-                <th className="px-3 py-3">#</th>
-                <th className="px-3 py-3">Account Code</th>
-                <th className="px-3 py-3">Account Name</th>
-                <th className="px-3 py-3">Debit</th>
-                <th className="px-3 py-3">Credit</th>
-                <th className="px-3 py-3">Line Description</th>
-                <th className="px-3 py-3">Project</th>
-                <th className="px-3 py-3">Division</th>
-                <th className="px-3 py-3">Action</th>
+                <th className="min-w-[2rem] px-3 py-3">#</th>
+                <th className="min-w-[12rem] px-3 py-3">Account Code</th>
+                <th className="min-w-[10rem] px-3 py-3">Account Name</th>
+                <th className="min-w-[10rem] px-3 py-3">Debit</th>
+                <th className="min-w-[10rem] px-3 py-3">Credit</th>
+                <th className="min-w-[10rem] px-3 py-3">Line Description</th>
+                <th className="min-w-[10rem] px-3 py-3">Project</th>
+                <th className="min-w-[10rem] px-3 py-3">Division</th>
+                <th className="min-w-[5rem] px-3 py-3">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -351,41 +415,31 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
                 <tr key={line.id} className="border-t border-border-soft">
                   <td className="px-3 py-3 text-slate-300">{index + 1}</td>
                   <td className="px-3 py-3">
-                    <input
-                      list="coa-options"
-                      value={line.account_code ? `${line.account_code} — ${line.account_name}` : ''}
-                      onChange={(e) => handleLineChange(index, 'account_code', e.target.value)}
-                      placeholder="Type code or name"
-                      className={clsInput}
+                    <ScrollableSelect
+                      searchable
+                      optionLayout="account"
+                      showValueWhenClosed
+                      value={line.account_code}
+                      onChange={(code) => handleLineChange(index, 'account_code', code)}
+                      options={accountOptions}
+                      placeholder="Select account"
+                      searchPlaceholder="Search code or name…"
+                      className="min-w-[11rem]"
                     />
-                    <datalist id="coa-options">
-                      {accounts.map((account) => (
-                        <option
-                          key={account.account_code}
-                          value={`${account.account_code} — ${account.account_name}`}
-                        />
-                      ))}
-                    </datalist>
                   </td>
                   <td className="px-3 py-3 text-slate-200">{line.account_name || '—'}</td>
                   <td className="px-3 py-3">
-                    <input
-                      type="number"
-                      min="0"
+                    <AmountInput
                       value={line.debit_amount}
                       onChange={(e) => handleLineChange(index, 'debit_amount', e.target.value)}
-                      className={clsInput}
-                      placeholder="0.00"
+                      className="!min-w-[9.5rem]"
                     />
                   </td>
                   <td className="px-3 py-3">
-                    <input
-                      type="number"
-                      min="0"
+                    <AmountInput
                       value={line.credit_amount}
                       onChange={(e) => handleLineChange(index, 'credit_amount', e.target.value)}
-                      className={clsInput}
-                      placeholder="0.00"
+                      className="!min-w-[9.5rem]"
                     />
                   </td>
                   <td className="px-3 py-3">
@@ -394,37 +448,27 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
                       value={line.line_description}
                       onChange={(e) => handleLineChange(index, 'line_description', e.target.value)}
                       placeholder="Optional note"
-                      className={clsInput}
+                      className={`${clsInput} min-w-[9rem]`}
                     />
                   </td>
                   <td className="px-3 py-3">
-                    <select
+                    <ScrollableSelect
                       value={line.project_id}
-                      onChange={(e) => handleLineChange(index, 'project_id', e.target.value)}
-                      className={clsInput}
-                    >
-                      <option value="">None</option>
-                      {projects.map((project) => (
-                        <option key={project.id} value={project.id}>
-                          {project.name}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(v) => handleLineChange(index, 'project_id', v)}
+                      options={projectOptions}
+                      placeholder="None"
+                      className="min-w-[9rem]"
+                    />
                   </td>
                   <td className="px-3 py-3">
-                    <select
+                    <ScrollableSelect
                       value={line.division_id}
-                      onChange={(e) => handleLineChange(index, 'division_id', e.target.value)}
-                      className={clsInput}
+                      onChange={(v) => handleLineChange(index, 'division_id', v)}
+                      options={divisionOptions}
+                      placeholder="None"
                       disabled={Boolean(line.project_id)}
-                    >
-                      <option value="">None</option>
-                      {divisions.map((division) => (
-                        <option key={division.id} value={division.id}>
-                          {division.name}
-                        </option>
-                      ))}
-                    </select>
+                      className="min-w-[9rem]"
+                    />
                   </td>
                   <td className="px-3 py-3">
                     <button
@@ -484,7 +528,9 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
             {draftSavedAt && (
               <p className="text-sm text-slate-400">Draft saved at {draftSavedAt.toLocaleTimeString('en-GB')}</p>
             )}
-            <p className="text-sm text-slate-400">When balanced, the journal can be posted immediately into the general ledger.</p>
+            <p className="text-sm text-slate-400">
+              Minimum two lines (debit + credit). Use &quot;Add Line&quot; only when a third account is involved — blank extra rows are ignored.
+            </p>
           </div>
         </div>
 
@@ -494,7 +540,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
             onClick={addLine}
             className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-teal-400/30 hover:bg-teal-500/10"
           >
-            Add Line
+            Add Line (optional)
           </button>
         </div>
         {error && <p className="mt-4 rounded-2xl border border-rose-400/20 bg-rose-500/10 p-4 text-sm text-rose-100">{error}</p>}

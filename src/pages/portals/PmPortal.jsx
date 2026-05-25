@@ -16,6 +16,7 @@ import PaymentCertificateForm from '../../components/PaymentCertificateForm'
 import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
 import TimesheetApproval from '../../components/TimesheetApproval'
 import ThemeToggle from '../../components/ui/ThemeToggle'
+import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
 import Modal from '../../components/ui/Modal'
 
 const NAV_SECTIONS = [
@@ -256,9 +257,10 @@ function PmPortalContent() {
                 </div>
               ))}
             </nav>
-            <button type="button" onClick={signOut} className="min-touch mt-6 w-full rounded-full border border-border-soft py-3 text-sm text-slate-300">
-              Sign Out
-            </button>
+            <PortalSidebarFooter
+              onSignOut={signOut}
+              signOutClassName="text-slate-300 hover:border-cyan-400/40"
+            />
           </aside>
 
           <main className="portal-main portal-main-with-tabs min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">
@@ -315,6 +317,7 @@ function PmPortalContent() {
           <button type="button" className="portal-drawer-backdrop" onClick={() => setMoreOpen(false)} aria-label="Close" />
           <div className="portal-drawer-sheet">
             <h3 className="mb-3 text-lg font-semibold text-white">More</h3>
+            <ThemeToggle className="mb-4 w-full justify-center lg:hidden" />
             {[
               { id: 'payment-cert', label: 'Payment Certificates' },
               { id: 'reports', label: 'Daily Reports' },

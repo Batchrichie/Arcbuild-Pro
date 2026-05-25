@@ -110,7 +110,7 @@ export default function Login() {
               <p className="text-stone-600 text-xs tracking-[0.25em] uppercase mb-2">Portal Access</p>
               <h2 className="text-stone-100 text-3xl font-black tracking-tight">Sign in</h2>
             </div>
-            <ThemeToggle className="hidden sm:inline-flex" />
+            <ThemeToggle className="inline-flex shrink-0" />
           </div>
 
           {error && (

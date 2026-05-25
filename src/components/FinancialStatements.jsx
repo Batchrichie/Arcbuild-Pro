@@ -1,426 +1,409 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { PDFDownloadLink } from '@react-pdf/renderer'
 import FinancialStatementPdf from './pdf/FinancialStatementPdf'
 import { supabase } from '../lib/supabase'
+import ScrollableSelect from './ui/ScrollableSelect'
+import { btnGhostCls } from '../lib/portal-classes'
+import {
+  aggregateTrialBalance,
+  buildFinancialReports,
+  dayBefore,
+  endOfYear,
+  startOfYear,
+} from '../lib/financialStatements'
+import {
+  StatementLine,
+  StatementPanel,
+  StatementSectionHeader,
+  StatementSubLine,
+  StatementTotal,
+  TrialBalanceTable,
+} from './financialStatements/StatementTable'
+import GlIntegrityBanner from './financialStatements/GlIntegrityBanner'
 
-function startOfYear(date) {
-  const d = new Date(date)
-  return new Date(d.getFullYear(), 0, 1).toISOString().slice(0, 10)
-}
+const TABS = [
+  { id: 'trial', label: 'Trial Balance' },
+  { id: 'income', label: 'Income Statement' },
+  { id: 'balance', label: 'Balance Sheet' },
+  { id: 'cash', label: 'Cash Flow' },
+]
 
-function endOfYear(date) {
-  const d = new Date(date)
-  return new Date(d.getFullYear(), 11, 31).toISOString().slice(0, 10)
-}
-
-function fmt(amount) {
-  if (amount == null) return ''
-  const neg = Number(amount) < 0
-  const abs = Math.abs(Number(amount)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  return neg ? `(${abs})` : abs
-}
-
-export default function FinancialStatements({ defaultTab = 'income' }) {
+export default function FinancialStatements({ defaultTab = 'trial' }) {
   const today = new Date()
   const [tab, setTab] = useState(defaultTab)
   const [startDate, setStartDate] = useState(startOfYear(today))
   const [endDate, setEndDate] = useState(endOfYear(today))
-  const [asAtDate, setAsAtDate] = useState(new Date().toISOString().slice(0,10))
+  const [asAtDate, setAsAtDate] = useState(today.toISOString().slice(0, 10))
   const [division, setDivision] = useState('All')
 
-  const [glRows, setGlRows] = useState([])
   const [coaMap, setCoaMap] = useState({})
   const [divisions, setDivisions] = useState([])
-  const [, setLoading] = useState(false)
+  const [glPeriod, setGlPeriod] = useState([])
+  const [glAsAt, setGlAsAt] = useState([])
+  const [glOpening, setGlOpening] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [dataVersion, setDataVersion] = useState(0)
 
-  useEffect(() => { fetchCoaAndDivisions(); }, [])
-
-  async function fetchCoaAndDivisions(){
-    const { data: coa } = await supabase.from('chart_of_accounts').select('account_code,account_name,account_type')
-    const map = {}
-    coa?.forEach(c => map[c.account_code] = c)
-    setCoaMap(map)
-
-    const { data: divs } = await supabase.from('divisions').select('id,name')
-    setDivisions(divs || [])
-  }
-
-  async function fetchGL(rangeStart, rangeEnd, upto=false){
-    setLoading(true)
-    let query = supabase.from('general_ledger').select('*')
-    if (upto) query = query.lte('entry_date', rangeEnd)
-    else query = query.gte('entry_date', rangeStart).lte('entry_date', rangeEnd)
-    const { data, error } = await query.order('entry_date', { ascending: true }).limit(20000)
-    if (error) console.error('GL fetch', error)
-    setGlRows(data || [])
-    setLoading(false)
-  }
-
-  useEffect(() => { fetchGL(startDate, endDate) }, [startDate, endDate])
-
-  // Income statement aggregation
-  const incomeAgg = useMemo(() => {
-    const rows = glRows.filter(r => {
-      const coa = coaMap[r.account_code]
-      return coa && (coa.account_type === 'revenue' || coa.account_type === 'expense') && (division === 'All' || (r.division_id && divisions.find(d=>d.id===r.division_id)?.name === division))
-    })
-    const byDivision = {}
-    rows.forEach(r => {
-      const divName = divisions.find(d=>d.id===r.division_id)?.name || 'All'
-      byDivision[divName] = byDivision[divName] || { revenue: 0, expense: 0 }
-      const coa = coaMap[r.account_code]
-      if (coa.account_type === 'revenue') byDivision[divName].revenue += Number(r.credit_amount || 0) - Number(r.debit_amount || 0)
-      if (coa.account_type === 'expense') byDivision[divName].expense += Number(r.debit_amount || 0) - Number(r.credit_amount || 0)
-    })
-    return byDivision
-  }, [glRows, coaMap, division, divisions])
-
-  // Trial balance aggregation
-  const trialAgg = useMemo(() => {
-    const map = {}
-    glRows.forEach(r => {
-      const key = r.account_code
-      map[key] = map[key] || { account_code: key, account_name: r.account_name, total_debits: 0, total_credits: 0 }
-      map[key].total_debits += Number(r.debit_amount || 0)
-      map[key].total_credits += Number(r.credit_amount || 0)
-    })
-    return Object.values(map).sort((a,b)=>a.account_code.localeCompare(b.account_code))
-  }, [glRows])
-
-  // Balance sheet as-of date: fetch upto asAtDate separately when tab changes
-  const [bsRows, setBsRows] = useState([])
   useEffect(() => {
-    if (tab !== 'balance') return
-    fetchGL(null, asAtDate, true).then(()=>{
-      const glBalance = {}
-      glRows.forEach(r => {
-        glBalance[r.account_code] = glBalance[r.account_code] || { account_name: r.account_name, balance: 0 }
-        glBalance[r.account_code].balance += Number(r.debit_amount || 0) - Number(r.credit_amount || 0)
+    async function loadMeta() {
+      const { data: coa } = await supabase
+        .from('chart_of_accounts')
+        .select(
+          'account_code,account_name,account_type,financial_statement,element,sub_element,nature,is_contra,is_active'
+        )
+        .eq('is_active', true)
+      const map = {}
+      coa?.forEach((c) => {
+        map[c.account_code] = c
       })
+      setCoaMap(map)
 
-      const list = Object.keys(coaMap).map((code) => {
-        const coa = coaMap[code]
-        const ledger = glBalance[code]?.balance || 0
-        return {
-          account_code: code,
-          account_name: coa.account_name,
-          account_type: coa.account_type,
-          balance: ledger,
-        }
-      })
+      const { data: divs } = await supabase.from('divisions').select('id,name').order('name')
+      setDivisions(divs || [])
+    }
+    loadMeta()
+  }, [])
 
-      setBsRows(list.filter(x => ['asset','liability','equity'].includes(x.account_type)))
-    })
-  }, [tab, asAtDate, coaMap])
+  const loadLedger = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const openEnd = dayBefore(startDate)
 
-  // Cash flow simplified
-  const cashFlow = useMemo(() => {
-    // use glRows for the date range
-    const netProfit = Object.values(incomeAgg).reduce((s,v)=>s + (v.revenue - v.expense), 0)
-    const depreciation = glRows.filter(r=>r.account_code==='6401').reduce((s,r)=>s + (Number(r.debit_amount||0)-Number(r.credit_amount||0)),0)
-    const receivables = glRows.filter(r=>r.account_code==='1110').reduce((s,r)=>s + (Number(r.debit_amount||0)-Number(r.credit_amount||0)),0)
-    const payables = glRows.filter(r=>r.account_code==='2101').reduce((s,r)=>s + (Number(r.credit_amount||0)-Number(r.debit_amount||0)),0)
-    const investing = glRows.filter(r=>r.account_code==='1210').reduce((s,r)=>s + (Number(r.debit_amount||0)-Number(r.credit_amount||0)),0)
-    const financing = glRows.filter(r=>r.account_code==='2201').reduce((s,r)=>s + (Number(r.credit_amount||0)-Number(r.debit_amount||0)),0)
-    return { netProfit, depreciation, receivables, payables, investing, financing }
-  }, [glRows, incomeAgg])
+      const [periodRes, asAtRes, openingRes] = await Promise.all([
+        supabase
+          .from('general_ledger')
+          .select('*')
+          .gte('entry_date', startDate)
+          .lte('entry_date', endDate)
+          .order('entry_date', { ascending: true })
+          .limit(50000),
+        supabase
+          .from('general_ledger')
+          .select('*')
+          .lte('entry_date', asAtDate)
+          .order('entry_date', { ascending: true })
+          .limit(50000),
+        supabase
+          .from('general_ledger')
+          .select('*')
+          .lte('entry_date', openEnd)
+          .order('entry_date', { ascending: true })
+          .limit(50000),
+      ])
 
-  const pdfStatementProps = {
+      if (periodRes.error) throw periodRes.error
+      if (asAtRes.error) throw asAtRes.error
+      if (openingRes.error) throw openingRes.error
+
+      setGlPeriod(periodRes.data || [])
+      setGlAsAt(asAtRes.data || [])
+      setGlOpening(openingRes.data || [])
+    } catch (err) {
+      console.error('Financial statements GL load failed', err)
+      setError(err.message || 'Failed to load ledger data.')
+    } finally {
+      setLoading(false)
+    }
+  }, [startDate, endDate, asAtDate])
+
+  useEffect(() => {
+    loadLedger()
+  }, [loadLedger])
+
+  const divisionOptions = useMemo(
+    () => [
+      { value: 'All', label: 'All divisions' },
+      ...divisions.map((d) => ({ value: d.name, label: d.name })),
+    ],
+    [divisions]
+  )
+
+  const reports = useMemo(() => {
+    const trialPeriod = aggregateTrialBalance(glPeriod, coaMap, { division, divisions })
+    const trialAsAt = aggregateTrialBalance(glAsAt, coaMap, { division, divisions })
+    const trialOpening = aggregateTrialBalance(glOpening, coaMap, { division, divisions })
+
+    return {
+      trialPeriod,
+      trialAsAt,
+      ...buildFinancialReports({ trialPeriod, trialAsAt, trialOpening, coaMap }),
+    }
+  }, [glPeriod, glAsAt, glOpening, coaMap, division, divisions, dataVersion])
+
+  const pdfProps = {
     startDate,
     endDate,
     asAtDate,
     division,
-    incomeAgg,
-    bsRows,
-    trialAgg,
-    cashFlow,
+    reports,
   }
 
-  function exportCsvForTrial() {
-    const cols = ['account_code','account_name','total_debits','total_credits']
+  function exportTrialCsv() {
+    const cols = ['account_code', 'account_name', 'total_debits', 'total_credits', 'net_balance', 'account_type']
     const csv = [cols.join(',')]
-    for (const r of trialAgg) csv.push(cols.map(c=>r[c]).join(','))
+    for (const r of reports.trialPeriod) {
+      csv.push(cols.map((c) => (c === 'net_balance' ? r.net_balance : r[c] ?? '')).join(','))
+    }
     const blob = new Blob([csv.join('\n')], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url; a.download = 'trial_balance.csv'; a.click(); URL.revokeObjectURL(url)
+    a.href = url
+    a.download = `trial_balance_${startDate}_${endDate}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
+  const { incomeStatement: is, balanceSheet: bs, cashFlow: cf } = reports
+
+  const pdfButton = (statementType, fileName) => (
+    <PDFDownloadLink
+      document={<FinancialStatementPdf statementType={statementType} {...pdfProps} />}
+      fileName={fileName}
+      className={btnGhostCls}
+    >
+      {({ loading: pdfLoading }) => (pdfLoading ? 'Preparing PDF…' : 'Export PDF')}
+    </PDFDownloadLink>
+  )
+
   return (
-    <div className="mt-8 space-y-6">
-      <div className="flex gap-2 border-b border-border-soft">
-        <button onClick={()=>setTab('income')} className={`px-4 py-3 text-sm font-semibold transition ${tab==='income'?'border-b-2 border-amber-400 text-amber-300':'text-slate-400 hover:text-slate-300'}`}>Income Statement</button>
-        <button onClick={()=>setTab('balance')} className={`px-4 py-3 text-sm font-semibold transition ${tab==='balance'?'border-b-2 border-blue-400 text-blue-300':'text-slate-400 hover:text-slate-300'}`}>Balance Sheet</button>
-        <button onClick={()=>setTab('trial')} className={`px-4 py-3 text-sm font-semibold transition ${tab==='trial'?'border-b-2 border-teal-400 text-teal-300':'text-slate-400 hover:text-slate-300'}`}>Trial Balance</button>
-        <button onClick={()=>setTab('cash')} className={`px-4 py-3 text-sm font-semibold transition ${tab==='cash'?'border-b-2 border-green-400 text-green-300':'text-slate-400 hover:text-slate-300'}`}>Cash Flow</button>
+    <div className="mt-6 space-y-6">
+      <GlIntegrityBanner onRepaired={() => setDataVersion((v) => v + 1)} />
+
+      <div className="rounded-2xl border border-border-soft bg-surface/60 px-4 py-3 text-sm text-text-muted">
+        All statements are built from the same <strong className="text-text-primary">Trial Balance</strong> data.
+        Income Statement uses the selected period; Balance Sheet uses balances as at the as-at date, with current-year
+        profit from the Income Statement included in equity.
       </div>
 
-      <div className="space-y-6">
-        {(tab === 'income') && (
-          <div className="space-y-6">
-            <div className="flex gap-4 items-end flex-wrap">
-              <div>
-                <label className="block text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Start date</label>
-                <input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)} className="rounded-lg border border-border-soft bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-amber-400/50 focus:bg-white/10 outline-none" />
-              </div>
-              <div>
-                <label className="block text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">End date</label>
-                <input type="date" value={endDate} onChange={e=>setEndDate(e.target.value)} className="rounded-lg border border-border-soft bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-amber-400/50 focus:bg-white/10 outline-none" />
-              </div>
-              <div>
-                <label className="block text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">Division</label>
-                <select value={division} onChange={e=>setDivision(e.target.value)} className="rounded-lg border border-border-soft bg-white/5 px-3 py-2 text-sm text-white focus:border-amber-400/50 focus:bg-white/10 outline-none">
-                  <option className="bg-slate-950 text-white">All</option>
-                  {divisions.map(d => <option key={d.id} className="bg-slate-950 text-white">{d.name}</option>)}
-                </select>
-              </div>
-              <div className="ml-auto">
-                <PDFDownloadLink
-                  document={<FinancialStatementPdf statementType="income" {...pdfStatementProps} />}
-                  fileName={`income-statement-${startDate}-${endDate}.pdf`}
-                  className="rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-300 transition hover:border-amber-400/50 hover:bg-amber-500/20"
-                >
-                  {({ loading: pdfLoading }) => (pdfLoading ? 'Preparing PDF…' : 'Export to PDF')}
-                </PDFDownloadLink>
-              </div>
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="rounded-2xl border border-border-soft bg-white/5 p-6">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Revenue</p>
-                <div className="mt-4 space-y-3">
-                  {Object.keys(incomeAgg).map(divName => (
-                    <div key={divName} className="flex justify-between border-b border-border-soft pb-3">
-                      <div className="text-sm text-slate-300">{divName}</div>
-                      <div className="text-sm font-semibold text-amber-300">GHS {fmt(incomeAgg[divName].revenue)}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 border-t border-border-soft pt-4 flex justify-between">
-                  <div className="font-semibold text-white">Total Revenue</div>
-                  <div className="font-semibold text-amber-300">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+v.revenue,0))}</div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-border-soft bg-white/5 p-6">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Expenses</p>
-                <div className="mt-4 flex justify-between border-b border-border-soft pb-4">
-                  <div className="text-sm text-slate-300">Operating Expenses</div>
-                  <div className="text-sm font-semibold text-red-300">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+v.expense,0))}</div>
-                </div>
-                <div className="mt-6 space-y-4">
-                  <div className="flex justify-between text-sm">
-                    <div className="text-slate-300">Net Profit Before Tax</div>
-                    <div className="font-semibold text-cyan-300">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0))}</div>
-                  </div>
-                  <div className="flex justify-between text-sm border-t border-border-soft pt-4">
-                    <div className="text-slate-300">Tax Provision (25%)</div>
-                    <div className="font-semibold text-orange-300">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.25)}</div>
-                  </div>
-                  <div className="flex justify-between border-t border-border-soft pt-4">
-                    <div className="font-semibold text-white">Net Profit After Tax</div>
-                    <div className="font-bold text-green-300 text-lg">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.75)}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {(tab === 'balance') && (
-          <div className="space-y-6">
-            <div className="flex gap-4 items-end">
-              <div>
-                <label className="block text-xs uppercase tracking-[0.16em] text-slate-400 mb-2">As at date</label>
-                <input type="date" value={asAtDate} onChange={e=>setAsAtDate(e.target.value)} className="rounded-lg border border-border-soft bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-400/50 focus:bg-white/10 outline-none" />
-              </div>
-              <div className="ml-auto">
-                <PDFDownloadLink
-                  document={<FinancialStatementPdf statementType="balance" {...pdfStatementProps} />}
-                  fileName={`balance-sheet-${asAtDate}.pdf`}
-                  className="rounded-lg border border-blue-400/30 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-300 transition hover:border-blue-400/50 hover:bg-blue-500/20"
-                >
-                  {({ loading: pdfLoading }) => (pdfLoading ? 'Preparing PDF…' : 'Export to PDF')}
-                </PDFDownloadLink>
-              </div>
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="rounded-2xl border border-border-soft bg-white/5 p-6">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Assets</p>
-                <div className="mt-4 space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <div className="text-slate-300">Current Assets</div>
-                    <div className="text-blue-300">GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('11')).reduce((s,r)=>s+r.balance,0))}</div>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <div className="text-slate-300">Non-Current Assets</div>
-                    <div className="text-blue-300">GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('12')).reduce((s,r)=>s+r.balance,0))}</div>
-                  </div>
-                </div>
-                <div className="mt-4 border-t border-border-soft pt-4 flex justify-between">
-                  <div className="font-semibold text-white">Total Assets</div>
-                  <div className="font-semibold text-blue-300">GHS {fmt(bsRows.reduce((s,r)=>s+r.balance,0))}</div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-border-soft bg-white/5 p-6">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Liabilities</p>
-                <div className="mt-4 space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <div className="text-slate-300">Current Liabilities</div>
-                    <div className="text-red-300">GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('21')).reduce((s,r)=>s+r.balance,0))}</div>
-                  </div>
-                </div>
-                <div className="mt-4 border-t border-border-soft pt-4 flex justify-between">
-                  <div className="font-semibold text-white">Total Liabilities</div>
-                  <div className="font-semibold text-red-300">GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('21') || r.account_code.startsWith('22')).reduce((s,r)=>s+r.balance,0))}</div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-border-soft bg-white/5 p-6">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Equity</p>
-                <div className="mt-4 border-t border-border-soft pt-4 flex justify-between">
-                  <div className="font-semibold text-white">Total Equity</div>
-                  <div className="font-semibold text-green-300">GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('3')).reduce((s,r)=>s+r.balance,0))}</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-border-soft bg-white/5 p-6">
-              <div className="flex justify-between mb-4 pb-4 border-b border-border-soft">
-                <div className="font-semibold text-white">Total Liabilities + Equity</div>
-                <div className="font-semibold text-teal-300">GHS {fmt(bsRows.filter(r=>r.account_code.startsWith('21') || r.account_code.startsWith('22')).reduce((s,r)=>s+r.balance,0) + bsRows.filter(r=>r.account_code.startsWith('3')).reduce((s,r)=>s+r.balance,0))}</div>
-              </div>
-              {Math.abs(bsRows.reduce((s,r)=>s+r.balance,0) - (bsRows.filter(r=>r.account_code.startsWith('21') || r.account_code.startsWith('22')).reduce((s,r)=>s+r.balance,0) + bsRows.filter(r=>r.account_code.startsWith('3')).reduce((s,r)=>s+r.balance,0))) > 0.5 && (
-                <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300 font-semibold">⚠ Balance sheet does not balance — contact your accountant.</div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {(tab === 'trial') && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-slate-400">Date range: <span className="text-white font-semibold">{startDate} — {endDate}</span></div>
-              <button onClick={exportCsvForTrial} className="rounded-lg border border-teal-400/30 bg-teal-500/10 px-4 py-2 text-sm font-semibold text-teal-300 transition hover:border-teal-400/50 hover:bg-teal-500/20">Export CSV</button>
-            </div>
-
-            <div className="rounded-2xl border border-border-soft bg-white/5 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border-soft bg-white/5">
-                      <th className="px-6 py-4 text-left text-xs uppercase tracking-[0.16em] font-semibold text-slate-400">Account Code</th>
-                      <th className="px-6 py-4 text-left text-xs uppercase tracking-[0.16em] font-semibold text-slate-400">Account Name</th>
-                      <th className="px-6 py-4 text-right text-xs uppercase tracking-[0.16em] font-semibold text-slate-400">Total Debits</th>
-                      <th className="px-6 py-4 text-right text-xs uppercase tracking-[0.16em] font-semibold text-slate-400">Total Credits</th>
-                      <th className="px-6 py-4 text-right text-xs uppercase tracking-[0.16em] font-semibold text-slate-400">Net Balance</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {trialAgg.map((r, idx) => (
-                      <tr key={r.account_code} className={`border-b border-border-soft ${idx % 2 === 0 ? 'bg-white/2' : ''} hover:bg-white/5`}>
-                        <td className="px-6 py-3 text-slate-300">{r.account_code}</td>
-                        <td className="px-6 py-3 text-slate-300">{r.account_name}</td>
-                        <td className="px-6 py-3 text-right text-teal-300">{fmt(r.total_debits)}</td>
-                        <td className="px-6 py-3 text-right text-orange-300">{fmt(r.total_credits)}</td>
-                        <td className="px-6 py-3 text-right font-semibold text-slate-200">{fmt(r.total_debits - r.total_credits)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t-2 border-border-soft bg-white/5 font-semibold">
-                      <td colSpan="2" className="px-6 py-4 text-white">Totals</td>
-                      <td className="px-6 py-4 text-right text-teal-300">{fmt(trialAgg.reduce((s,r)=>s+r.total_debits,0))}</td>
-                      <td className="px-6 py-4 text-right text-orange-300">{fmt(trialAgg.reduce((s,r)=>s+r.total_credits,0))}</td>
-                      <td className="px-6 py-4 text-right text-slate-200">{fmt(trialAgg.reduce((s,r)=>s+(r.total_debits - r.total_credits),0))}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-
-            {Math.abs(trialAgg.reduce((s,r)=>s+r.total_debits,0) - trialAgg.reduce((s,r)=>s+r.total_credits,0)) > 0.5 && (
-              <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300 font-semibold">⚠ Trial balance is out of balance.</div>
-            )}
-          </div>
-        )}
-
-        {(tab === 'cash') && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-slate-400">Period: <span className="text-white font-semibold">{startDate} — {endDate}</span></div>
-              <PDFDownloadLink
-                document={<FinancialStatementPdf statementType="cash" {...pdfStatementProps} />}
-                fileName={`cash-flow-${startDate}-${endDate}.pdf`}
-                className="rounded-lg border border-green-400/30 bg-green-500/10 px-4 py-2 text-sm font-semibold text-green-300 transition hover:border-green-400/50 hover:bg-green-500/20"
-              >
-                {({ loading: pdfLoading }) => (pdfLoading ? 'Preparing PDF…' : 'Export to PDF')}
-              </PDFDownloadLink>
-            </div>
-
-            <div className="grid gap-6">
-              <div className="rounded-2xl border border-border-soft bg-white/5 p-6">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-4">Operating Activities</p>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <div className="text-slate-300">Net Profit After Tax</div>
-                    <div className="text-green-300">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.75)}</div>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <div className="text-slate-300">Add back: Depreciation</div>
-                    <div className="text-green-300">GHS {fmt(cashFlow.depreciation)}</div>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <div className="text-slate-300">(Increase)/Decrease in Receivables</div>
-                    <div className="text-green-300">GHS {fmt(-cashFlow.receivables)}</div>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <div className="text-slate-300">Increase/(Decrease) in Payables</div>
-                    <div className="text-green-300">GHS {fmt(cashFlow.payables)}</div>
-                  </div>
-                </div>
-                <div className="mt-4 border-t border-border-soft pt-4 flex justify-between font-semibold">
-                  <div className="text-white">Net Cash from Operations</div>
-                  <div className="text-green-300">GHS {fmt(Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.75 + cashFlow.depreciation - cashFlow.receivables + cashFlow.payables)}</div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-border-soft bg-white/5 p-6">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-4">Investing Activities</p>
-                <div className="flex justify-between text-sm mb-4">
-                  <div className="text-slate-300">Purchase of Assets</div>
-                  <div className="text-blue-300">GHS {fmt(-cashFlow.investing)}</div>
-                </div>
-                <div className="border-t border-border-soft pt-4 flex justify-between font-semibold">
-                  <div className="text-white">Net Cash from Investing</div>
-                  <div className="text-blue-300">GHS {fmt(-cashFlow.investing)}</div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-border-soft bg-white/5 p-6">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-4">Financing Activities</p>
-                <div className="flex justify-between text-sm mb-4">
-                  <div className="text-slate-300">Loan drawdowns / repayments</div>
-                  <div className="text-amber-300">GHS {fmt(cashFlow.financing)}</div>
-                </div>
-                <div className="border-t border-border-soft pt-4 flex justify-between font-semibold">
-                  <div className="text-white">Net Cash from Financing</div>
-                  <div className="text-amber-300">GHS {fmt(cashFlow.financing)}</div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-6">
-                <div className="flex justify-between items-center">
-                  <div className="text-white font-bold">Net Increase/(Decrease) in Cash</div>
-                  <div className="text-3xl font-bold text-cyan-300">GHS {fmt((Object.values(incomeAgg).reduce((s,v)=>s+(v.revenue - v.expense),0) * 0.75 + cashFlow.depreciation - cashFlow.receivables + cashFlow.payables) + (-cashFlow.investing) + cashFlow.financing)}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="flex flex-wrap gap-1 border-b border-border-soft">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setTab(t.id)}
+            className={`min-touch px-4 py-3 text-sm font-medium transition ${
+              tab === t.id
+                ? 'border-b-2 border-teal-500 text-text-primary'
+                : 'text-text-muted hover:text-text-primary'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
+
+      <div className="flex flex-wrap items-end gap-4">
+        <label className="space-y-1">
+          <span className="text-xs uppercase tracking-[0.16em] text-text-muted">Period start</span>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="min-h-11 rounded-lg border border-border-soft bg-surface-2 px-3 py-2 text-sm text-text-primary"
+          />
+        </label>
+        <label className="space-y-1">
+          <span className="text-xs uppercase tracking-[0.16em] text-text-muted">Period end</span>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="min-h-11 rounded-lg border border-border-soft bg-surface-2 px-3 py-2 text-sm text-text-primary"
+          />
+        </label>
+        {(tab === 'balance' || tab === 'trial') && (
+          <label className="space-y-1">
+            <span className="text-xs uppercase tracking-[0.16em] text-text-muted">Balance sheet as at</span>
+            <input
+              type="date"
+              value={asAtDate}
+              onChange={(e) => setAsAtDate(e.target.value)}
+              className="min-h-11 rounded-lg border border-border-soft bg-surface-2 px-3 py-2 text-sm text-text-primary"
+            />
+          </label>
+        )}
+        <label className="min-w-[10rem] space-y-1">
+          <span className="text-xs uppercase tracking-[0.16em] text-text-muted">Division</span>
+          <ScrollableSelect value={division} onChange={setDivision} options={divisionOptions} placeholder="All" />
+        </label>
+        {loading && <span className="text-sm text-text-muted">Loading ledger…</span>}
+      </div>
+
+      {error && (
+        <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</p>
+      )}
+
+      {tab === 'trial' && (
+        <StatementPanel
+          title="Trial Balance"
+          actions={
+            <div className="flex gap-2">
+              <button type="button" onClick={exportTrialCsv} className={btnGhostCls}>
+                Export CSV
+              </button>
+              {pdfButton('trial', `trial-balance-${startDate}-${endDate}.pdf`)}
+            </div>
+          }
+        >
+          <p className="mb-4 text-sm text-text-muted">
+            Period: {startDate} — {endDate}
+            {division !== 'All' ? ` · ${division}` : ''}
+          </p>
+          <TrialBalanceTable rows={reports.trialPeriod} totals={reports.trialTotals} />
+          {!reports.trialTotals.balanced && (
+            <p className="mt-4 text-sm font-medium text-red-500">Trial balance debits and credits do not match.</p>
+          )}
+          {reports.trialTotals.balanced && (
+            <p className="mt-4 text-sm text-teal-600 dark:text-teal-300">Trial balance is balanced.</p>
+          )}
+        </StatementPanel>
+      )}
+
+      {tab === 'income' && (
+        <StatementPanel
+          title="Income Statement"
+          actions={pdfButton('income', `income-statement-${startDate}-${endDate}.pdf`)}
+        >
+          <StatementSectionHeader>Revenue</StatementSectionHeader>
+          {is.revenueLines.map((line) => (
+            <StatementSubLine key={line.label} label={line.label} amount={line.amount} />
+          ))}
+          <StatementTotal label="Total Revenue" amount={is.totalRevenue} />
+
+          <StatementSectionHeader>Cost of Sales / Direct Costs</StatementSectionHeader>
+          {is.costOfSalesLines.length === 0 ? (
+            <StatementLine label="No direct costs in period" amount={0} />
+          ) : (
+            is.costOfSalesLines.map((line) => (
+              <StatementSubLine key={line.account_code} label={line.label || line.account_name} amount={line.amount} />
+            ))
+          )}
+          <StatementTotal label="Total Cost of Sales" amount={is.totalCostOfSales} />
+          <StatementTotal label="Gross Profit" amount={is.grossProfit} />
+
+          <StatementSectionHeader>Operating Expenses</StatementSectionHeader>
+          {is.operatingExpenseLines.map((line) => (
+            <StatementSubLine key={line.label} label={line.label} amount={line.amount} />
+          ))}
+          <StatementTotal label="Total Operating Expenses" amount={is.totalOperatingExpenses} />
+          <StatementTotal label="Operating Profit (EBIT)" amount={is.operatingProfit} />
+
+          {is.financeLines.length > 0 && (
+            <>
+              <StatementSectionHeader>Finance Costs</StatementSectionHeader>
+              {is.financeLines.map((line) => (
+                <StatementSubLine key={line.label} label={line.label} amount={line.amount} />
+              ))}
+            </>
+          )}
+          <StatementTotal label="Net Profit Before Tax" amount={is.netProfitBeforeTax} />
+          <StatementLine label="Tax Provision (25%)" amount={-is.taxProvision} />
+          <StatementTotal label="Net Profit After Tax" amount={is.netProfitAfterTax} />
+        </StatementPanel>
+      )}
+
+      {tab === 'balance' && (
+        <StatementPanel
+          title="Balance Sheet"
+          actions={pdfButton('balance', `balance-sheet-${asAtDate}.pdf`)}
+        >
+          <p className="mb-4 text-sm text-text-muted">As at {asAtDate}</p>
+
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div>
+              <StatementSectionHeader>Assets</StatementSectionHeader>
+              <StatementLine label="Current Assets" amount={null} bold />
+              {bs.assetsCurrent.map((l) => (
+                <StatementSubLine key={l.account_code} label={l.account_name} amount={l.amount} />
+              ))}
+              <StatementLine label="Non-Current Assets" amount={null} bold />
+              {bs.assetsNonCurrent.map((l) => (
+                <StatementSubLine key={l.account_code} label={l.account_name} amount={l.amount} />
+              ))}
+              <StatementTotal label="Total Assets" amount={bs.totalAssets} />
+            </div>
+
+            <div>
+              <StatementSectionHeader>Liabilities & Equity</StatementSectionHeader>
+              <StatementLine label="Current Liabilities" amount={null} bold />
+              {bs.liabilitiesCurrent.map((l) => (
+                <StatementSubLine key={l.account_code} label={l.account_name} amount={l.amount} />
+              ))}
+              <StatementLine label="Non-Current Liabilities" amount={null} bold />
+              {bs.liabilitiesNonCurrent.map((l) => (
+                <StatementSubLine key={l.account_code} label={l.account_name} amount={l.amount} />
+              ))}
+              <StatementTotal label="Total Liabilities" amount={bs.totalLiabilities} />
+
+              <StatementLine label="Equity" amount={null} bold />
+              {bs.equityLines.map((l) => (
+                <StatementSubLine
+                  key={l.account_code}
+                  label={l.account_name}
+                  amount={l.amount}
+                />
+              ))}
+              <StatementTotal label="Total Equity" amount={bs.totalEquity} />
+            </div>
+          </div>
+
+          <StatementTotal
+            label="Total Liabilities + Equity"
+            amount={bs.totalLiabilitiesAndEquity}
+            ok={bs.balanced}
+          />
+          {!bs.balanced && (
+            <p className="mt-3 text-sm text-red-500">
+              Balance sheet does not balance (variance GHS {Math.abs(bs.variance).toFixed(2)}). Check trial balance
+              and that current-year profit is reflected in equity.
+            </p>
+          )}
+        </StatementPanel>
+      )}
+
+      {tab === 'cash' && (
+        <StatementPanel
+          title="Cash Flow Statement"
+          actions={pdfButton('cash', `cash-flow-${startDate}-${endDate}.pdf`)}
+        >
+          <StatementSectionHeader>Operating Activities</StatementSectionHeader>
+          <StatementLine label="Net Profit After Tax" amount={cf.netProfitAfterTax} />
+          <StatementLine label="Add back: Depreciation" amount={cf.depreciation} />
+          <StatementLine label="(Increase)/Decrease in Receivables" amount={cf.receivablesChange} />
+          <StatementLine label="Increase/(Decrease) in Payables" amount={cf.payablesChange} />
+          {Math.abs(cf.inventoryChange) > 0.005 && (
+            <StatementLine label="(Increase)/Decrease in Inventory" amount={cf.inventoryChange} />
+          )}
+          {Math.abs(cf.contractAssetChange) > 0.005 && (
+            <StatementLine label="(Increase)/Decrease in Contract Assets" amount={cf.contractAssetChange} />
+          )}
+          <StatementTotal label="Net Cash from Operations" amount={cf.netCashFromOperations} />
+
+          <StatementSectionHeader>Investing Activities</StatementSectionHeader>
+          {cf.investingLines.map((l) => (
+            <StatementSubLine key={l.label} label={l.label} amount={l.amount} />
+          ))}
+          <StatementTotal label="Net Cash from Investing" amount={cf.netCashFromInvesting} />
+
+          <StatementSectionHeader>Financing Activities</StatementSectionHeader>
+          {cf.financingLines.length === 0 ? (
+            <StatementLine label="Loan drawdowns / repayments" amount={cf.netCashFromFinancing} />
+          ) : (
+            cf.financingLines.map((l) => (
+              <StatementSubLine key={l.label} label={l.label} amount={l.amount} />
+            ))
+          )}
+          <StatementTotal label="Net Cash from Financing" amount={cf.netCashFromFinancing} />
+
+          <StatementTotal label="Net Increase/(Decrease) in Cash" amount={cf.netCashChange} ok={cf.netCashChange >= 0} />
+          <p className="mt-4 text-xs text-text-muted">
+            Opening cash GHS {cf.openingCash?.toLocaleString?.('en-GH', { minimumFractionDigits: 2 })} → Closing cash
+            GHS {cf.closingCash?.toLocaleString?.('en-GH', { minimumFractionDigits: 2 })}
+          </p>
+        </StatementPanel>
+      )}
     </div>
   )
 }

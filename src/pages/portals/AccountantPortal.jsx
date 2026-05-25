@@ -29,6 +29,7 @@ import JournalDrillDown from '../../components/accountant/JournalDrillDown'
 import ManualJournalForm from '../../components/accounting/ManualJournalForm'
 import ManualJournalList from '../../components/accounting/ManualJournalList'
 import ThemeToggle from '../../components/ui/ThemeToggle'
+import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
 import { COMPANY } from '../../lib/company-config'
 import logo from '../../assets/ModuloDevLogo.png'
 import DebtorsLedger from '../../components/accounting/DebtorsLedger'
@@ -63,7 +64,6 @@ const NAV_SECTIONS = [
       { id: 'debtors-ledger', label: 'Debtors Ledger' },
           { id: 'financial-statements', label: 'Financial Statements' },
           { id: 'revenue-recognition', label: 'Revenue Recognition' },
-      { id: 'trial-balance', label: 'Trial Balance' },
     ],
   },
   {
@@ -127,9 +127,9 @@ const MOBILE_SUB_NAV = {
   ],
   ledger: [
     { id: 'general-ledger', label: 'GL' },
-    { id: 'journal-history', label: 'Journals' },
+    { id: 'new-journal', label: 'New Journal' },
+    { id: 'journal-history', label: 'History' },
     { id: 'financial-statements', label: 'Statements' },
-    { id: 'trial-balance', label: 'Trial' },
     { id: 'bank-accounts', label: 'Bank Accounts' },
     { id: 'import-statement', label: 'Import' },
     { id: 'reconciliation', label: 'Reconciliation' },
@@ -300,7 +300,7 @@ export default function AccountantPortal() {
       case 'chart-of-accounts':
         return <ChartOfAccounts />
       case 'financial-statements':
-        return <FinancialStatements />
+        return <FinancialStatements defaultTab="trial" />
       case 'management-reports':
         return <ManagementReports />
       case 'trial-balance':
@@ -313,11 +313,23 @@ export default function AccountantPortal() {
         return <ReconciliationWorkspace onCreateJournal={() => navigate('new-journal')} />
       case 'new-journal':
         return (
-          <div>
-            <button type="button" onClick={() => setCreateJournalOpen(true)} className="rounded-lg bg-sky-500 px-4 py-2 text-white">New journal</button>
-            <Modal open={createJournalOpen} onClose={() => setCreateJournalOpen(false)} title="New manual journal" size="xl">
+          <div className="space-y-4">
+            <p className="text-sm text-slate-400 lg:hidden">Post a manual journal entry below.</p>
+            <div className="lg:hidden">
               <ManualJournalForm />
-            </Modal>
+            </div>
+            <div className="hidden lg:block">
+              <button
+                type="button"
+                onClick={() => setCreateJournalOpen(true)}
+                className="rounded-lg bg-sky-500 px-4 py-2 text-white hover:bg-sky-600"
+              >
+                New journal
+              </button>
+              <Modal open={createJournalOpen} onClose={() => setCreateJournalOpen(false)} title="New manual journal" size="xl">
+                <ManualJournalForm />
+              </Modal>
+            </div>
           </div>
         )
       case 'journal-history':
@@ -446,13 +458,10 @@ export default function AccountantPortal() {
               ))}
             </nav>
 
-            <button
-              type="button"
-              onClick={signOut}
-              className="min-touch mt-auto w-full rounded-full border border-border-soft bg-white/5 px-4 py-3 text-sm text-white hover:border-teal-400/40 hover-animate"
-            >
-              Sign Out
-            </button>
+            <PortalSidebarFooter
+              onSignOut={signOut}
+              signOutClassName="border-border-soft bg-white/5 text-white hover:border-teal-400/40 hover-animate"
+            />
           </aside>
 
           <main className="portal-main portal-main-with-tabs min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">
@@ -462,6 +471,7 @@ export default function AccountantPortal() {
                 <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-white truncate">{VIEW_TITLES[activeView] || 'Workspace'}</h1>
               </div>
               <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <ThemeToggle className="self-start" />
                 <button
                   type="button"
                   onClick={signOut}
@@ -471,7 +481,6 @@ export default function AccountantPortal() {
                 </button>
               </div>
             </div>
-            <ThemeToggle className="self-start" />
 
             {showMobileSubNav && (
               <div className="mb-4 flex gap-2 overflow-x-auto lg:hidden">
@@ -535,6 +544,7 @@ export default function AccountantPortal() {
                 Close
               </button>
             </div>
+            <ThemeToggle className="mb-4 w-full justify-center" />
             <div className="grid gap-2">
               {MORE_DRAWER_ITEMS.map((item) => (
                 <button

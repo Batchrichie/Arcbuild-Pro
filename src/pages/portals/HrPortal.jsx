@@ -14,6 +14,7 @@ import EmployeeCostReport from '../../components/hr/EmployeeCostReport'
 import HeadcountReport from '../../components/hr/HeadcountReport'
 import TimesheetApproval from '../../components/TimesheetApproval'
 import ThemeToggle from '../../components/ui/ThemeToggle'
+import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
 
 const NAV_SECTIONS = [
   {
@@ -188,9 +189,10 @@ export default function HrPortal() {
                 </div>
               ))}
             </nav>
-            <button type="button" onClick={signOut} className="min-touch mt-6 w-full rounded-full border border-border-soft py-3 text-sm text-slate-300">
-              Sign Out
-            </button>
+            <PortalSidebarFooter
+              onSignOut={signOut}
+              signOutClassName="text-slate-300 hover:border-violet-400/40"
+            />
           </aside>
 
           <main className="portal-main portal-main-with-tabs min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">
@@ -236,6 +238,7 @@ export default function HrPortal() {
           <button type="button" className="portal-drawer-backdrop" onClick={() => setMoreOpen(false)} aria-label="Close" />
           <div className="portal-drawer-sheet">
             <h3 className="mb-3 text-lg font-semibold text-white">More</h3>
+            <ThemeToggle className="mb-4 w-full justify-center lg:hidden" />
             {MORE_ITEMS.map((item) => (
               <button
                 key={item.id}

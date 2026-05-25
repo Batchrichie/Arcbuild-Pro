@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import Modal from './ui/Modal'
+import ScrollableSelect from './ui/ScrollableSelect'
 import { usePaymentReceipt } from '../hooks/usePaymentReceipt'
 import { getPaymentAccounts } from '../services/chartOfAccountsService'
 import { recordPayment } from '../services/paymentService'
@@ -71,6 +72,17 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
     : 'border-amber-400/30 bg-amber-500/10 text-amber-300'
 
   const selectedAccount = paymentAccounts.find((account) => account.account_code === paymentAccountCode)
+
+  const paymentAccountOptions = useMemo(
+    () => [
+      { value: '', label: 'Select cash or bank account' },
+      ...paymentAccounts.map((account) => ({
+        value: account.account_code,
+        label: `${account.account_code} — ${account.account_name}`,
+      })),
+    ],
+    [paymentAccounts]
+  )
 
   const loadInvoiceDetails = async () => {
     if (!invoice?.id) return
@@ -274,18 +286,16 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
 
           <label className="space-y-2 text-sm text-slate-300">
             <span className="block text-xs uppercase tracking-[0.16em] text-slate-400">Payment Account</span>
-            <select
+            <ScrollableSelect
+              searchable
+              optionLayout="account"
+              showValueWhenClosed
               value={paymentAccountCode}
-              onChange={(e) => setPaymentAccountCode(e.target.value)}
-              className="w-full rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-white focus:border-emerald-400/50 focus:bg-white/10 outline-none"
-            >
-              <option value="">Select cash or bank account</option>
-              {paymentAccounts.map((account) => (
-                <option key={account.account_code} value={account.account_code}>
-                  {account.account_code} — {account.account_name}
-                </option>
-              ))}
-            </select>
+              onChange={setPaymentAccountCode}
+              options={paymentAccountOptions}
+              placeholder="Select cash or bank account"
+              searchPlaceholder="Search accounts…"
+            />
           </label>
 
           <label className="space-y-2 text-sm text-slate-300">

@@ -12,11 +12,12 @@
  *   • Draft/Submit workflow
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { TAX_RATES, Currency } from '../lib/tax-constants';
 import { recordRetentionWithheld } from '../services/retentionService';
 import { getLatestRates } from '../services/fxRatesService';
+import ScrollableSelect from './ui/ScrollableSelect';
 
 export default function InvoiceForm({ onSave, initialData = null }) {
   // ===== State Management =====
@@ -577,12 +578,38 @@ export default function InvoiceForm({ onSave, initialData = null }) {
     }).format(value);
   };
 
+  const clientOptions = useMemo(
+    () => [
+      { value: '', label: 'Select a client…' },
+      ...clients.map((client) => ({
+        value: client.id,
+        label: `${client.name} (${client.client_type})`,
+      })),
+    ],
+    [clients]
+  );
+
+  const projectOptions = useMemo(
+    () => [
+      { value: '', label: 'Select a project…' },
+      ...projects.map((project) => ({ value: project.id, label: project.name })),
+    ],
+    [projects]
+  );
+
+  const currencyOptions = useMemo(
+    () => Object.values(Currency).map((curr) => ({ value: curr, label: curr })),
+    []
+  );
+
+  const fieldSelectCls = 'w-full';
+
   return (
     <div className="py-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-[1.75rem] border border-border-soft bg-slate-950/95 shadow-2xl shadow-black/30">
-          <div className="bg-slate-900/80 px-6 py-5 border-b border-border-soft">
-            <h1 className="text-3xl font-semibold text-white">Create invoice</h1>
+          <div className="bg-slate-900/80 px-4 py-5 border-b border-border-soft sm:px-6">
+            <h1 className="text-2xl font-semibold text-white sm:text-3xl">Create invoice</h1>
             <p className="mt-2 text-sm text-slate-400">
               Build an invoice with client, project, line items, and tax calculation in one flow.
             </p>
@@ -602,40 +629,34 @@ export default function InvoiceForm({ onSave, initialData = null }) {
             </div>
           )}
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Client</label>
-                  <select
+                  <ScrollableSelect
+                    searchable
                     value={formData.client_id}
-                    onChange={(e) => handleFormChange('client_id', e.target.value)}
-                      className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                  >
-                    <option value="">Select a client...</option>
-                    {clients.map((client) => (
-                      <option key={client.id} value={client.id}>
-                        {client.name} ({client.client_type})
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(v) => handleFormChange('client_id', v)}
+                    options={clientOptions}
+                    placeholder="Select a client…"
+                    searchPlaceholder="Search clients…"
+                    className={fieldSelectCls}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Project</label>
-                  <select
+                  <ScrollableSelect
+                    searchable
                     value={formData.project_id}
-                    onChange={(e) => handleFormChange('project_id', e.target.value)}
+                    onChange={(v) => handleFormChange('project_id', v)}
+                    options={projectOptions}
+                    placeholder="Select a project…"
+                    searchPlaceholder="Search projects…"
                     disabled={!formData.client_id}
-                      className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:bg-slate-800 disabled:text-slate-500"
-                  >
-                    <option value="">Select a project...</option>
-                    {projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.name}
-                      </option>
-                    ))}
-                  </select>
+                    className={fieldSelectCls}
+                  />
                 </div>
 
                 <div>
@@ -644,51 +665,47 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     type="text"
                     value={formData.division_name}
                     readOnly
-                    className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base text-slate-300"
+                    className="w-full min-h-11 min-w-0 rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base text-slate-300"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">Currency</label>
-                    <select
+                    <ScrollableSelect
                       value={formData.currency}
-                      onChange={(e) => handleFormChange('currency', e.target.value)}
-                      className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                    >
-                      {Object.values(Currency).map((curr) => (
-                        <option key={curr} value={curr}>
-                          {curr}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(v) => handleFormChange('currency', v)}
+                      options={currencyOptions}
+                      placeholder="Select currency"
+                      className={fieldSelectCls}
+                    />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">Retention Rate (%)</label>
                     <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
+                      autoComplete="off"
                       value={formData.retention_rate}
-                      onChange={(e) => handleFormChange('retention_rate', Number(e.target.value))}
-                      className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      onChange={(e) => handleFormChange('retention_rate', Number(e.target.value) || 0)}
+                      className="input-amount w-full min-h-11 min-w-0 rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base tabular-nums text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="mt-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">FX Rate to GHS</label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
                       <input
-                        type="number"
-                        step="0.01"
+                        type="text"
+                        inputMode="decimal"
+                        autoComplete="off"
                         value={formData.fx_rate_to_ghs}
                         onChange={handleOverrideFxRate}
                         disabled={formData.currency === Currency.GHS}
-                        className="flex-1 rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:bg-slate-800"
+                        className="input-amount min-h-11 min-w-0 flex-1 rounded-2xl border border-border-soft bg-slate-900 px-4 py-3 text-base tabular-nums text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:bg-slate-800"
                       />
                       <button
                         onClick={() =>
@@ -698,7 +715,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           }))
                         }
                         disabled={formData.currency === Currency.GHS}
-                        className="rounded-2xl bg-white/5 px-3 py-2 text-xs font-medium text-slate-200 transition hover:bg-white/10 disabled:opacity-50"
+                        className="min-h-11 shrink-0 rounded-2xl border border-border-soft bg-white/5 px-4 py-3 text-left text-xs font-medium text-slate-200 transition hover:bg-white/10 disabled:opacity-50 sm:max-w-[14rem]"
                       >
                         {formData.currency === Currency.GHS
                           ? 'Local currency'
@@ -744,9 +761,9 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     </button>
                   </div>
 
-                  <div className="space-y-3 rounded-3xl border border-border-soft bg-slate-950/80 p-4">
+                  <div className="portal-table-scroll space-y-3 overflow-x-auto rounded-3xl border border-border-soft bg-slate-950/80 p-4">
                     {lineItems.map((item, index) => (
-                      <div key={index} className="grid grid-cols-12 gap-2 items-end">
+                      <div key={index} className="grid min-w-[36rem] grid-cols-12 gap-2 items-end">
                         <input
                           type="text"
                           placeholder="Description"
@@ -754,37 +771,40 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           onChange={(e) =>
                             handleLineItemChange(index, 'description', e.target.value)
                           }
-                          className="col-span-4 lg:col-span-3 rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                          className="col-span-4 min-w-0 rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
-                          type="number"
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
+                          autoComplete="off"
                           placeholder="Qty"
                           value={item.quantity}
                           onChange={(e) =>
-                            handleLineItemChange(index, 'quantity', parseFloat(e.target.value))
+                            handleLineItemChange(index, 'quantity', parseFloat(e.target.value) || 0)
                           }
-                          className="col-span-2 lg:col-span-3 rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                          className="input-amount col-span-2 min-w-[5rem] rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base tabular-nums text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
-                          type="number"
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
+                          autoComplete="off"
                           placeholder="Unit Price"
                           value={item.unit_price}
                           onChange={(e) =>
-                            handleLineItemChange(index, 'unit_price', parseFloat(e.target.value))
+                            handleLineItemChange(index, 'unit_price', parseFloat(e.target.value) || 0)
                           }
-                          className="col-span-2 lg:col-span-3 rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                          className="input-amount col-span-2 min-w-[5.5rem] rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base tabular-nums text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="text"
                           readOnly
                           value={formatCurrency(item.quantity * item.unit_price)}
-                          className="col-span-2 rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base text-slate-300"
+                          className="input-amount col-span-2 min-w-[5.5rem] rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base tabular-nums text-slate-300"
                         />
                         <button
+                          type="button"
                           onClick={() => removeLineItem(index)}
-                          className="col-span-2 lg:col-span-1 rounded-full text-sm font-semibold text-rose-300 transition hover:text-rose-100"
+                          className="col-span-2 rounded-full text-sm font-semibold text-rose-300 transition hover:text-rose-100"
                         >
                           ✕
                         </button>
@@ -799,7 +819,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                     value={formData.notes}
                     onChange={(e) => handleFormChange('notes', e.target.value)}
                     rows="3"
-                    className="w-full rounded-2xl border border-border-soft bg-slate-900 px-4 py-4 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    className="w-full min-w-0 rounded-2xl border border-border-soft bg-slate-900 px-4 py-4 text-base text-white transition focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   />
                 </div>
               </div>
