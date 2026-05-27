@@ -362,7 +362,7 @@ export default function PaymentsReceived() {
 
       {paymentModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-4xl overflow-hidden rounded-3xl border border-border-soft bg-slate-900/95 shadow-2xl shadow-black/40">
+          <div className="w-full max-w-4xl max-h-[85vh] overflow-auto rounded-3xl border border-border-soft bg-slate-900/95 shadow-2xl shadow-black/40">
             <div className="flex items-start justify-between gap-4 border-b border-border-soft px-6 py-5">
               <div>
                 <h2 className="text-xl font-semibold text-white">Record Payment</h2>

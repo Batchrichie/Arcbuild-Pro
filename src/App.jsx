@@ -6,6 +6,9 @@ import ProtectedRoute from './components/ProtectedRoute'
 // Pages
 import Login        from './pages/Login'
 import Unauthorized from './pages/Unauthorized'
+import ForgotPassword from './pages/ForgotPassword'
+import ConfirmResetPassword from './pages/ConfirmResetPassword'
+import UpdatePassword from './pages/UpdatePassword'
 import ClientRegistry   from './pages/clients/ClientRegistry'
 import ClientDetail     from './pages/clients/ClientDetail'
 import SupplierRegistry from './pages/suppliers/SupplierRegistry'
@@ -34,6 +37,11 @@ export default function App() {
           {/* Public routes */}
           <Route path="/login"        element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          
+          {/* Password reset flow */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/auth/confirm-reset-password" element={<ConfirmResetPassword />} />
+          <Route path="/auth/update-password" element={<UpdatePassword />} />
 
           {/* CEO portal */}
           <Route path="/ceo" element={

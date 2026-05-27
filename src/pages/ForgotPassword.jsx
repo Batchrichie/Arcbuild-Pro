@@ -5,22 +5,11 @@ import { COMPANY } from '../lib/company-config'
 import logo from '../assets/ModuloDevLogo.png'
 import ThemeToggle from '../components/ui/ThemeToggle'
 
-// Role → portal route mapping
-const ROLE_ROUTES = {
-  ceo:             '/ceo',
-  accountant:      '/accountant',
-  project_manager: '/pm',
-  hr_manager:      '/hr',
-  employee:        '/employee',
-  client:          '/client',
-}
-
-export default function Login() {
+export default function ForgotPassword() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e) {
@@ -29,34 +18,67 @@ export default function Login() {
     setLoading(true)
 
     try {
-      const { data: authData, error: authError } =
-        await supabase.auth.signInWithPassword({ email, password })
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/confirm-reset-password`,
+      })
 
-      if (authError) {
-        setError(authError.message)
-        setLoading(false)
+      if (resetError) {
+        setError(resetError.message)
         return
       }
 
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', authData.user.id)
-        .single()
-
-      if (profileError || !profile) {
-        setError('Account found but profile is missing. Contact your administrator.')
-        setLoading(false)
-        return
-      }
-
-      const destination = ROLE_ROUTES[profile.role] ?? '/unauthorized'
-      navigate(destination, { replace: true })
-
-    } catch {
-      setError('An unexpected error occurred. Please try again.')
+      setSuccess(true)
+    } catch (err) {
+      setError(err.message || 'An error occurred. Please try again.')
+    } finally {
       setLoading(false)
     }
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-stone-950 flex items-center justify-center p-8">
+        <div className="w-full max-w-sm">
+          <div className="lg:hidden flex items-center gap-3 mb-12">
+            <img src={logo} alt={COMPANY.shortName} className="w-10 h-10 rounded-3xl object-cover" />
+            <span className="text-stone-200 font-bold tracking-widest text-xs uppercase">{COMPANY.shortName}</span>
+          </div>
+
+          <div className="mb-10">
+            <h2 className="text-stone-100 text-3xl font-black tracking-tight mb-2">Check your email</h2>
+            <p className="text-stone-400 text-sm">We've sent a password reset link to:</p>
+            <p className="text-amber-500 font-semibold mt-2">{email}</p>
+          </div>
+
+          <div className="rounded-3xl border border-emerald-900/40 bg-emerald-950/40 p-4 mb-6">
+            <p className="text-emerald-400 text-sm leading-relaxed">
+              Click the link in your email to reset your password. The link will expire in 24 hours.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-stone-500 text-xs text-center">Didn't receive the email?</p>
+            <button
+              onClick={() => {
+                setSuccess(false)
+                setEmail('')
+                setError(null)
+              }}
+              className="w-full bg-amber-500 text-stone-950 font-bold px-6 py-3 text-sm tracking-widest uppercase hover:bg-amber-400 active:bg-amber-600 transition-colors duration-150"
+            >
+              Try another email
+            </button>
+
+            <Link
+              to="/login"
+              className="block text-center text-stone-400 hover:text-stone-300 text-xs underline transition-colors"
+            >
+              Back to sign in
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -78,13 +100,11 @@ export default function Login() {
         <div className="relative z-10">
           <p className="text-stone-600 text-xs tracking-[0.3em] uppercase mb-8">Integrated Management System</p>
           <h1 className="text-stone-100 font-black text-6xl leading-none tracking-tight mb-6">
-            Built for<br />
-            <span className="text-amber-500">Ghana's</span><br />
-            builders.
+            Reset your<br />
+            <span className="text-amber-500">password</span>
           </h1>
           <p className="text-stone-500 text-sm leading-relaxed max-w-xs">
-            Construction · Architecture · Real Estate · Logistics.
-            One system. Every number. Every project.
+            Enter your email address and we'll send you a link to reset your password.
           </p>
         </div>
 
@@ -107,8 +127,8 @@ export default function Login() {
 
           <div className="mb-10 flex items-center justify-between gap-4">
             <div>
-              <p className="text-stone-600 text-xs tracking-[0.25em] uppercase mb-2">Portal Access</p>
-              <h2 className="text-stone-100 text-3xl font-black tracking-tight">Sign in</h2>
+              <p className="text-stone-600 text-xs tracking-[0.25em] uppercase mb-2">Account Recovery</p>
+              <h2 className="text-stone-100 text-3xl font-black tracking-tight">Forgot password?</h2>
             </div>
             <ThemeToggle className="inline-flex shrink-0" />
           </div>
@@ -129,33 +149,9 @@ export default function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@modulodevelopmentltd@yahoo.com"
+                placeholder="you@company.com"
                 className="bg-stone-900 border border-stone-800 text-stone-100 px-4 py-3 text-sm placeholder-stone-700 focus:outline-none focus:border-amber-500 transition-colors duration-150"
               />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="password" className="text-stone-500 text-xs tracking-[0.2em] uppercase">Password</label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-stone-900 border border-stone-800 text-stone-100 px-4 py-3 pr-24 text-sm placeholder-stone-700 focus:outline-none focus:border-amber-500 transition-colors duration-150"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="toggle-button"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </button>
-              </div>
             </div>
 
             <button
@@ -166,24 +162,20 @@ export default function Login() {
               {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-stone-950 border-t-transparent rounded-full animate-spin" />
-                  Signing in
+                  Sending…
                 </>
               ) : (
-                'Sign in'
+                'Send reset link'
               )}
             </button>
-
-            <div className="mt-4 text-center">
-              <Link
-                to="/forgot-password"
-                className="text-stone-400 hover:text-stone-300 text-xs underline transition-colors"
-              >
-                Forgot password?
-              </Link>
-            </div>
           </form>
 
-          <p className="mt-10 text-stone-700 text-xs text-center">Access is role-restricted. Contact your administrator<br />if you have not received your credentials.</p>
+          <Link
+            to="/login"
+            className="mt-6 block text-center text-stone-400 hover:text-stone-300 text-xs underline transition-colors"
+          >
+            Back to sign in
+          </Link>
         </div>
       </div>
     </div>
