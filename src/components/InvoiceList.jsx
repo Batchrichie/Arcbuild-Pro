@@ -160,6 +160,33 @@ export default function InvoiceList() {
     updateInvoiceStatus(invoice, 'draft')
   }
 
+  const handleDeleteInvoice = async (invoice) => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this invoice? This cannot be undone.'
+    )
+    if (!confirmed) return
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      await supabase.from('invoice_line_items').delete().eq('invoice_id', invoice.id)
+      await supabase.from('invoice_payments').delete().eq('invoice_id', invoice.id)
+
+      const { error } = await supabase
+        .from('invoices')
+        .delete()
+        .eq('id', invoice.id)
+
+      if (error) throw error
+      await fetchInvoices()
+    } catch (err) {
+      setError(err.message || 'Unable to delete invoice')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleView = async (invoice) => {
     setInvoiceViewError(null)
     setSelectedInvoice(null)
@@ -389,6 +416,16 @@ export default function InvoiceList() {
                             title="Mark invoice as sent to client"
                           >
                             Send
+                          </button>
+                        )}
+                        {(invoice.status === 'draft' || invoice.status === 'pending_approval') && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteInvoice(invoice)}
+                            className="rounded-2xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                            title="Delete invoice"
+                          >
+                            Delete
                           </button>
                         )}
                         {invoice.status === 'rejected' && (

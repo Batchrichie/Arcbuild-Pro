@@ -34,9 +34,18 @@ export default function InvoiceForm({ onSave, initialData = null }) {
     notes: initialData?.notes || '',
   });
 
-  const [lineItems, setLineItems] = useState(
-    initialData?.lineItems || [{ id: null, description: '', quantity: 1, unit_price: 0 }]
-  );
+  const [lineItems, setLineItems] = useState(() => {
+    if (initialData?.lineItems && Array.isArray(initialData.lineItems)) {
+      return initialData.lineItems.map((it) => ({
+        ...it,
+        quantity: String(it.quantity ?? 0),
+        unit_price: String(it.unit_price ?? 0),
+      }))
+    }
+    return [{ id: null, description: '', quantity: '1', unit_price: '0' }]
+  });
+
+  const [applyTax, setApplyTax] = useState(true); // Toggle for tax application
 
   const [clients, setClients] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -296,23 +305,39 @@ export default function InvoiceForm({ onSave, initialData = null }) {
     }
   }, [formData.currency, latestFxRates, formData.fx_rate_override]);
 
-  // Compute taxes when line items, retention or exchange rate changes
-  useEffect(() => {
-    computeTaxes();
-  }, [lineItems, formData.fx_rate_to_ghs, formData.retention_rate, clientTaxProfile]);
 
   // ===== Functions =====
 
   const computeTaxes = useCallback(() => {
     if (!clientTaxProfile) return;
 
-    // Calculate subtotal in invoice currency
-    const subtotal = lineItems.reduce(
-      (sum, item) => sum + (item.quantity * item.unit_price || 0),
-      0
-    );
+    // Calculate subtotal in invoice currency (parse strings to numbers)
+    const subtotal = lineItems.reduce((sum, item) => {
+      const qty = Number(item.quantity) || 0
+      const price = Number(item.unit_price) || 0
+      return sum + qty * price
+    }, 0)
 
-    // Compute taxes
+    // If taxes are disabled, use subtotal as the final total
+    if (!applyTax) {
+      const fx = formData.fx_rate_to_ghs || 1.0;
+      setTaxes({
+        subtotal,
+        vat: 0,
+        nhil: 0,
+        getfund: 0,
+        gross_total: subtotal,
+        retention_withheld: 0,
+        wht: 0,
+        expected_receipt: subtotal,
+        gross_total_ghs: subtotal * fx,
+        expected_receipt_ghs: subtotal * fx,
+      });
+      setRequiresApproval(false);
+      return;
+    }
+
+    // Compute taxes when enabled
     const vat = clientTaxProfile.applies_vat ? subtotal * TAX_RATES.VAT : 0;
     const nhil = clientTaxProfile.applies_nhil ? subtotal * TAX_RATES.NHIL : 0;
     const getfund = clientTaxProfile.applies_getfund ? subtotal * TAX_RATES.GETFUND : 0;
@@ -343,7 +368,12 @@ export default function InvoiceForm({ onSave, initialData = null }) {
 
     // Check if approval is required
     setRequiresApproval(gross_total_ghs >= approvalThreshold);
-  }, [clientTaxProfile, lineItems, formData.fx_rate_to_ghs, approvalThreshold]);
+  }, [clientTaxProfile, lineItems, formData.fx_rate_to_ghs, approvalThreshold, applyTax, formData.retention_rate]);
+
+  // Compute taxes when line items, retention or exchange rate changes
+  useEffect(() => {
+    computeTaxes();
+  }, [computeTaxes]);
 
   const handleFormChange = (field, value) => {
     setFormData((prev) => ({
@@ -363,7 +393,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
   const addLineItem = () => {
     setLineItems((prev) => [
       ...prev,
-      { id: null, description: '', quantity: 1, unit_price: 0 },
+      { id: null, description: '', quantity: '1', unit_price: '0' },
     ]);
   };
 
@@ -439,6 +469,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
         approval_threshold_at_creation: approvalThreshold,
         created_by: user.data.user.id,
         notes: formData.notes,
+        apply_tax: applyTax,
       };
 
       // Insert or update invoice as a draft first.
@@ -464,12 +495,12 @@ export default function InvoiceForm({ onSave, initialData = null }) {
       // Delete existing line items and insert the current set.
       await supabase.from('invoice_line_items').delete().eq('invoice_id', invoiceId);
       const lineItemsData = lineItems
-        .filter((item) => item.unit_price > 0)
+        .filter((item) => Number(item.unit_price) > 0)
         .map((item) => ({
           invoice_id: invoiceId,
           description: item.description,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
+          quantity: Number(item.quantity) || 0,
+          unit_price: Number(item.unit_price) || 0,
         }));
 
       if (lineItemsData.length > 0) {
@@ -694,6 +725,20 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                   </div>
                 </div>
 
+                <div className="rounded-3xl border border-border-soft bg-slate-900/90 p-4">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={applyTax}
+                      onChange={(e) => setApplyTax(e.target.checked)}
+                      className="w-5 h-5 rounded border-slate-500 bg-slate-700 accent-cyan-500 cursor-pointer"
+                    />
+                    <span className="text-white font-medium">
+                      Apply Tax (VAT 15% + GETFUND 2.5% + NHIL 2.5%)
+                    </span>
+                  </label>
+                </div>
+
                 <div className="mt-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">FX Rate to GHS</label>
@@ -779,9 +824,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           autoComplete="off"
                           placeholder="Qty"
                           value={item.quantity}
-                          onChange={(e) =>
-                            handleLineItemChange(index, 'quantity', parseFloat(e.target.value) || 0)
-                          }
+                          onChange={(e) => handleLineItemChange(index, 'quantity', e.target.value)}
                           className="input-amount col-span-2 min-w-[5rem] rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base tabular-nums text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
@@ -790,15 +833,13 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                           autoComplete="off"
                           placeholder="Unit Price"
                           value={item.unit_price}
-                          onChange={(e) =>
-                            handleLineItemChange(index, 'unit_price', parseFloat(e.target.value) || 0)
-                          }
+                          onChange={(e) => handleLineItemChange(index, 'unit_price', e.target.value)}
                           className="input-amount col-span-2 min-w-[5.5rem] rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base tabular-nums text-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         />
                         <input
                           type="text"
                           readOnly
-                          value={formatCurrency(item.quantity * item.unit_price)}
+                          value={formatCurrency((Number(item.quantity) || 0) * (Number(item.unit_price) || 0))}
                           className="input-amount col-span-2 min-w-[5.5rem] rounded-2xl border border-border-soft bg-slate-900 px-3 py-3 text-base tabular-nums text-slate-300"
                         />
                         <button
@@ -826,7 +867,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
 
               <div className="lg:col-span-1">
                 <div className="sticky top-6 rounded-3xl border border-border-soft bg-slate-900/90 p-6 shadow-lg shadow-black/20">
-                  <h3 className="text-lg font-semibold text-white mb-4">Tax Breakdown</h3>
+                  <h3 className="text-lg font-semibold text-white mb-4">Invoice Total</h3>
 
                   <div className="space-y-3 text-sm text-slate-200">
                     <div className="flex justify-between">
@@ -838,43 +879,47 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                       </span>
                     </div>
 
-                    {clientTaxProfile?.applies_vat && (
-                      <div className="flex justify-between">
-                        <span>VAT (15%):</span>
-                        <span className="font-medium text-white">
-                          {formData.currency === Currency.GHS
-                            ? formatCurrency(taxes.vat)
-                            : formatGHS(taxes.vat * formData.fx_rate_to_ghs)}
-                        </span>
-                      </div>
-                    )}
+                    {applyTax && (
+                      <>
+                        {clientTaxProfile?.applies_vat && (
+                          <div className="flex justify-between">
+                            <span>VAT (15%):</span>
+                            <span className="font-medium text-white">
+                              {formData.currency === Currency.GHS
+                                ? formatCurrency(taxes.vat)
+                                : formatGHS(taxes.vat * formData.fx_rate_to_ghs)}
+                            </span>
+                          </div>
+                        )}
 
-                    {clientTaxProfile?.applies_nhil && (
-                      <div className="flex justify-between">
-                        <span>NHIL (2.5%):</span>
-                        <span className="font-medium text-white">
-                          {formData.currency === Currency.GHS
-                            ? formatCurrency(taxes.nhil)
-                            : formatGHS(taxes.nhil * formData.fx_rate_to_ghs)}
-                        </span>
-                      </div>
-                    )}
+                        {clientTaxProfile?.applies_nhil && (
+                          <div className="flex justify-between">
+                            <span>NHIL (2.5%):</span>
+                            <span className="font-medium text-white">
+                              {formData.currency === Currency.GHS
+                                ? formatCurrency(taxes.nhil)
+                                : formatGHS(taxes.nhil * formData.fx_rate_to_ghs)}
+                            </span>
+                          </div>
+                        )}
 
-                    {clientTaxProfile?.applies_getfund && (
-                      <div className="flex justify-between">
-                        <span>GetFUND (2.5%):</span>
-                        <span className="font-medium text-white">
-                          {formData.currency === Currency.GHS
-                            ? formatCurrency(taxes.getfund)
-                            : formatGHS(taxes.getfund * formData.fx_rate_to_ghs)}
-                        </span>
-                      </div>
-                    )}
+                        {clientTaxProfile?.applies_getfund && (
+                          <div className="flex justify-between">
+                            <span>GetFUND (2.5%):</span>
+                            <span className="font-medium text-white">
+                              {formData.currency === Currency.GHS
+                                ? formatCurrency(taxes.getfund)
+                                : formatGHS(taxes.getfund * formData.fx_rate_to_ghs)}
+                            </span>
+                          </div>
+                        )}
 
-                    <div className="border-t border-border-soft my-2"></div>
+                        <div className="border-t border-border-soft my-2"></div>
+                      </>
+                    )}
 
                     <div className="flex justify-between font-bold text-base text-white">
-                      <span>Gross Total:</span>
+                      <span>Total:</span>
                       <span>
                         {formData.currency === Currency.GHS
                           ? formatCurrency(taxes.gross_total)
@@ -882,7 +927,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                       </span>
                     </div>
 
-                    {clientTaxProfile?.applies_wht && (
+                    {applyTax && clientTaxProfile?.applies_wht && (
                       <div className="flex justify-between text-orange-300 font-medium">
                         <span>WHT Deduction ({(clientTaxProfile.wht_rate * 100).toFixed(1)}%):</span>
                         <span>
@@ -893,27 +938,33 @@ export default function InvoiceForm({ onSave, initialData = null }) {
                       </div>
                     )}
 
-                    <div className="border-t border-border-soft my-2"></div>
+                    {applyTax && (
+                      <>
+                        <div className="border-t border-border-soft my-2"></div>
 
-                    <div className="flex justify-between font-bold text-base text-emerald-300">
-                      <span>Expected Receipt:</span>
-                      <span>
-                        {formData.currency === Currency.GHS
-                          ? formatCurrency(taxes.expected_receipt)
-                          : formatGHS(taxes.expected_receipt_ghs)}
-                      </span>
-                    </div>
+                        <div className="flex justify-between font-bold text-base text-emerald-300">
+                          <span>Expected Receipt:</span>
+                          <span>
+                            {formData.currency === Currency.GHS
+                              ? formatCurrency(taxes.expected_receipt)
+                              : formatGHS(taxes.expected_receipt_ghs)}
+                          </span>
+                        </div>
+                      </>
+                    )}
 
                     {formData.currency !== Currency.GHS && (
                       <div className="mt-4 pt-4 border-t border-border-soft text-xs text-slate-400">
                         <div className="flex justify-between mb-2">
-                          <span>Gross (GHS):</span>
+                          <span>Total (GHS):</span>
                           <span className="font-medium text-white">{formatGHS(taxes.gross_total_ghs)}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span>Expected (GHS):</span>
-                          <span className="font-medium text-white">{formatGHS(taxes.expected_receipt_ghs)}</span>
-                        </div>
+                        {applyTax && (
+                          <div className="flex justify-between">
+                            <span>Expected (GHS):</span>
+                            <span className="font-medium text-white">{formatGHS(taxes.expected_receipt_ghs)}</span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
