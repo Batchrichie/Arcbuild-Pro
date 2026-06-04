@@ -97,6 +97,12 @@ BEGIN
   END IF;
   amount_ghs_val := amount_param * fx_rate_val;
 
+  IF cost_type_param = 'Equipment Hire' THEN
+    IF lower(description_param) LIKE '%month%' OR amount_ghs_val > 100000 THEN
+      RAISE NOTICE 'Equipment Hire cost looks lease-like. Consider using createLease() instead of posting it as a project cost.';
+    END IF;
+  END IF;
+
   -- Post journal entry
   INSERT INTO journal_entries (
     entry_date, description, reference,

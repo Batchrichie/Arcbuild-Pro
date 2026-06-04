@@ -110,17 +110,40 @@ CREATE OR REPLACE FUNCTION post_revenue_recognition_journal(
   p_recognised_by UUID DEFAULT NULL
 ) RETURNS UUID LANGUAGE plpgsql AS $$
 DECLARE
-  v_cumulative_rev NUMERIC := p_contract_value * (p_pct_complete / 100);
-  v_period_rev NUMERIC := v_cumulative_rev - p_prior_recognised;
+  v_cumulative_rev NUMERIC := 0;
+  v_period_rev NUMERIC := 0;
   v_invoiced_to_date NUMERIC := 0;
   v_contract_asset NUMERIC := 0;
   v_advance_billing NUMERIC := 0;
   v_journal_id UUID;
+  v_project_contract_value NUMERIC := p_contract_value;
+  v_has_performance_obligations BOOLEAN := FALSE;
 BEGIN
   PERFORM validate_active_accounts(ARRAY['4600','1400','2300']);
 
   SELECT COALESCE(SUM(gross_total_ghs), 0) INTO v_invoiced_to_date
     FROM invoices WHERE project_id = p_project_id AND status != 'voided';
+
+  SELECT EXISTS(
+    SELECT 1 FROM performance_obligations WHERE project_id = p_project_id
+  ) INTO v_has_performance_obligations;
+
+  IF v_has_performance_obligations THEN
+    PERFORM allocate_transaction_price(p_project_id);
+
+    SELECT COALESCE(SUM(allocated_transaction_price * (pct_complete / 100)), 0)
+      INTO v_cumulative_rev
+    FROM performance_obligations
+    WHERE project_id = p_project_id;
+
+    SELECT contract_value INTO v_project_contract_value
+      FROM projects WHERE id = p_project_id;
+
+    v_period_rev := v_cumulative_rev - p_prior_recognised;
+  ELSE
+    v_cumulative_rev := p_contract_value * (p_pct_complete / 100);
+    v_period_rev := v_cumulative_rev - p_prior_recognised;
+  END IF;
 
   v_contract_asset := GREATEST(v_cumulative_rev - v_invoiced_to_date, 0);
   v_advance_billing := GREATEST(v_invoiced_to_date - v_cumulative_rev, 0);
@@ -129,20 +152,37 @@ BEGIN
   VALUES ('revenue_recognition', p_project_id, TRUE, NOW())
   RETURNING id INTO v_journal_id;
 
-  INSERT INTO ledger_entries (
-    journal_entry_id, account_code, account_name,
-    debit_amount, credit_amount, description, project_id, currency, created_at
-  ) VALUES (
-    v_journal_id,
-    '4600',
-    (SELECT account_name FROM chart_of_accounts WHERE account_code = '4600'),
-    0,
-    v_period_rev,
-    'Revenue recognised for project ' || p_project_id,
-    p_project_id,
-    'GHS',
-    NOW()
-  );
+  IF v_period_rev >= 0 THEN
+    INSERT INTO ledger_entries (
+      journal_entry_id, account_code, account_name,
+      debit_amount, credit_amount, description, project_id, currency, created_at
+    ) VALUES (
+      v_journal_id,
+      '4600',
+      (SELECT account_name FROM chart_of_accounts WHERE account_code = '4600'),
+      0,
+      v_period_rev,
+      'Revenue recognised for project ' || p_project_id,
+      p_project_id,
+      'GHS',
+      NOW()
+    );
+  ELSE
+    INSERT INTO ledger_entries (
+      journal_entry_id, account_code, account_name,
+      debit_amount, credit_amount, description, project_id, currency, created_at
+    ) VALUES (
+      v_journal_id,
+      '4600',
+      (SELECT account_name FROM chart_of_accounts WHERE account_code = '4600'),
+      ABS(v_period_rev),
+      0,
+      'Revenue reversal for project ' || p_project_id,
+      p_project_id,
+      'GHS',
+      NOW()
+    );
+  END IF;
 
   IF v_contract_asset > 0 THEN
     INSERT INTO ledger_entries (
@@ -152,8 +192,8 @@ BEGIN
       v_journal_id,
       '1400',
       (SELECT account_name FROM chart_of_accounts WHERE account_code = '1400'),
-      v_period_rev,
-      0,
+      CASE WHEN v_period_rev >= 0 THEN v_period_rev ELSE 0 END,
+      CASE WHEN v_period_rev < 0 THEN ABS(v_period_rev) ELSE 0 END,
       'Revenue recognised against contract asset for project ' || p_project_id,
       p_project_id,
       'GHS',
@@ -167,8 +207,8 @@ BEGIN
       v_journal_id,
       '2300',
       (SELECT account_name FROM chart_of_accounts WHERE account_code = '2300'),
-      v_period_rev,
-      0,
+      CASE WHEN v_period_rev >= 0 THEN v_period_rev ELSE 0 END,
+      CASE WHEN v_period_rev < 0 THEN ABS(v_period_rev) ELSE 0 END,
       'Revenue recognised against advance billings for project ' || p_project_id,
       p_project_id,
       'GHS',
@@ -182,8 +222,8 @@ BEGIN
       v_journal_id,
       '1400',
       (SELECT account_name FROM chart_of_accounts WHERE account_code = '1400'),
-      v_period_rev,
-      0,
+      CASE WHEN v_period_rev >= 0 THEN v_period_rev ELSE 0 END,
+      CASE WHEN v_period_rev < 0 THEN ABS(v_period_rev) ELSE 0 END,
       'Revenue recognised against contract asset for project ' || p_project_id,
       p_project_id,
       'GHS',
@@ -196,7 +236,7 @@ BEGIN
     cumulative_revenue, prior_recognised, period_revenue, cost_to_date, gross_profit,
     journal_entry_id, completion_method, recognised_by, notes, created_at
   ) VALUES (
-    p_project_id, CURRENT_DATE, p_period_label, p_pct_complete, p_contract_value,
+    p_project_id, CURRENT_DATE, p_period_label, p_pct_complete, v_project_contract_value,
     v_cumulative_rev, p_prior_recognised, v_period_rev, p_cost_to_date, NULL,
     v_journal_id, NULL, p_recognised_by, NULL, NOW()
   );
