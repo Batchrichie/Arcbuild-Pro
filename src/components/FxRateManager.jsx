@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 import { getLatestRates } from '../services/fxRatesService'
 
 const ACTIVE_CODES = ['USD', 'EUR', 'GBP']
@@ -8,14 +9,9 @@ const FLAG_MAP = {
   GBP: '🇬🇧'
 }
 
-const CARD_STYLES = {
-  USD: 'border-t-4 border-emerald-400/90 bg-white text-slate-900 shadow-sm shadow-slate-200 dark:border-emerald-500 dark:bg-slate-900/95 dark:text-white dark:shadow-slate-950/40',
-  EUR: 'border-t-4 border-sky-500/90 bg-white text-slate-900 shadow-sm shadow-slate-200 dark:border-sky-500 dark:bg-slate-900/95 dark:text-white dark:shadow-slate-950/40',
-  GBP: 'border-t-4 border-violet-500/90 bg-white text-slate-900 shadow-sm shadow-slate-200 dark:border-violet-500 dark:bg-slate-900/95 dark:text-white dark:shadow-slate-950/40',
-  default: 'border-t-4 border-slate-300/70 bg-white text-slate-900 shadow-sm shadow-slate-200 dark:border-slate-700 dark:bg-slate-900/90 dark:text-white dark:shadow-slate-950/40'
-}
 
-export default function FxRateManager() {
+
+function FxRateManager() {
   const [rates, setRates] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -34,7 +30,13 @@ export default function FxRateManager() {
   }
 
   const getRateValue = (rate) => {
-    return typeof rate.median === 'number' ? rate.median : null
+    return typeof rate.median === 'number'
+      ? rate.median
+      : typeof rate.rate_to_ghs === 'number'
+        ? rate.rate_to_ghs
+        : typeof rate.rate === 'number'
+          ? rate.rate
+          : null
   }
 
   const formatDate = (dateStr) => {
@@ -75,6 +77,22 @@ export default function FxRateManager() {
     }
   }
 
+  const refreshRates = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const { data, error } = await supabase.functions.invoke('schedule-bog-fx')
+      if (error) throw error
+      await loadRates()
+      return data
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to refresh FX rates')
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     loadRates()
   }, [])
@@ -106,62 +124,78 @@ export default function FxRateManager() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-4xl overflow-hidden border border-slate-200/70 bg-white shadow-sm shadow-slate-200/40 dark:border-slate-800/70 dark:bg-slate-950/95 dark:shadow-lg dark:shadow-slate-950/40">
-        <div className="border-l-4 border-cyan-400/70 p-8 sm:p-10">
-          <p className="text-sm uppercase tracking-[0.32em] text-slate-500 dark:text-slate-300">Exchange Rates · Live Bank of Ghana feed</p>
-          <h2 className="mt-3 text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">FX Rates Dashboard</h2>
-          <p className="mt-3 max-w-2xl text-base text-slate-600 dark:text-slate-300">
-            See the latest interbank rates with bold currency platelets and a premium market dashboard layout.
+    <div className="space-y-6 bg-slate-50 dark:bg-slate-950 -mx-6 -my-6 px-6 py-6">
+      <div className="rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="border-l-4 border-blue-600 dark:border-blue-500 p-8 sm:p-10">
+          <p className="text-xs uppercase tracking-[0.15em] font-medium text-slate-500 dark:text-slate-400">Exchange Rates · Live Bank of Ghana feed</p>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">FX Rates Dashboard</h2>
+          <p className="mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
+            Real-time foreign exchange rates with automatic daily updates. Powered by open.er-api.com.
           </p>
-          <div className="mt-6 inline-flex rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm shadow-slate-200/50 dark:bg-slate-900/80 dark:text-cyan-200 dark:shadow-cyan-500/10">
-            <span className="mr-2 inline-flex h-2.5 w-2.5 rounded-full bg-cyan-300 shadow-[0_0_16px_rgba(45,212,191,0.35)]"></span>
-            Updated {lastUpdated}
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Updated {lastUpdated}
+            </div>
+            <button
+              type="button"
+              onClick={refreshRates}
+              disabled={loading}
+              className="rounded-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-slate-400 px-4 py-2 text-sm font-semibold text-white transition-colors"
+            >
+              {loading ? 'Refreshing...' : 'Refresh Rates'}
+            </button>
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-red-400/30 bg-red-50/80 p-4 text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
+        <div className="rounded-lg border border-rose-300 bg-rose-50 p-4 text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-200">
           <div className="flex items-start gap-3">
-            <span className="text-xl">❌</span>
-            <p className="text-sm">{error}</p>
+            <span className="text-lg font-bold">⚠</span>
+            <p className="text-sm font-medium">{error}</p>
           </div>
         </div>
       )}
 
       {allRates.length === 0 ? (
-        <div className="rounded-3xl border border-slate-200/20 bg-slate-50/90 p-8 text-center text-slate-500 dark:border-slate-800/50 dark:bg-slate-950/70 dark:text-slate-400">
-          No FX rates available yet. Please run the Bank of Ghana sync function or check back after the next scheduled update.
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-8 text-center text-slate-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400">
+          <p className="text-sm font-medium">No FX rates available yet. Please click "Refresh Rates" or check back after the next scheduled update.</p>
         </div>
       ) : (
         <div className="space-y-8">
           <section className="space-y-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Active currencies</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">USD, EUR and GBP are shown as compact active currency platelets.</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">Primary Currencies</h3>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">USD, EUR, and GBP exchange rates</p>
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">{activeRates.length} active rates</p>
+              <p className="inline-flex rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300">{activeRates.length} active</p>
             </div>
-            <div className="flex flex-wrap gap-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {activeRates.map((rate) => {
                 const code = getRateCode(rate)
+                const colorMap = {
+                  USD: { border: 'border-l-emerald-500 dark:border-l-emerald-400', text: 'text-emerald-600 dark:text-emerald-400' },
+                  EUR: { border: 'border-l-blue-500 dark:border-l-blue-400', text: 'text-blue-600 dark:text-blue-400' },
+                  GBP: { border: 'border-l-violet-500 dark:border-l-violet-400', text: 'text-violet-600 dark:text-violet-400' },
+                }
+                const colors = colorMap[code] || { border: 'border-l-slate-300 dark:border-l-slate-600', text: 'text-slate-600 dark:text-slate-400' }
                 return (
-                  <div key={`${code}-${rate.rate_date}`} className={`rounded-3xl border p-5 shadow-sm ${CARD_STYLES[code] ?? CARD_STYLES.default}`}>
-                            <div className="flex items-start gap-4">
+                  <div key={`${code}-${rate.rate_date}`} className={`rounded-lg border-l-4 ${colors.border} border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:shadow-md`}>
+                    <div className="flex items-center justify-between mb-4">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.28em] text-white/80">{FLAG_MAP[code] ?? ''} {code}</p>
-                        <p className="mt-2 text-2xl font-bold text-white tracking-tight">{getRateName(rate)}</p>
+                        <p className="text-xs font-medium tracking-wider text-slate-500 dark:text-slate-400 uppercase">{FLAG_MAP[code] ?? ''} {code}</p>
+                        <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">{getRateName(rate)}</p>
                       </div>
-                      <div className="ml-auto inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-slate-300 ring-1 ring-white/10">
-                        <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(34,197,94,0.45)] animate-pulse"></span>
-                        Active
+                      <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 px-2 py-1">
+                        <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">Live</span>
                       </div>
                     </div>
-                    <div className="mt-6">
-                      <p className="text-xs uppercase tracking-[0.28em] text-slate-400 dark:text-slate-500">Rate</p>
-                      <p className={`mt-3 text-[2.5rem] font-extrabold tracking-tight ${code === 'USD' ? 'text-emerald-400 dark:text-emerald-300' : code === 'EUR' ? 'text-sky-400 dark:text-sky-300' : code === 'GBP' ? 'text-violet-400 dark:text-violet-300' : 'text-cyan-300'}`}>
+                    <div>
+                      <p className="text-xs font-medium tracking-wider text-slate-500 dark:text-slate-400 uppercase">1 GHS to {code}</p>
+                      <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
                         {formatNumber(getRateValue(rate))}
                       </p>
                     </div>
@@ -174,41 +208,33 @@ export default function FxRateManager() {
           <section className="space-y-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Full currency list</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">All remaining currencies from the current Bank of Ghana data.</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">All Currencies</h3>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Complete list of supported exchange rates</p>
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">{otherRates.length} currencies</p>
+              <p className="inline-flex rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300">{otherRates.length} rates</p>
             </div>
-            <div className="overflow-x-auto rounded-3xl border border-slate-200/70 bg-white dark:bg-black p-4 shadow-sm shadow-slate-200/40 dark:border-slate-800/70 dark:shadow-lg dark:shadow-slate-950/40">
-              <table className="min-w-full text-left text-sm text-slate-900 dark:text-slate-200">
+            <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm">
+              <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="bg-surface-light border-b border-border text-text-primary font-semibold dark:bg-black dark:border-border dark:text-text">
-                    <th className="px-4 py-3">Currency</th>
-                    <th className="px-4 py-3">Code</th>
-                    <th className="px-4 py-3">Rate</th>
+                  <tr className="border-b border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-800/50">
+                    <th className="px-6 py-3 font-semibold text-slate-700 dark:text-slate-300">Currency</th>
+                    <th className="px-6 py-3 font-semibold text-slate-700 dark:text-slate-300">Code</th>
+                    <th className="px-6 py-3 text-right font-semibold text-slate-700 dark:text-slate-300">Rate to GHS</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {otherRates.map((rate, index) => {
-                    const code = getRateCode(rate)
-                    const rowAccent = code === 'USD'
-                      ? 'border-l-4 border-emerald-400/90 dark:border-emerald-500'
-                      : code === 'EUR'
-                        ? 'border-l-4 border-sky-500/90 dark:border-sky-500'
-                        : code === 'GBP'
-                          ? 'border-l-4 border-violet-500/90 dark:border-violet-500'
-                          : 'border-l-4 border-cyan-400/75 dark:border-cyan-500/60'
-                    return (
-                      <tr
-                        key={`${code}-${rate.rate_date}`}
-                        className={`${rowAccent} border-b border-border dark:border-border transition-colors duration-150 ${index % 2 === 0 ? 'bg-white dark:bg-black' : 'bg-surface-2 dark:bg-black'} hover:bg-sky-50 dark:hover:bg-surface-3`}
-                      >
-                        <td className="px-4 py-3 font-semibold text-text-primary dark:text-text">{getRateName(rate)}</td>
-                        <td className="px-4 py-3 text-muted dark:text-text-muted">{code}</td>
-                        <td className="px-4 py-3 font-semibold text-teal dark:text-teal">{formatNumber(getRateValue(rate))}</td>
-                      </tr>
-                    )
-                  })}
+                  {otherRates.map((rate, index) => (
+                    <tr
+                      key={`${getRateCode(rate)}-${rate.rate_date}`}
+                      className={`border-b border-slate-200 transition-colors dark:border-slate-800 ${
+                        index % 2 === 0 ? 'bg-white dark:bg-slate-950/20' : 'bg-slate-50 dark:bg-slate-950/50'
+                      } hover:bg-slate-100 dark:hover:bg-slate-900`}
+                    >
+                      <td className="px-6 py-3 font-medium text-slate-900 dark:text-slate-50">{getRateName(rate)}</td>
+                      <td className="px-6 py-3 font-semibold text-slate-600 dark:text-slate-400">{getRateCode(rate)}</td>
+                      <td className="px-6 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">{formatNumber(getRateValue(rate))}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -216,9 +242,13 @@ export default function FxRateManager() {
         </div>
       )}
 
-      <div className="rounded-2xl border border-slate-800/60 bg-slate-900/95 p-4 text-sm text-slate-200 shadow-sm shadow-slate-950/20 dark:border-slate-800/60 dark:bg-slate-950/90 dark:text-slate-400">
-        Exchange rates are sourced from the Bank of Ghana daily interbank feed and reflected here for the most recent available date.
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+        <p className="font-medium">ℹ Data Source:</p>
+        <p className="mt-1">Exchange rates are updated daily at 8:00 AM GMT. Rates reflect the latest Bank of Ghana interbank data via open.er-api.com.</p>
       </div>
     </div>
   )
 }
+
+export default FxRateManager
+
