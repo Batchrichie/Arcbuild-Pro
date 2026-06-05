@@ -100,7 +100,9 @@ DECLARE
   actor profiles%ROWTYPE;
   journal_id UUID;
   asset_rec assets%ROWTYPE;
+  component_rec RECORD;
   monthly_dep NUMERIC;
+  component_dep NUMERIC;
   total_depreciation NUMERIC := 0;
   asset_count INTEGER := 0;
   period_label TEXT;
@@ -145,9 +147,17 @@ BEGIN
       AND accumulated_depreciation < cost
       AND acquisition_date <= (depreciation_month_start + INTERVAL '1 month' - INTERVAL '1 day')::DATE
   LOOP
-    monthly_dep := ROUND(
-      asset_rec.cost / (asset_rec.useful_life_years * 12), 2
-    );
+    IF asset_rec.depreciation_method = 'reducing_balance' THEN
+      monthly_dep := ROUND(
+        (asset_rec.cost - asset_rec.accumulated_depreciation)
+          * (1.0 / asset_rec.useful_life_years) / 12,
+        2
+      );
+    ELSE
+      monthly_dep := ROUND(
+        asset_rec.cost / (asset_rec.useful_life_years * 12), 2
+      );
+    END IF;
 
     monthly_dep := LEAST(
       monthly_dep,
@@ -189,6 +199,65 @@ BEGIN
 
     total_depreciation := total_depreciation + monthly_dep;
     asset_count := asset_count + 1;
+
+    FOR component_rec IN
+      EXECUTE 'SELECT id, parent_asset_id, component_name, cost, useful_life_years, depreciation_method, accumulated_depreciation, is_disposed
+               FROM asset_components
+               WHERE parent_asset_id = ' || quote_literal(asset_rec.id) || '
+                 AND is_disposed = FALSE
+                 AND accumulated_depreciation < cost'
+    LOOP
+      IF component_rec.depreciation_method = 'reducing_balance' THEN
+        component_dep := ROUND(
+          (component_rec.cost - component_rec.accumulated_depreciation)
+            * (1.0 / component_rec.useful_life_years) / 12,
+          2
+        );
+      ELSE
+        component_dep := ROUND(
+          component_rec.cost / (component_rec.useful_life_years * 12), 2
+        );
+      END IF;
+
+      component_dep := LEAST(
+        component_dep,
+        component_rec.cost - component_rec.accumulated_depreciation
+      );
+
+      IF component_dep <= 0 THEN
+        CONTINUE;
+      END IF;
+
+      INSERT INTO ledger_entries (
+        journal_entry_id, account_code, account_name,
+        debit_amount, credit_amount,
+        description, project_id, division_id
+      ) VALUES (
+        journal_id,
+        COALESCE(asset_rec.depreciation_account, '6401'),
+        'Depreciation — Plant & Equipment',
+        component_dep, 0,
+        asset_rec.asset_name || ' / ' || component_rec.component_name || ' — ' || period_label,
+        asset_rec.project_id, asset_rec.division_id
+      );
+
+      INSERT INTO ledger_entries (
+        journal_entry_id, account_code, account_name,
+        debit_amount, credit_amount,
+        description, project_id, division_id
+      ) VALUES (
+        journal_id, '1211', 'Accumulated Depreciation',
+        0, component_dep,
+        asset_rec.asset_name || ' / ' || component_rec.component_name || ' — ' || period_label,
+        asset_rec.project_id, asset_rec.division_id
+      );
+
+      UPDATE asset_components SET
+        accumulated_depreciation = accumulated_depreciation + component_dep
+      WHERE id = component_rec.id;
+
+      total_depreciation := total_depreciation + component_dep;
+    END LOOP;
   END LOOP;
 
   UPDATE journal_entries SET source_id = journal_id WHERE id = journal_id;

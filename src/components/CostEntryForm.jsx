@@ -147,6 +147,16 @@ export default function CostEntryForm({ userRole, userId, defaultProjectId = nul
         throw new Error('Subcontractor is required for Subcontractors cost type');
       }
 
+      if (formData.costType === 'Equipment Hire') {
+        const leaseHintThreshold = 100000
+        const normalizedDescription = formData.description.toLowerCase()
+        if (normalizedDescription.includes('month') || parseFloat(formData.amount) > leaseHintThreshold) {
+          console.warn(
+            'Equipment Hire cost appears lease-like. Use createLease() instead of posting it as a project cost for IFRS 16 compliance.'
+          )
+        }
+      }
+
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
