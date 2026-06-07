@@ -53,31 +53,40 @@ export default function AuthConfirm() {
       navigate(target, { replace: true })
     }
 
-    const { data: subscription } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY' || event === 'USER_UPDATED') {
-        await redirectToRole(session)
-      }
-    })
+    const handleConfirm = async () => {
+      setStatus('Verifying your invite link…')
+      setError(null)
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (data?.session) {
-        redirectToRole(data.session).catch((err) => {
+      const params = new URLSearchParams(window.location.search)
+      const code = params.get('code')
+
+      if (code) {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+        if (exchangeError) {
           if (mounted) {
-            setError(err?.message || 'Failed to verify invite link.')
+            setError('Invalid or expired invite link. Please request a new one.')
             setStatus(null)
           }
-        })
+          return
+        }
       }
-    }).catch((err) => {
-      if (mounted) {
-        setError(err?.message || 'Failed to verify session.')
-        setStatus(null)
+
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        if (mounted) {
+          setError('No valid session found. Please request a new invite.')
+          setStatus(null)
+        }
+        return
       }
-    })
+
+      await redirectToRole(session)
+    }
+
+    handleConfirm()
 
     return () => {
       mounted = false
-      subscription?.unsubscribe?.()
     }
   }, [navigate])
 
