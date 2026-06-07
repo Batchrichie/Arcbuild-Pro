@@ -27,16 +27,16 @@ export default function TaxLiabilitiesPanel({ balances, loading }) {
 
   if (loading) {
     return (
-      <div className="rounded-3xl panel-surface p-5">
+      <div className="rounded-3xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 p-4">
         <div className="h-40 animate-pulse rounded-xl bg-white/5" />
       </div>
     )
   }
 
   return (
-    <div className="rounded-3xl border border-amber-400/20 bg-amber-500/5 p-5">
-      <p className="text-sm font-semibold text-white">Tax liabilities</p>
-      <p className="mt-0.5 text-sm text-slate-500">Ledger balances</p>
+    <div className="rounded-3xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 p-4">
+      <p className="text-sm font-semibold text-gray-900 dark:text-white">Tax liabilities</p>
+      <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">Ledger balances</p>
       <ul className="mt-4 space-y-3">
         {TAX_ITEMS.map(({ code, label }) => {
           const amount = balances[code] || 0
@@ -44,7 +44,7 @@ export default function TaxLiabilitiesPanel({ balances, loading }) {
           const isFiled = Boolean(filed[code])
           return (
             <li key={code} className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <span className={`text-sm ${warn ? 'font-semibold text-amber-200' : 'text-slate-400'}`}>
+              <span className={`text-sm ${warn ? 'font-semibold text-amber-200' : 'text-gray-500 dark:text-gray-400'}`}>
                 {label}: GHS {formatGhs(amount)}
                 {isFiled && <span className="ml-2 text-emerald-400">(Filed)</span>}
               </span>

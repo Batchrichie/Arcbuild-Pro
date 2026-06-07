@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..700;1,300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -16,6 +16,22 @@
     <title>ARCBUILD PRO — Modulo Development</title>
   </head>
   <body>
+    <script>
+      ;(() => {
+        try {
+          const stored = window.localStorage.getItem('arcbuild_theme')
+          const theme = stored === 'light' || stored === 'dark' ? stored : 'dark'
+          const root = document.documentElement
+          root.classList.toggle('theme-light', theme === 'light')
+          root.classList.toggle('theme-dark', theme === 'dark')
+          root.classList.toggle('dark', theme === 'dark')
+          root.dataset.theme = theme
+        } catch {
+          document.documentElement.classList.add('theme-dark', 'dark')
+          document.documentElement.dataset.theme = 'dark'
+        }
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

@@ -10,7 +10,7 @@ function financialCompletion(totalInvoiced, contractValue) {
   return Math.min(100, Math.round((inv / cv) * 100))
 }
 
-export default function ClientProjects({ selectedProjectId, onSelectProject }) {
+export default function ClientProjects({ selectedProjectId, onSelectProject, onSwitchTab }) {
   const { clientId, loading: clientLoading } = useClient()
   const [projects, setProjects] = useState([])
   const [detail, setDetail] = useState(null)
@@ -19,6 +19,78 @@ export default function ClientProjects({ selectedProjectId, onSelectProject }) {
   const [reports, setReports] = useState([])
   const [finance, setFinance] = useState({ invoiced: 0, paid: 0, outstanding: 0 })
   const [loading, setLoading] = useState(true)
+  const [overviewLoading, setOverviewLoading] = useState(true)
+  const [overview, setOverview] = useState({
+    activeProjects: 0,
+    latestUpdate: null,
+    unpaidAmount: 0,
+    pendingDocuments: 0,
+    latestPhoto: null,
+  })
+
+  const loadOverview = useCallback(
+    async (projectRows) => {
+      setOverviewLoading(true)
+      const projectIds = projectRows.map((project) => project.id)
+      if (!clientId || projectIds.length === 0) {
+        setOverview({
+          activeProjects: 0,
+          latestUpdate: null,
+          unpaidAmount: 0,
+          pendingDocuments: 0,
+          latestPhoto: null,
+        })
+        setOverviewLoading(false)
+        return
+      }
+
+      const [invoiceRes, docsRes] = await Promise.all([
+        supabase
+          .from('invoices')
+          .select('expected_receipt_ghs, status')
+          .in('project_id', projectIds)
+          .eq('status', 'sent'),
+        supabase
+          .from('documents')
+          .select('id, file_url, file_name, document_type, document_date, description, content, project_id, created_at')
+          .in('project_id', projectIds)
+          .order('document_date', { ascending: false })
+          .order('created_at', { ascending: false }),
+      ])
+
+      const invoices = invoiceRes.data ?? []
+      const docs = docsRes.data ?? []
+      const unpaidAmount = invoices.reduce((sum, invoice) => sum + Number(invoice.expected_receipt_ghs || 0), 0)
+      const pendingDocuments = docs.length
+      const latestReport = docs.find((doc) => doc.document_type === 'daily_report')
+      const latestPhoto = docs.find((doc) => doc.document_type === 'site_photo' && doc.file_url)
+
+      const latestUpdate = latestReport
+        ? {
+            projectId: latestReport.project_id,
+            text:
+              (latestReport.content && typeof latestReport.content === 'object'
+                ? latestReport.content.work_completed || latestReport.content.summary || latestReport.content.notes
+                : latestReport.content) || latestReport.description || latestReport.file_name || 'Latest progress update available',
+            date: latestReport.document_date
+              ? new Date(latestReport.document_date).toLocaleDateString('en-GH')
+              : latestReport.created_at
+              ? new Date(latestReport.created_at).toLocaleDateString('en-GH')
+              : '—',
+          }
+        : null
+
+      setOverview({
+        activeProjects: projectRows.filter((project) => project.status === 'active').length,
+        latestUpdate,
+        unpaidAmount,
+        pendingDocuments,
+        latestPhoto,
+      })
+      setOverviewLoading(false)
+    },
+    [clientId]
+  )
 
   const loadProjects = useCallback(async () => {
     if (!clientId) return
@@ -34,7 +106,7 @@ export default function ClientProjects({ selectedProjectId, onSelectProject }) {
       rows.map(async (p) => {
         const { data: inv } = await supabase
           .from('invoices')
-          .select('gross_total_ghs, status, created_at')
+          .select('gross_total_ghs, status, created_at, expected_receipt_ghs')
           .eq('project_id', p.id)
           .in('status', ['approved', 'sent', 'paid'])
         const invoices = inv ?? []
@@ -52,8 +124,9 @@ export default function ClientProjects({ selectedProjectId, onSelectProject }) {
     )
     setProjects(withMeta)
     setLoading(false)
+    await loadOverview(withMeta)
     return withMeta
-  }, [clientId])
+  }, [clientId, loadOverview])
 
   const loadDetail = useCallback(
     async (projectId) => {
@@ -112,44 +185,135 @@ export default function ClientProjects({ selectedProjectId, onSelectProject }) {
     return <div className="h-48 animate-pulse rounded-2xl bg-slate-200" />
   }
 
+  const activeProjects = projects.filter((project) => project.status === 'active').length
+  const latestUpdate = overview.latestUpdate
+  const latestPhotoUrl = overview.latestPhoto ? publicStorageUrl(overview.latestPhoto.file_url) : null
+  const progressText = latestUpdate?.text || 'No progress updates yet.'
+  const progressDate = latestUpdate?.date || '—'
+  const summaryItems = [
+    {
+      title: 'Active projects',
+      value: overviewLoading ? '—' : activeProjects,
+      description: 'Projects currently in progress',
+      onClick: () => onSelectProject?.(null),
+    },
+    {
+      title: 'Latest progress',
+      value: overviewLoading ? 'Loading...' : progressDate,
+      description: progressText,
+      onClick: () => {
+        if (latestUpdate?.projectId) onSelectProject?.(latestUpdate.projectId)
+      },
+    },
+    {
+      title: 'Amount due',
+      value: overviewLoading ? '—' : formatGhs(overview.unpaidAmount),
+      description: 'Sent invoices awaiting payment',
+      onClick: () => onSwitchTab?.('invoices'),
+    },
+    {
+      title: 'Documents to review',
+      value: overviewLoading ? '—' : overview.pendingDocuments,
+      description: 'Latest project documents awaiting your review',
+      onClick: () => onSwitchTab?.('documents'),
+    },
+  ]
+
+  const overviewSection = (
+    <section className="space-y-4">
+      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-700">Client overview</p>
+            <h1 className="mt-2 text-2xl font-semibold text-slate-900">Your current project summary</h1>
+          </div>
+          <p className="max-w-2xl text-sm leading-6 text-slate-600">
+            See active projects, recent progress, outstanding invoices, pending documents, and the latest site photo in one place.
+          </p>
+        </div>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,320px)]">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {summaryItems.map((item) => (
+              <button
+                key={item.title}
+                type="button"
+                onClick={item.onClick}
+                className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-teal-300 hover:bg-white"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">{item.title}</p>
+                <p className="mt-3 text-2xl font-semibold text-slate-900">{item.value}</p>
+                <p className="mt-2 text-sm text-slate-600">{item.description}</p>
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onSwitchTab?.('documents')}
+            className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 text-left transition hover:border-teal-300"
+          >
+            {latestPhotoUrl ? (
+              <img src={latestPhotoUrl} alt="Latest site photo" className="h-full w-full object-cover opacity-90 transition duration-300 group-hover:scale-105" />
+            ) : (
+              <div className="flex h-full min-h-[12rem] items-center justify-center bg-slate-900 px-4 py-6 text-center">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-teal-300">Latest site photo</p>
+                  <p className="mt-3 text-sm text-slate-300">No site photo available yet.</p>
+                </div>
+              </div>
+            )}
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 to-transparent p-4">
+              <p className="text-sm font-semibold text-white">Latest site photo</p>
+              <p className="mt-1 text-xs text-slate-300">Tap to view all documents</p>
+            </div>
+          </button>
+        </div>
+      </div>
+    </section>
+  )
+
   if (!clientId) {
     return <p className="text-slate-600">Your account is not linked to a client record. Contact Modulo Development Limited.</p>
   }
 
   if (!selectedProjectId && projects.length > 1) {
     return (
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-slate-900">My projects</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {projects.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => onSelectProject(p.id)}
-              className="client-card text-left transition hover:shadow-md"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold text-slate-900">{p.name}</h3>
-                <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize ${PROJECT_STATUS_STYLE[p.status] || PROJECT_STATUS_STYLE.active}`}>
-                  {p.status?.replace('_', ' ')}
-                </span>
-              </div>
-              {p.division?.name && (
-                <span className="mt-2 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{p.division.name}</span>
-              )}
-              <p className="mt-3 text-sm text-slate-600">Contract {formatGhs(p.contract_value)}</p>
-              <p className="text-sm text-slate-500">Last invoice: {p.lastInvoiceDate}</p>
-              <div className="mt-3">
-                <div className="mb-1 flex justify-between text-xs text-slate-500">
-                  <span>Financial completion</span>
-                  <span>{p.completionPct}%</span>
+      <div className="space-y-8">
+        {overviewSection}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-slate-900">My projects</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {projects.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => onSelectProject(p.id)}
+                className="client-card text-left transition hover:shadow-md"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-semibold text-slate-900">{p.name}</h3>
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize ${PROJECT_STATUS_STYLE[p.status] || PROJECT_STATUS_STYLE.active}`}>
+                    {p.status?.replace('_', ' ')}
+                  </span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-                  <div className="h-full rounded-full bg-teal-600" style={{ width: `${p.completionPct}%` }} />
+                {p.division?.name && (
+                  <span className="mt-2 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{p.division.name}</span>
+                )}
+                <p className="mt-3 text-sm text-slate-600">Contract {formatGhs(p.contract_value)}</p>
+                <p className="text-sm text-slate-500">Last invoice: {p.lastInvoiceDate}</p>
+                <div className="mt-3">
+                  <div className="mb-1 flex justify-between text-xs text-slate-500">
+                    <span>Financial completion</span>
+                    <span>{p.completionPct}%</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                    <div className="h-full rounded-full bg-teal-600" style={{ width: `${p.completionPct}%` }} />
+                  </div>
                 </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -162,6 +326,7 @@ export default function ClientProjects({ selectedProjectId, onSelectProject }) {
 
   return (
     <div className="space-y-8">
+      {overviewSection}
       {projects.length > 1 && (
         <button type="button" onClick={() => onSelectProject(null)} className="text-sm font-medium text-teal-700">
           ← All projects
@@ -226,7 +391,7 @@ export default function ClientProjects({ selectedProjectId, onSelectProject }) {
               return (
                 <figure key={doc.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
                   {src ? (
-                    <img src={src} alt={doc.description || doc.file_name} className="aspect-square w-full object-cover" />
+                    <img src={src} alt={doc.description || doc.file_name} className="aspect-square max-h-48 w-full object-cover" />
                   ) : (
                     <div className="flex aspect-square items-center justify-center bg-slate-100 text-xs text-slate-500">No preview</div>
                   )}

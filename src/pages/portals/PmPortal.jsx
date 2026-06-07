@@ -18,6 +18,7 @@ import TimesheetApproval from '../../components/TimesheetApproval'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
 import Modal from '../../components/ui/Modal'
+import { Banknote, Camera, LayoutDashboard, MoreHorizontal, Target } from 'lucide-react'
 
 const NAV_SECTIONS = [
   {
@@ -62,11 +63,11 @@ const NAV_SECTIONS = [
 ]
 
 const MOBILE_TABS = [
-  { id: 'overview', label: 'Overview', icon: '📊' },
-  { id: 'milestones', label: 'Milestones', icon: '🎯' },
-  { id: 'costs', label: 'Costs', icon: '💰' },
-  { id: 'site', label: 'Site', icon: '📷' },
-  { id: 'more', label: 'More', icon: '⋯' },
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+  { id: 'milestones', label: 'Milestones', icon: Target },
+  { id: 'costs', label: 'Costs', icon: Banknote },
+  { id: 'site', label: 'Site', icon: Camera },
+  { id: 'more', label: 'More', icon: MoreHorizontal },
 ]
 
 const VIEW_TITLES = {
@@ -83,6 +84,10 @@ const VIEW_TITLES = {
   reports: 'Daily Reports',
   'timesheet-approvals': 'Timesheet Approvals',
   issues: 'Issues & Risks',
+}
+
+function PortalIcon({ icon: Icon, className = 'h-4 w-4' }) {
+  return <Icon className={className} aria-hidden />
 }
 
 function viewFromMobileTab(tab, currentView) {
@@ -224,9 +229,9 @@ function PmPortalContent() {
 
   return (
     <div className="portal-shell min-h-screen w-full overflow-x-hidden">
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-8 lg:px-8">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside className="portal-sidebar hidden lg:flex lg:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl">
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:max-w-none lg:px-8 lg:py-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-[260px_minmax(0,1fr)]">
+          <aside className="portal-sidebar hidden md:flex md:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl">
             <div className="mb-6 inline-flex items-center gap-3 rounded-3xl bg-cyan-500/15 px-4 py-3 text-sm font-semibold text-cyan-200">
               <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
               {COMPANY.shortName}
@@ -264,7 +269,7 @@ function PmPortalContent() {
           </aside>
 
           <main className="portal-main portal-main-with-tabs min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">
-            <div className="mb-4 flex flex-wrap items-start justify-between gap-3 lg:hidden">
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <h1 className="text-xl sm:text-2xl font-semibold text-white truncate">{VIEW_TITLES[activeView]}</h1>
               </div>
@@ -280,12 +285,12 @@ function PmPortalContent() {
               <h2 className="text-2xl font-semibold text-white">{VIEW_TITLES[activeView]}</h2>
             </div>
 
-            <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">{renderView()}</div>
+            <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6 lg:p-8">{renderView()}</div>
           </main>
         </div>
       </div>
 
-      <div className="portal-mobile-quick-actions lg:hidden">
+      <div className="portal-mobile-quick-actions md:hidden">
         <button type="button" onClick={() => setSheet('cost')} className="min-touch flex-1 rounded-2xl border border-cyan-400/30 bg-cyan-500/15 px-4 py-3 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-500/25">
           Log a Cost
         </button>
@@ -294,7 +299,7 @@ function PmPortalContent() {
         </button>
       </div>
 
-      <nav className="portal-mobile-nav lg:hidden">
+      <nav className="portal-mobile-nav md:hidden">
         <div className="mx-auto flex max-w-lg justify-around px-1">
           {MOBILE_TABS.map((tab) => (
             <button
@@ -305,7 +310,7 @@ function PmPortalContent() {
                 mobileTab === tab.id ? 'text-cyan-300' : 'text-slate-500'
               }`}
             >
-              <span className="text-base">{tab.icon}</span>
+              <span className="text-base"><PortalIcon icon={tab.icon} /></span>
               {tab.label}
             </button>
           ))}
@@ -317,7 +322,7 @@ function PmPortalContent() {
           <button type="button" className="portal-drawer-backdrop" onClick={() => setMoreOpen(false)} aria-label="Close" />
           <div className="portal-drawer-sheet">
             <h3 className="mb-3 text-lg font-semibold text-white">More</h3>
-            <ThemeToggle className="mb-4 w-full justify-center lg:hidden" />
+            <ThemeToggle className="mb-4 w-full justify-center md:hidden" />
             {[
               { id: 'payment-cert', label: 'Payment Certificates' },
               { id: 'reports', label: 'Daily Reports' },

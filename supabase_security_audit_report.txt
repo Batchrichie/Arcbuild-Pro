@@ -1,0 +1,281 @@
+
+================================================================================
+           SUPABASE SECURITY VULNERABILITY AUDIT REPORT
+================================================================================
+Project:  prpvozkyiybcffuccdoe.supabase.co
+Date:     2026-06-06
+Scope:    API, Auth, Storage, Data Exposure, RLS, JWT, SQL Injection
+Method:   Automated black-box + grey-box testing via REST API
+================================================================================
+
+SEVERITY LEGEND:
+  CRITICAL  -> Must fix immediately. Active exploitation risk.
+  HIGH      -> Serious risk. Fix within days.
+  MEDIUM    -> Potential risk. Fix within weeks.
+  LOW       -> Minor hardening opportunity.
+
+================================================================================
+  #   SEVERITY   FINDING
+================================================================================
+
+ 1.  CRITICAL   SERVICE ROLE KEY EXPOSED IN CHAT
+     ---------------------------------------------------------------
+     The service_role key was shared in plaintext. This key:
+     - Bypasses ALL Row Level Security policies
+     - Grants full read/write/delete access to every table
+     - Has a 10-year expiry (until ~2036)
+     - Cannot be rotated without updating all backend services
+
+     IMPACT: Anyone with this key can read all financial data, PII,
+     salaries, bank details, and modify/delete any record.
+
+     REMEDIATION:
+     - Rotate the service_role key IMMEDIATELY in Supabase Dashboard
+       -> Settings > API > Service Role Key > Regenerate
+     - Never share service keys in chat, code repos, or client-side code
+     - Use environment variables with secrets management (Vault, AWS
+       Secrets Manager, etc.)
+     - Consider using the anon key + RLS policies for client-side access
+
+ 2.  CRITICAL   AUTH ADMIN API EXPOSES FULL USER LIST
+     ---------------------------------------------------------------
+     The /auth/v1/admin/users endpoint is accessible via the service
+     key and returns:
+     - All user email addresses (7 users found)
+     - User IDs and authentication metadata
+     - Email confirmation status
+     - Last sign-in timestamps
+
+     Exposed users include:
+     - richmond@inmotionlogisticsafrica.com
+     - ceo@admin.com, hr@admin.com, pm@admin.com
+     - employee@admin.com, master@admin.com
+     - batchrichie@gmail.com (UNCONFIRMED)
+
+     IMPACT: Email harvesting for phishing attacks. Attacker can
+     identify high-value targets (CEO, HR, PM accounts).
+
+     REMEDIATION:
+     - Restrict auth admin access in your backend only
+     - Never call auth admin endpoints from client-side code
+     - Use Supabase Edge Functions as a proxy if user management
+       is needed from the frontend
+
+ 3.  CRITICAL   NO MFA ENABLED ON ANY ACCOUNT
+     ---------------------------------------------------------------
+     All 7 user accounts have 0 MFA factors enrolled.
+
+     IMPACT: A compromised password gives full account access.
+     High-value accounts (CEO, Accountant) are especially at risk.
+
+     REMEDIATION:
+     - Enforce MFA enrollment via Supabase Auth policies
+     - Require MFA for admin roles (ceo, accountant, hr_manager)
+     - Use Supabase's enforce MFA feature in RLS policies:
+       auth.jwt.aal >= 'aal2' for sensitive operations
+
+ 4.  HIGH       SENSITIVE PII STORED IN PLAIN TEXT
+     ---------------------------------------------------------------
+     The following PII is stored unencrypted:
+
+     employees table:
+       - basic_salary (2 records)
+       - tin (Tax Identification Number)
+       - ssnit_number (Social Security)
+       - bank_name + bank_account
+
+     clients table:
+       - tin
+       - email, phone, address
+       - credit_limit
+
+     suppliers/subcontractors:
+       - tin, bank_account/bank_account_no
+
+     payroll_lines:
+       - basic_salary, ssnit_employee, ssnit_employer
+
+     IMPACT: Under Ghana's Data Protection Act 2012 (Act 843),
+     personal data must be protected. A breach exposes employee
+     financial details, enabling identity theft, social engineering,
+     or payroll fraud.
+
+     REMEDIATION:
+     - Encrypt PII columns at application level using pgcrypto
+     - Use vault for bank account numbers and SSNIT numbers
+     - Implement column-level encryption for salary data
+     - Consider using Supabase Vault for secrets
+
+ 5.  HIGH       PII LEAKAGE THROUGH DENORMALIZED VIEWS
+     ---------------------------------------------------------------
+     Multiple views expose client/subcontractor PII without
+     access controls:
+
+     - debtors_ledger: client_name, email, division, project_name
+     - client_balance_summary: client_name, email
+     - subcontractor_payment_history: subcontractor_name, tin
+     - asset_register: project_name, division_name
+     - project_finance_summary: project_name, division_name
+     - general_ledger: account names
+
+     IMPACT: Any user with API access can enumerate all clients,
+     their contact details, and financial positions.
+
+     REMEDIATION:
+     - Apply RLS policies to views (create as security_barrier)
+     - Strip PII from views where not needed for display
+     - Use separate "detail" vs "summary" views based on role
+
+ 6.  HIGH       PUBLIC SIGNUP ENABLED
+     ---------------------------------------------------------------
+     The Supabase Auth settings show public signup is ENABLED.
+     Anyone can create an account on your system.
+
+     IMPACT: Attackers can self-register and potentially access
+     data if RLS policies are not strict. Could lead to data
+     scraping or abuse of compute resources.
+
+     REMEDIATION:
+     - Disable public signup if users should only be invited
+       Dashboard > Authentication > Providers > Email > Disable signup
+     - Or implement invite-only flow via admin-created accounts
+     - Add email domain restriction (e.g., @inmotionlogisticsafrica.com)
+
+ 7.  HIGH       UNCONFIRMED EMAIL ACCOUNT ACTIVE
+     ---------------------------------------------------------------
+     User batchrichie@gmail.com has email_confirmed_at = null,
+     meaning their email was never verified.
+
+     IMPACT: Unverified accounts could be using fake/typosquatted
+     emails, bypassing accountability.
+
+     REMEDIATION:
+     - Enforce email confirmation before allowing access
+     - Delete or deactivate unconfirmed accounts after a grace period
+     - Set auth config: confirm_email = true
+
+ 8.  MEDIUM     SERVICE KEY HAS 10-YEAR EXPIRY
+     ---------------------------------------------------------------
+     The JWT token for the service_role key expires in ~9.9 years
+     (exp: 2094492515). This is the Supabase default but creates
+     a long window of exposure if the key is leaked.
+
+     REMEDIATION:
+     - Rotate keys periodically (quarterly recommended)
+     - Use short-lived tokens where possible
+     - Monitor for unauthorized usage in Supabase logs
+
+ 9.  MEDIUM     NO RATE LIMITING ON DATA EXPORT
+     ---------------------------------------------------------------
+     Tables can be queried for up to 1000+ rows per request
+     without apparent rate limiting. All financial data (invoices,
+     journal entries, ledger entries, chart of accounts) can be
+     bulk-exported in a single API call.
+
+     IMPACT: An attacker with valid credentials can exfiltrate
+     the entire database in minutes.
+
+     REMEDIATION:
+     - Implement API rate limiting (Supabase Edge Functions)
+     - Use Supabase's built-in rate limiting features
+     - Set row limits on API responses
+     - Monitor for bulk export patterns in logs
+
+10.  MEDIUM     POTENTIAL IDOR (INSECURE DIRECT OBJECT REFERENCE)
+     ---------------------------------------------------------------
+     If the client-side application uses the service_role key
+     (or even the anon key without strict RLS), users can access
+     data belonging to other clients/projects by simply changing
+     the ID in API requests.
+
+     IMPACT: Cross-tenant data access. A client could view other
+     clients' invoices, financial data, etc.
+
+     REMEDIATION:
+     - NEVER use service_role key on the client side
+     - Implement strict RLS policies filtering by auth.uid()
+     - Use tenant isolation patterns in RLS:
+       CREATE POLICY "Users see own client data" ON invoices
+         USING (client_id = get_user_client_id(auth.uid()));
+
+11.  MEDIUM     DATA INTEGRITY RISKS (CASCADE DELETES UNCLEAR)
+     ---------------------------------------------------------------
+     Without direct DB access, we cannot verify ON DELETE behavior
+     for foreign keys. Risks include:
+
+     - Deleting a client may orphan invoices and ledger entries
+     - Deleting a user may orphan journal entries and audit logs
+     - Deleting a project may orphan costs, milestones, invoices
+
+     REMEDIATION:
+     - Verify all FK constraints use ON DELETE RESTRICT or
+       ON DELETE SET NULL (never CASCADE for financial data)
+     - Implement soft-delete (is_deleted flag) for all entities
+     - Add pre-delete validation in RPC functions
+
+12.  MEDIUM     PUBLIC STORAGE BUCKET EXISTS
+     ---------------------------------------------------------------
+     A storage bucket named "site-photos" is marked as public=True.
+     While listing requires auth, individual file URLs may be
+     directly accessible if the path is known.
+
+     IMPACT: Photos could be accessed by anyone who guesses the
+     file path, potentially exposing project site details.
+
+     REMEDIATION:
+     - Review if public access is actually needed
+     - If photos contain sensitive project info, make bucket private
+     - Use signed URLs with expiration for time-limited access
+
+13.  LOW        SQL INJECTION - PROTECTED BY POSTGREST
+     ---------------------------------------------------------------
+     RPC functions could not be directly tested for SQL injection
+     due to parameter naming mismatches. However, PostgREST
+     inherently parameterizes all queries, providing strong
+     protection against SQL injection.
+
+     RISK: Custom RPC functions using EXECUTE or format() with
+     string concatenation could still be vulnerable.
+
+     REMEDIATION:
+     - Audit all 56 RPC functions for raw SQL execution
+     - Ensure no EXECUTE with string concatenation
+     - Use parameterized queries in all PL/pgSQL functions
+
+14.  LOW        NO PLAIN-TEXT PASSWORDS FOUND
+     ---------------------------------------------------------------
+     Good news: No password, secret, or token fields were found
+     in the database schema. Authentication is properly handled
+     by Supabase Auth (which uses bcrypt hashing).
+
+15.  LOW        USER ENUMERATION - PROPERLY MITIGATED
+     ---------------------------------------------------------------
+     Login attempts with wrong passwords return generic
+     "Invalid login credentials" messages for both existing
+     and non-existing users. This prevents user enumeration.
+
+================================================================================
+                         RISK SUMMARY
+================================================================================
+
+  CRITICAL:   3 findings  (Key exposure, Auth admin access, No MFA)
+  HIGH:       4 findings  (PII storage, View leakage, Public signup, Unconfirmed email)
+  MEDIUM:     4 findings  (Key expiry, Rate limiting, IDOR, Data integrity, Storage)
+  LOW:        3 findings  (SQLi protected, No plaintext passwords, No enumeration)
+
+================================================================================
+                    IMMEDIATE ACTION ITEMS (Priority Order)
+================================================================================
+
+  1. [URGENT]  ROTATE the service_role key you shared in this chat
+  2. [URGENT]  Enable MFA on all accounts, especially admin roles
+  3. [URGENT]  Disable public signup or restrict to company domains
+  4. [HIGH]    Encrypt PII columns (bank accounts, SSNIT, TIN, salaries)
+  5. [HIGH]    Apply RLS policies to all views containing PII
+  6. [HIGH]    Verify unconfirmed email account (batchrichie@gmail.com)
+  7. [MEDIUM]  Implement rate limiting on API endpoints
+  8. [MEDIUM]  Audit RLS policies for IDOR protection
+  9. [MEDIUM]  Review FK cascade behavior for financial tables
+  10.[MEDIUM]  Review site-photos bucket public access
+
+================================================================================

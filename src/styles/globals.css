@@ -484,6 +484,11 @@ button {
   cursor: pointer;
 }
 
+a,
+button {
+  min-height: 2.75rem;
+}
+
 ::selection {
   background: rgba(245,166,35,0.24);
   color: var(--color-text);

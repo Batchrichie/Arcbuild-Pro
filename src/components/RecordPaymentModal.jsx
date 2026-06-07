@@ -311,7 +311,7 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
           </label>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
             <div className="text-xs uppercase tracking-[0.16em] text-slate-400">Invoice Currency</div>
             <div className="mt-2 text-lg font-semibold text-white">{invoiceCurrency}</div>

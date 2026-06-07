@@ -1,0 +1,1453 @@
+================================================================================
+SUPABASE DATABASE SCHEMA - COMPLETE REPORT
+Project: prpvozkyiybcffuccdoe.supabase.co
+================================================================================
+
+Total Tables/Views: 67
+Total RPC Functions: 56
+
+================================================================================
+TABLES & VIEWS
+================================================================================
+  - account_running_balance
+  - alert_log
+  - asset_components
+  - asset_register
+  - asset_revaluations
+  - asset_roll_forward_view
+  - assets
+  - audit_log
+  - balance_sheet
+  - bank_accounts
+  - bank_reconciliations
+  - bank_transactions
+  - chart_of_accounts
+  - client_balance_summary
+  - clients
+  - contract_modifications
+  - contracts
+  - debtors_ledger
+  - divisions
+  - documents
+  - employees
+  - exchange_rates
+  - fx_rates
+  - general_ledger
+  - impairment_assessments
+  - income_statement
+  - inventory_items
+  - inventory_movement_schedule_view
+  - inventory_movements
+  - invoice_line_items
+  - invoice_payments
+  - invoices
+  - issue_log
+  - journal_entries
+  - lease_schedules
+  - leases
+  - leave_requests
+  - ledger_entries
+  - messages
+  - milestone_invoice_queue
+  - milestones
+  - payroll_lines
+  - payroll_runs
+  - performance_obligations
+  - profiles
+  - project_assignments
+  - project_budgets
+  - project_costs
+  - project_finance_summary
+  - projects
+  - receivable_aging
+  - retention_ledger
+  - revenue_recognition
+  - roles
+  - staff_loans
+  - subcontractor_payment_history
+  - subcontractors
+  - suppliers
+  - system_config
+  - tax_calendar
+  - tax_filings
+  - tax_rates
+  - timesheet_summary
+  - timesheets
+  - trial_balance
+  - variable_consideration
+  - wht_certificate_summary
+
+================================================================================
+RPC FUNCTIONS (Stored Procedures)
+================================================================================
+  - allocate_transaction_price
+  - approve_timesheet
+  - auto_match_bank_transactions
+  - backfill_missing_invoice_journals
+  - calculate_lease_schedule
+  - check_asset_impairment_indicators
+  - check_budget_variance
+  - complete_milestone
+  - compute_asset_depreciation
+  - compute_invoice_taxes
+  - compute_paye
+  - compute_vat_return
+  - correct_reversed_expense_account
+  - dispose_asset
+  - fix_utilities_6202_journal
+  - get_cost_account_code
+  - get_current_user_role
+  - get_fx_rate
+  - get_gl_integrity_report
+  - get_user_client_id
+  - get_user_employee_id
+  - get_user_profile_id
+  - get_user_role
+  - invoice_has_gl_posting
+  - issue_payment_certificate
+  - link_milestone_invoice
+  - mark_tax_filed
+  - populate_tax_calendar
+  - post_depreciation_journal
+  - post_fx_gainloss_journal
+  - post_impairment_journal
+  - post_invoice_journal
+  - post_lease_journal_entry
+  - post_manual_journal
+  - post_opening_balance_journal
+  - post_payroll_journal
+  - post_project_cost
+  - post_retention_released_journal
+  - post_retention_withheld_journal
+  - post_revaluation_journal
+  - post_revenue_recognition_journal
+  - post_subcontractor_retention_journal
+  - process_employee_payroll
+  - record_contract_modification
+  - record_invoice_payment
+  - record_invoice_payment_deprecated
+  - record_invoice_payment_rpc_deprecated
+  - reverse_impairment_assessment
+  - reverse_journal_entry
+  - run_gl_integrity_repair
+  - run_nrv_test
+  - run_receivables_aging
+  - transition_invoice_status
+  - update_weighted_average_cost
+  - validate_active_accounts
+  - validate_journal_balance
+
+
+================================================================================
+DETAILED TABLE DEFINITIONS
+================================================================================
+
+============================================================
+TABLE: account_running_balance
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  ledger_id                      string (uuid)                  NO
+  account_code                   string (text)                  NO
+  entry_date                     string (date)                  NO
+  entry_number                   string (text)                  NO
+  description                    string (text)                  NO
+  client_id                      string (uuid)                  NO
+  project_id                     string (uuid)                  NO
+  division_id                    string (uuid)                  NO
+  debit_amount                   number (numeric)               NO
+  credit_amount                  number (numeric)               NO
+  amount                         number (numeric)               NO
+  running_balance                number (numeric)               NO
+
+============================================================
+TABLE: alert_log
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  alert_type                     string (text)                  YES
+  recipient_role                 string (text)                  NO
+  recipient_email                string (text)                  NO
+  subject                        string (text)                  NO
+  message                        string (text)                  NO
+  related_table                  string (text)                  NO
+  related_id                     string (uuid)                  NO
+  sent_at                        string (timestamp with time zone) NO         now()
+  delivery_status                string (text)                  NO         pending
+
+============================================================
+TABLE: asset_components
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  parent_asset_id                string (uuid)                  YES
+  component_name                 string (text)                  YES
+  cost                           number (numeric)               YES
+  useful_life_years              integer (integer)              YES        1
+  depreciation_method            string (text)                  YES        straight_line
+  accumulated_depreciation       number (numeric)               YES
+  is_disposed                    boolean (boolean)              YES
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: asset_register
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  NO
+  asset_code                     string (text)                  NO
+  asset_name                     string (text)                  NO
+  category                       string (text)                  NO
+  cost                           number (numeric)               NO
+  acquisition_date               string (date)                  NO
+  useful_life_years              integer (integer)              NO
+  depreciation_method            string (text)                  NO
+  accumulated_depreciation       number (numeric)               NO
+  net_book_value                 number (numeric)               NO
+  is_disposed                    boolean (boolean)              NO
+  disposal_date                  string (date)                  NO
+  disposal_proceeds              number (numeric)               NO
+  project_id                     string (uuid)                  NO
+  division_id                    string (uuid)                  NO
+  project_name                   string (text)                  NO
+  division_name                  string (text)                  NO
+  depreciation_pct               number (numeric)               NO
+  monthly_depreciation_charge    number (numeric)               NO
+  asset_status                   string (text)                  NO
+
+============================================================
+TABLE: asset_revaluations
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  asset_id                       string (uuid)                  YES
+  revaluation_date               string (date)                  YES
+  carrying_amount_before         number (numeric)               YES
+  fair_value                     number (numeric)               YES
+  surplus_or_deficit             number (numeric)               NO
+  valuer_name                    string (text)                  NO
+  posted                         boolean (boolean)              YES
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: asset_roll_forward_view
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  asset_id                       string (uuid)                  NO
+  asset_name                     string (text)                  NO
+  fiscal_year                    number (numeric)               NO
+  opening_cost                   number (numeric)               NO
+  additions                      number (numeric)               NO
+  disposals_cost                 number (numeric)               NO
+  closing_cost                   number (numeric)               NO
+  opening_accum_dep              number (numeric)               NO
+  depreciation_charge            number (numeric)               NO
+  disposals_accum_dep            number (numeric)               NO
+  closing_accum_dep              number (numeric)               NO
+  closing_nbv                    number (numeric)               NO
+
+============================================================
+TABLE: assets
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  asset_name                     string (text)                  YES
+  asset_code                     string (text)                  YES
+  category                       string (text)                  YES
+  cost                           number (numeric)               YES
+  acquisition_date               string (date)                  YES
+  useful_life_years              integer (integer)              YES        1
+  depreciation_method            string (text)                  YES        straight_line
+  accumulated_depreciation       number (numeric)               YES
+  net_book_value                 number (numeric)               YES
+  project_id                     string (uuid)                  NO
+  is_disposed                    boolean (boolean)              YES
+  created_at                     string (timestamp with time zone) YES        now()
+  disposal_date                  string (date)                  NO
+  disposal_proceeds              number (numeric)               NO
+  disposal_journal_id            string (uuid)                  NO
+  division_id                    string (uuid)                  NO
+  depreciation_account           string (text)                  NO         6401
+  measurement_model              string (text)                  YES        cost
+  last_revaluation_date          string (date)                  NO
+  revalued_amount                number (numeric)               NO
+  revaluation_surplus            number (numeric)               YES
+
+============================================================
+TABLE: audit_log
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  user_id                        string (uuid)                  YES
+  action                         string (text)                  YES
+  table_name                     string (text)                  YES
+  record_id                      string (uuid)                  NO
+  old_value                      unknown (jsonb)                NO
+  new_value                      unknown (jsonb)                NO
+  ip_address                     string (text)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: balance_sheet
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  account_code                   string (text)                  NO
+  account_name                   string (text)                  NO
+  account_type                   string (text)                  NO
+  balance                        number (numeric)               NO
+
+============================================================
+TABLE: bank_accounts
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  account_name                   string (text)                  YES
+  bank_name                      string (text)                  YES
+  account_number                 string (text)                  YES
+  currency                       string (text)                  YES        GHS
+  gl_account_code                string (text)                  NO
+  is_active                      boolean (boolean)              NO         True
+  opening_balance                number (numeric)               NO
+  created_by                     string (uuid)                  NO
+  created_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: bank_reconciliations
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  bank_account_id                string (uuid)                  YES
+  period_start                   string (date)                  YES
+  period_end                     string (date)                  YES
+  statement_closing_balance      number (numeric)               YES
+  gl_closing_balance             number (numeric)               NO
+  unmatched_count                integer (integer)              NO
+  status                         string (text)                  YES        in_progress
+  completed_by                   string (uuid)                  NO
+  completed_at                   string (timestamp with time zone) NO
+  notes                          string (text)                  NO
+  created_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: bank_transactions
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  bank_account_id                string (uuid)                  YES
+  transaction_date               string (date)                  YES
+  value_date                     string (date)                  NO
+  description                    string (text)                  YES
+  reference                      string (text)                  NO
+  debit_amount                   number (numeric)               NO
+  credit_amount                  number (numeric)               NO
+  balance                        number (numeric)               NO
+  match_status                   string (text)                  YES        unmatched
+  matched_ledger_entry_id        string (uuid)                  NO
+  matched_journal_entry_id       string (uuid)                  NO
+  matched_by                     string (uuid)                  NO
+  matched_at                     string (timestamp with time zone) NO
+  notes                          string (text)                  NO
+  created_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: chart_of_accounts
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  account_code                   string (text)                  YES
+  account_name                   string (text)                  YES
+  account_type                   string (text)                  YES
+  parent_code                    string (text)                  NO
+  division_id                    string (uuid)                  NO
+  is_active                      boolean (boolean)              YES        True
+  created_at                     string (timestamp with time zone) YES        now()
+  is_system                      boolean (boolean)              NO
+  status                         string (text)                  NO         Active
+  description                    string (text)                  NO
+  created_by                     string (uuid)                  NO
+  updated_at                     string (timestamp with time zone) NO         now()
+  opening_balance                number (numeric)               YES
+  financial_statement            string (text)                  NO
+  element                        string (text)                  NO
+  sub_element                    string (text)                  NO
+  nature                         string (text)                  NO
+  is_contra                      boolean (boolean)              NO
+  is_payment_account             boolean (boolean)              NO
+  payment_method_type            string (text)                  NO
+
+============================================================
+TABLE: client_balance_summary
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  client_id                      string (uuid)                  NO
+  client_name                    string (text)                  NO
+  client_type                    string (text)                  NO
+  email                          string (text)                  NO
+  total_invoices                 integer (bigint)               NO
+  total_invoiced_ghs             number (numeric)               NO
+  total_received_ghs             number (numeric)               NO
+  total_outstanding_ghs          number (numeric)               NO
+  total_wht_deducted_ghs         number (numeric)               NO
+  current_ghs                    number (numeric)               NO
+  overdue_1_30_ghs               number (numeric)               NO
+  overdue_31_60_ghs              number (numeric)               NO
+  overdue_61_90_ghs              number (numeric)               NO
+  overdue_90_plus_ghs            number (numeric)               NO
+  oldest_due_date                string (date)                  NO
+
+============================================================
+TABLE: clients
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  name                           string (text)                  YES
+  client_type                    string (text)                  YES
+  email                          string (text)                  NO
+  phone                          string (text)                  NO
+  address                        string (text)                  NO
+  tin                            string (text)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+  applies_vat                    boolean (boolean)              NO         True
+  applies_nhil                   boolean (boolean)              NO         True
+  applies_getfund                boolean (boolean)              NO         True
+  applies_wht                    boolean (boolean)              NO
+  auth_user_id                   string (uuid)                  NO
+  wht_rate                       number (numeric)               NO
+  vat_registered                 boolean (boolean)              NO
+  vat_number                     string (text)                  NO
+  credit_limit                   number (numeric)               NO
+  payment_terms                  integer (integer)              NO         30
+  currency                       string (text)                  NO         GHS
+  contact_person                 string (text)                  NO
+  contact_phone                  string (text)                  NO
+  contact_email                  string (text)                  NO
+  region                         string (text)                  NO
+  country                        string (text)                  NO         Ghana
+  status                         string (text)                  NO         Active
+  notes                          string (text)                  NO
+  created_by                     string (uuid)                  NO
+  updated_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: contract_modifications
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  project_id                     string (uuid)                  NO
+  modification_date              string (date)                  YES
+  description                    string (text)                  YES
+  original_contract_value        number (numeric)               NO
+  modified_contract_value        number (numeric)               NO
+  price_change                   number (numeric)               NO
+  accounting_treatment           string (text)                  YES
+  approved_by                    string (text)                  NO
+  journal_posted                 boolean (boolean)              YES
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: contracts
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  project_id                     string (uuid)                  YES
+  document_url                   string (text)                  NO
+  signed_date                    string (date)                  NO
+  value                          number (numeric)               YES
+  retention_percentage           number (numeric)               YES
+  created_at                     string (timestamp with time zone) YES        now()
+  retention_amount               number (numeric)               NO
+  retention_released             boolean (boolean)              NO
+  retention_released_date        string (date)                  NO
+  retention_invoice_id           string (uuid)                  NO
+  start_date                     string (date)                  NO
+  end_date                       string (date)                  NO
+  contract_type                  string (text)                  NO         fixed_price
+
+============================================================
+TABLE: debtors_ledger
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  client_id                      string (uuid)                  NO
+  client_name                    string (text)                  NO
+  client_type                    string (text)                  NO
+  email                          string (text)                  NO
+  invoice_id                     string (uuid)                  NO
+  invoice_number                 string (text)                  NO
+  transaction_date               string (date)                  NO
+  due_date                       string (date)                  NO
+  division_id                    string (uuid)                  NO
+  division_name                  string (text)                  NO
+  invoice_status                 string (public.invoice_status) NO
+  invoiced_amount                number (numeric)               NO
+  wht_deducted                   number (numeric)               NO
+  net_receivable                 number (numeric)               NO
+  amount_received                number (numeric)               NO
+  amount_outstanding             number (numeric)               NO
+  days_overdue                   integer (integer)              NO
+  payment_date                   string (date)                  NO
+  fx_gain_loss_ghs               number (numeric)               NO
+  project_id                     string (uuid)                  NO
+  project_name                   string (text)                  NO
+
+============================================================
+TABLE: divisions
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  name                           string (text)                  YES
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: documents
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  related_type                   string (text)                  YES
+  related_id                     string (uuid)                  YES
+  file_name                      string (text)                  YES
+  file_url                       string (text)                  YES
+  uploaded_by                    string (uuid)                  YES
+  created_at                     string (timestamp with time zone) YES        now()
+  project_id                     string (uuid)                  NO
+  document_type                  string (text)                  NO
+  description                    string (text)                  NO
+  content                        unknown (jsonb)                NO
+  document_date                  string (date)                  NO
+
+============================================================
+TABLE: employees
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  profile_id                     string (uuid)                  YES
+  employee_number                string (text)                  YES
+  department                     string (text)                  NO
+  job_title                      string (text)                  NO
+  basic_salary                   number (numeric)               YES
+  hire_date                      string (date)                  NO
+  contract_type                  string (text)                  NO
+  tin                            string (text)                  NO
+  ssnit_number                   string (text)                  NO
+  bank_name                      string (text)                  NO
+  bank_account                   string (text)                  NO
+  is_active                      boolean (boolean)              YES        True
+  created_at                     string (timestamp with time zone) YES        now()
+  termination_date               string (date)                  NO
+  monthly_allowances             number (numeric)               NO
+  division_id                    string (uuid)                  NO
+  is_ssnit_exempt                boolean (boolean)              NO
+  is_paye_exempt                 boolean (boolean)              NO
+
+============================================================
+TABLE: exchange_rates
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  currency_code                  string (text)                  YES
+  rate_to_ghs                    number (numeric)               YES
+  rate_date                      string (date)                  YES
+  source                         string (text)                  NO         bank_of_ghana
+  created_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: fx_rates
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             integer (bigint)               YES
+  rate_date                      string (date)                  YES
+  currency                       string (text)                  YES
+  code                           string (text)                  YES
+  buy                            number (numeric)               NO
+  sell                           number (numeric)               NO
+  median                         number (numeric)               NO
+  source                         string (text)                  NO         BOG
+  created_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: general_ledger
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  ledger_id                      string (uuid)                  NO
+  journal_entry_id               string (uuid)                  NO
+  entry_date                     string (date)                  NO
+  entry_number                   string (text)                  NO
+  source_type                    string (text)                  NO
+  source_id                      string (uuid)                  NO
+  account_code                   string (text)                  NO
+  coa_account_name               string (text)                  NO
+  account_name                   string (text)                  NO
+  description                    string (text)                  NO
+  client_id                      string (uuid)                  NO
+  project_id                     string (uuid)                  NO
+  division_id                    string (uuid)                  NO
+  currency                       string (text)                  NO
+  foreign_amount                 number (numeric)               NO
+  fx_rate                        number (numeric)               NO
+  debit_amount                   number (numeric)               NO
+  credit_amount                  number (numeric)               NO
+  amount                         number (numeric)               NO
+  posted_by                      string (uuid)                  NO
+  created_by                     string (uuid)                  NO
+  created_at                     string (timestamp with time zone) NO
+
+============================================================
+TABLE: impairment_assessments
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  project_id                     string (uuid)                  NO
+  invoice_id                     string (uuid)                  NO
+  asset_id                       string (uuid)                  NO
+  asset_type                     string (text)                  YES
+  basis                          string (text)                  YES
+  assessment_date                string (date)                  YES        CURRENT_DATE
+  carrying_amount                number (numeric)               YES
+  recoverable_amount             number (numeric)               YES
+  impairment_loss                number (numeric)               NO
+  notes                          string (text)                  NO
+  posted                         boolean (boolean)              YES
+  posted_at                      string (timestamp with time zone) NO
+  created_by                     string (uuid)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+  updated_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: income_statement
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  account_code                   string (text)                  NO
+  account_name                   string (text)                  NO
+  account_type                   string (text)                  NO
+  division_name                  string (text)                  NO
+  amount                         number (numeric)               NO
+  period_month                   string (timestamp with time zone) NO
+
+============================================================
+TABLE: inventory_items
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  item_name                      string (text)                  YES
+  project_id                     string (uuid)                  NO
+  quantity                       number (numeric)               YES
+  unit_cost                      number (numeric)               YES
+  nrv                            number (numeric)               YES
+  total_cost                     number (numeric)               NO
+  write_down_amount              number (numeric)               NO
+  created_by                     string (uuid)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+  updated_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: inventory_movement_schedule_view
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  inventory_item_id              string (uuid)                  NO
+  item_name                      string (text)                  NO
+  year                           integer (integer)              NO
+  month                          integer (integer)              NO
+  opening_quantity               number (numeric)               NO
+  opening_value                  number (numeric)               NO
+  closing_quantity               number (numeric)               NO
+  closing_value                  number (numeric)               NO
+  purchases_qty                  number (numeric)               NO
+  purchases_value                number (numeric)               NO
+  consumption_qty                number (numeric)               NO
+  consumption_value              number (numeric)               NO
+
+============================================================
+TABLE: inventory_movements
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  inventory_item_id              string (uuid)                  YES
+  movement_date                  string (date)                  YES        CURRENT_DATE
+  movement_type                  string (text)                  YES
+  quantity                       number (numeric)               YES
+  unit_cost                      number (numeric)               YES
+  total_cost                     number (numeric)               NO
+  project_cost_id                string (uuid)                  NO
+  reference                      string (text)                  NO
+  created_by                     string (uuid)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: invoice_line_items
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  invoice_id                     string (uuid)                  YES
+  description                    string (text)                  YES
+  quantity                       number (numeric)               NO         1
+  unit_price                     number (numeric)               YES
+  line_total                     number (numeric)               NO
+  created_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: invoice_payments
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  invoice_id                     string (uuid)                  YES
+  client_id                      string (uuid)                  YES
+  payment_date                   string (date)                  YES
+  payment_reference              string (text)                  YES
+  payment_account_code           string (text)                  YES
+  payment_account_name           string (text)                  NO
+  amount_ghs                     number (numeric)               YES
+  journal_entry_id               string (uuid)                  NO
+  recorded_by                    string (uuid)                  NO
+  notes                          string (text)                  NO
+  created_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: invoices
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  invoice_number                 string (text)                  YES
+  client_id                      string (uuid)                  YES
+  project_id                     string (uuid)                  NO
+  division_id                    string (uuid)                  YES
+  currency                       string (public.invoice_currency) NO         GHS
+  fx_rate_to_ghs                 number (numeric)               NO         1.0
+  fx_rate_date                   string (date)                  NO
+  subtotal                       number (numeric)               YES
+  vat_amount                     number (numeric)               NO
+  nhil_amount                    number (numeric)               NO
+  getfund_amount                 number (numeric)               NO
+  gross_total                    number (numeric)               NO
+  wht_amount                     number (numeric)               NO
+  expected_receipt               number (numeric)               NO
+  subtotal_ghs                   number (numeric)               NO
+  vat_amount_ghs                 number (numeric)               NO
+  nhil_amount_ghs                number (numeric)               NO
+  getfund_amount_ghs             number (numeric)               NO
+  gross_total_ghs                number (numeric)               NO
+  wht_amount_ghs                 number (numeric)               NO
+  expected_receipt_ghs           number (numeric)               NO
+  status                         string (public.invoice_status) NO         draft
+  approval_threshold_at_creation number (numeric)               NO
+  requires_approval              boolean (boolean)              NO
+  approved_by                    string (uuid)                  NO
+  approved_at                    string (timestamp with time zone) NO
+  rejected_by                    string (uuid)                  NO
+  rejected_at                    string (timestamp with time zone) NO
+  rejection_note                 string (text)                  NO
+  created_by                     string (uuid)                  YES
+  created_at                     string (timestamp with time zone) NO         now()
+  updated_at                     string (timestamp with time zone) NO         now()
+  due_date                       string (date)                  NO
+  payment_date                   string (date)                  NO
+  payment_reference              string (text)                  NO
+  notes                          string (text)                  NO
+  fx_gain_loss_ghs               number (numeric)               NO
+  retention_rate                 number (numeric)               NO
+  retention_withheld             number (numeric)               NO
+  net_payable                    number (numeric)               NO
+  is_retention_invoice           boolean (boolean)              NO
+  amount_paid                    number (numeric)               NO
+  balance_due                    number (numeric)               NO
+  last_payment_date              string (date)                  NO
+  last_payment_reference         string (text)                  NO
+  apply_tax                      boolean (boolean)              NO         True
+
+============================================================
+TABLE: issue_log
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  project_id                     string (uuid)                  YES
+  title                          string (text)                  YES
+  description                    string (text)                  NO
+  issue_type                     string (text)                  YES        issue
+  severity                       string (text)                  YES        medium
+  status                         string (text)                  YES        open
+  raised_by                      string (uuid)                  NO
+  assigned_to                    string (uuid)                  NO
+  due_date                       string (date)                  NO
+  resolved_date                  string (date)                  NO
+  resolution_notes               string (text)                  NO
+  created_at                     string (timestamp with time zone) NO         now()
+  updated_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: journal_entries
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  entry_date                     string (date)                  YES        CURRENT_DATE
+  description                    string (text)                  YES
+  reference                      string (text)                  NO
+  created_by                     string (uuid)                  YES
+  is_posted                      boolean (boolean)              YES
+  created_at                     string (timestamp with time zone) YES        now()
+  entry_number                   string (text)                  NO
+  source_type                    string (text)                  NO
+  source_id                      string (uuid)                  NO
+  posted_by                      string (uuid)                  NO
+  is_reversed                    boolean (boolean)              NO
+  reversal_of                    string (uuid)                  NO
+
+============================================================
+TABLE: lease_schedules
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  lease_id                       string (uuid)                  NO
+  period_number                  integer (integer)              YES
+  period_date                    string (date)                  YES
+  opening_liability              number (numeric)               YES
+  interest_expense               number (numeric)               YES
+  principal_payment              number (numeric)               YES
+  cash_payment                   number (numeric)               YES
+  closing_liability              number (numeric)               YES
+  rou_depreciation               number (numeric)               YES
+  posted                         boolean (boolean)              YES
+  created_at                     string (timestamp with time zone) YES        now()
+  updated_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: leases
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  project_id                     string (uuid)                  NO
+  lessor_id                      string (uuid)                  NO
+  lease_term_months              integer (integer)              YES
+  lease_commencement_date        string (date)                  YES
+  payment_amount                 number (numeric)               YES
+  payment_frequency              string (text)                  YES        monthly
+  discount_rate                  number (numeric)               YES
+  rou_asset_value                number (numeric)               NO
+  lease_liability_opening        number (numeric)               NO
+  outstanding_liability          number (numeric)               NO
+  status                         string (text)                  YES        draft
+  created_by                     string (uuid)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+  updated_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: leave_requests
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  employee_id                    string (uuid)                  YES
+  leave_type                     string (text)                  YES
+  start_date                     string (date)                  YES
+  end_date                       string (date)                  YES
+  days_requested                 integer (integer)              YES
+  status                         string (text)                  YES        pending
+  approved_by                    string (uuid)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: ledger_entries
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  journal_entry_id               string (uuid)                  YES
+  account_code                   string (text)                  YES
+  debit_amount                   number (numeric)               YES
+  credit_amount                  number (numeric)               YES
+  project_id                     string (uuid)                  NO
+  description                    string (text)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+  account_name                   string (text)                  NO
+  client_id                      string (uuid)                  NO
+  division_id                    string (uuid)                  NO
+  currency                       string (text)                  NO         GHS
+  foreign_amount                 number (numeric)               NO
+  fx_rate                        number (numeric)               NO
+
+============================================================
+TABLE: messages
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  project_id                     string (uuid)                  YES
+  sender_id                      string (uuid)                  YES
+  message_body                   string (text)                  YES
+  is_read                        boolean (boolean)              YES
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: milestone_invoice_queue
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  milestone_id                   string (uuid)                  NO
+  milestone_title                string (text)                  NO
+  milestone_description          string (text)                  NO
+  completed_date                 string (date)                  NO
+  billing_amount                 number (numeric)               NO
+  retention_amount               number (numeric)               NO
+  net_billing                    number (numeric)               NO
+  percentage_complete            number (numeric)               NO
+  project_id                     string (uuid)                  NO
+  project_name                   string (text)                  NO
+  division_id                    string (uuid)                  NO
+  division_name                  string (text)                  NO
+  client_id                      string (uuid)                  NO
+  client_name                    string (text)                  NO
+  contract_value                 number (numeric)               NO
+  retention_percentage           number (numeric)               NO
+  contract_id                    string (uuid)                  NO
+
+============================================================
+TABLE: milestones
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  project_id                     string (uuid)                  YES
+  title                          string (text)                  YES
+  description                    string (text)                  NO
+  percentage_complete            number (numeric)               YES
+  due_date                       string (date)                  NO
+  completed_date                 string (date)                  NO
+  status                         string (text)                  YES        pending
+  invoice_id                     string (uuid)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+  invoice_trigger_percentage     number (numeric)               NO         100
+  billing_amount                 number (numeric)               NO
+
+============================================================
+TABLE: payroll_lines
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  payroll_run_id                 string (uuid)                  YES
+  employee_id                    string (uuid)                  YES
+  basic_salary                   number (numeric)               YES
+  allowances                     number (numeric)               YES
+  gross_pay                      number (numeric)               YES
+  paye                           number (numeric)               YES
+  ssnit_employee                 number (numeric)               YES
+  ssnit_employer                 number (numeric)               YES
+  loan_deduction                 number (numeric)               YES
+  net_pay                        number (numeric)               YES
+  created_at                     string (timestamp with time zone) YES        now()
+  overtime_hours                 number (numeric)               NO
+  overtime_rate                  number (numeric)               NO
+  overtime_amount                number (numeric)               NO
+  bonus_amount                   number (numeric)               NO
+  other_deductions               number (numeric)               NO
+  deduction_notes                string (text)                  NO
+  taxable_income                 number (numeric)               NO
+  project_id                     string (uuid)                  NO
+
+============================================================
+TABLE: payroll_runs
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  pay_period_month               integer (integer)              YES
+  pay_period_year                integer (integer)              YES
+  status                         string (text)                  YES        draft
+  processed_by                   string (uuid)                  YES
+  approved_by                    string (uuid)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+  period_start                   string (date)                  NO
+  period_end                     string (date)                  NO
+  total_gross_pay                number (numeric)               NO
+  total_paye                     number (numeric)               NO
+  total_ssnit_employee           number (numeric)               NO
+  total_ssnit_employer           number (numeric)               NO
+  total_net_pay                  number (numeric)               NO
+  journal_entry_id               string (uuid)                  NO
+  notes                          string (text)                  NO
+
+============================================================
+TABLE: performance_obligations
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  project_id                     string (uuid)                  NO
+  description                    string (text)                  YES
+  standalone_selling_price       number (numeric)               YES
+  allocated_transaction_price    number (numeric)               NO
+  satisfaction_method            string (text)                  YES        over_time
+  pct_complete                   number (numeric)               YES
+  status                         string (text)                  YES        pending
+  completion_evidence            string (text)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: profiles
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  user_id                        string (uuid)                  YES
+  role                           string (text)                  YES
+  full_name                      string (text)                  YES
+  phone                          string (text)                  NO
+  is_active                      boolean (boolean)              YES        True
+  created_at                     string (timestamp with time zone) YES        now()
+  client_id                      string (uuid)                  NO
+
+============================================================
+TABLE: project_assignments
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  project_id                     string (uuid)                  YES
+  profile_id                     string (uuid)                  YES
+  assigned_at                    string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: project_budgets
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  project_id                     string (uuid)                  YES
+  cost_category                  string (text)                  YES
+  budgeted_amount                number (numeric)               YES
+  created_by                     string (uuid)                  NO
+  created_at                     string (timestamp with time zone) NO         now()
+  updated_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: project_costs
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  project_id                     string (uuid)                  YES
+  cost_type                      string (text)                  YES
+  description                    string (text)                  YES
+  amount                         number (numeric)               YES
+  currency                       string (text)                  YES        GHS
+  supplier_subcontractor         string (text)                  NO
+  subcontractor_id               string (uuid)                  NO
+  receipt_url                    string (text)                  NO
+  date_incurred                  string (date)                  YES        CURRENT_DATE
+  posted_by                      string (uuid)                  YES
+  created_at                     string (timestamp with time zone) YES        now()
+  journal_entry_id               string (uuid)                  NO
+  account_code                   string (text)                  NO
+  amount_ghs                     number (numeric)               NO
+  fx_rate                        number (numeric)               NO         1.0
+  supplier_id                    string (uuid)                  NO
+
+============================================================
+TABLE: project_finance_summary
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  project_id                     string (uuid)                  NO
+  project_name                   string (text)                  NO
+  project_status                 string (text)                  NO
+  division_name                  string (text)                  NO
+  contract_id                    string (uuid)                  NO
+  contract_value                 number (numeric)               NO
+  retention_percentage           number (numeric)               NO
+  total_retention_held           number (numeric)               NO
+  retention_released             boolean (boolean)              NO
+  contract_start                 string (date)                  NO
+  contract_end                   string (date)                  NO
+  total_invoiced_ghs             number (numeric)               NO
+  total_received_ghs             number (numeric)               NO
+  total_outstanding_ghs          number (numeric)               NO
+  invoice_count                  integer (bigint)               NO
+  total_costs_ghs                number (numeric)               NO
+  materials_cost_ghs             number (numeric)               NO
+  labour_cost_ghs                number (numeric)               NO
+  subcontractor_cost_ghs         number (numeric)               NO
+  equipment_cost_ghs             number (numeric)               NO
+  other_cost_ghs                 number (numeric)               NO
+  total_budget_ghs               number (numeric)               NO
+  materials_budget_ghs           number (numeric)               NO
+  labour_budget_ghs              number (numeric)               NO
+  subcontractor_budget_ghs       number (numeric)               NO
+  equipment_budget_ghs           number (numeric)               NO
+  other_budget_ghs               number (numeric)               NO
+  gross_profit_ghs               number (numeric)               NO
+  gross_margin_pct               number (numeric)               NO
+  financial_completion_pct       number (numeric)               NO
+  budget_remaining_ghs           number (numeric)               NO
+  created_at                     string (timestamp with time zone) NO
+
+============================================================
+TABLE: projects
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  name                           string (text)                  YES
+  client_id                      string (uuid)                  YES
+  division_id                    string (uuid)                  YES
+  contract_value                 number (numeric)               YES
+  start_date                     string (date)                  NO
+  end_date                       string (date)                  NO
+  status                         string (text)                  YES        active
+  created_at                     string (timestamp with time zone) YES        now()
+  completion_method              string (text)                  NO         cost
+  budget_cost                    number (numeric)               NO
+  actual_cost_to_date            number (numeric)               NO
+  pct_complete                   number (numeric)               NO
+  revenue_to_recognise           number (numeric)               NO
+  revenue_recognised             number (numeric)               NO
+  last_recognition_date          string (date)                  NO
+  recognition_notes              string (text)                  NO
+
+============================================================
+TABLE: receivable_aging
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  invoice_id                     string (uuid)                  YES
+  project_id                     string (uuid)                  NO
+  client_id                      string (uuid)                  NO
+  run_date                       string (date)                  YES
+  due_date                       string (date)                  YES
+  days_overdue                   integer (integer)              NO
+  aging_bucket                   string (text)                  NO
+  invoice_amount                 number (numeric)               YES
+  expected_receipt_ghs           number (numeric)               YES
+  provision_rate                 number (numeric)               NO
+  provision_amount               number (numeric)               NO
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: retention_ledger
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  contract_id                    string (uuid)                  YES
+  invoice_id                     string (uuid)                  NO
+  project_id                     string (uuid)                  NO
+  client_id                      string (uuid)                  NO
+  retention_amount               number (numeric)               YES
+  transaction_type               string (text)                  YES
+  transaction_date               string (date)                  NO         CURRENT_DATE
+  notes                          string (text)                  NO
+  created_by                     string (uuid)                  NO
+  created_at                     string (timestamp with time zone) NO         now()
+  retention_type                 string (text)                  NO         client
+  status                         string (text)                  NO         withheld
+  withheld_amount                number (numeric)               NO
+  released_amount                number (numeric)               NO
+  balance_amount                 number (numeric)               NO
+  subcontractor_id               string (uuid)                  NO
+  supplier_id                    string (uuid)                  NO
+  release_date                   string (date)                  NO
+  release_invoice_id             string (uuid)                  NO
+  updated_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: revenue_recognition
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  project_id                     string (uuid)                  YES
+  recognition_date               string (date)                  YES        CURRENT_DATE
+  period_label                   string (text)                  NO
+  pct_complete                   number (numeric)               YES
+  contract_value                 number (numeric)               YES
+  cumulative_revenue             number (numeric)               YES
+  prior_recognised               number (numeric)               NO
+  period_revenue                 number (numeric)               YES
+  cost_to_date                   number (numeric)               NO
+  gross_profit                   number (numeric)               NO
+  journal_entry_id               string (uuid)                  NO
+  completion_method              string (text)                  NO
+  recognised_by                  string (uuid)                  NO
+  notes                          string (text)                  NO
+  created_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: roles
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  name                           string (text)                  YES
+  description                    string (text)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: staff_loans
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  employee_id                    string (uuid)                  YES
+  loan_amount                    number (numeric)               YES
+  outstanding_balance            number (numeric)               YES
+  monthly_deduction              number (numeric)               YES
+  start_date                     string (date)                  YES        CURRENT_DATE
+  status                         string (text)                  YES        active
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: subcontractor_payment_history
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  subcontractor_id               string (uuid)                  NO
+  subcontractor_name             string (text)                  NO
+  tin                            string (text)                  NO
+  trade_type                     string (text)                  NO
+  applies_wht                    boolean (boolean)              NO
+  wht_rate                       number (numeric)               NO
+  total_paid_ghs                 number (numeric)               NO
+  total_wht_deducted_ghs         number (numeric)               NO
+  cost_id                        string (uuid)                  NO
+  project_id                     string (uuid)                  NO
+  project_name                   string (text)                  NO
+  description                    string (text)                  NO
+  gross_amount                   number (numeric)               NO
+  currency                       string (text)                  NO
+  gross_amount_ghs               number (numeric)               NO
+  fx_rate                        number (numeric)               NO
+  payment_date                   string (date)                  NO
+  journal_entry_id               string (uuid)                  NO
+  entry_number                   string (text)                  NO
+
+============================================================
+TABLE: subcontractors
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  name                           string (text)                  YES
+  tin                            string (text)                  NO
+  contact_person                 string (text)                  NO
+  phone                          string (text)                  NO
+  email                          string (text)                  NO
+  trade_type                     string (text)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+  bank_name                      string (text)                  NO
+  bank_account                   string (text)                  NO
+  applies_wht                    boolean (boolean)              NO
+  wht_rate                       number (numeric)               NO         0.05
+  total_paid_ghs                 number (numeric)               NO
+  total_wht_deducted_ghs         number (numeric)               NO
+  supplier_id                    string (uuid)                  NO
+
+============================================================
+TABLE: suppliers
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  name                           string (text)                  YES
+  supplier_type                  string (text)                  NO         Vendor
+  tin                            string (text)                  NO
+  vat_registered                 boolean (boolean)              NO
+  vat_number                     string (text)                  NO
+  wht_applicable                 boolean (boolean)              NO         True
+  wht_rate                       number (numeric)               NO         5.0
+  payment_terms                  integer (integer)              NO         30
+  currency                       string (text)                  NO         GHS
+  contact_person                 string (text)                  NO
+  contact_phone                  string (text)                  NO
+  contact_email                  string (text)                  NO
+  address                        string (text)                  NO
+  region                         string (text)                  NO
+  country                        string (text)                  NO         Ghana
+  bank_name                      string (text)                  NO
+  bank_account_no                string (text)                  NO
+  bank_branch                    string (text)                  NO
+  credit_limit                   number (numeric)               NO
+  status                         string (text)                  NO         Active
+  notes                          string (text)                  NO
+  created_by                     string (uuid)                  NO
+  created_at                     string (timestamp with time zone) NO         now()
+  updated_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: system_config
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  key                            string (text)                  YES
+  value                          string (text)                  YES
+  description                    string (text)                  NO
+  updated_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: tax_calendar
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  tax_type                       string (text)                  YES
+  period_start                   string (date)                  YES
+  period_end                     string (date)                  YES
+  due_date                       string (date)                  YES
+  status                         string (text)                  YES        upcoming
+  filed_date                     string (date)                  NO
+  filed_by                       string (uuid)                  NO
+  gra_reference                  string (text)                  NO
+  amount_due                     number (numeric)               NO
+  amount_paid                    number (numeric)               NO
+  notes                          string (text)                  NO
+  created_at                     string (timestamp with time zone) NO         now()
+
+============================================================
+TABLE: tax_filings
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  tax_calendar_id                string (uuid)                  NO
+  tax_type                       string (text)                  YES
+  period_start                   string (date)                  YES
+  period_end                     string (date)                  YES
+  gross_amount                   number (numeric)               NO
+  input_tax                      number (numeric)               NO
+  output_tax                     number (numeric)               NO
+  net_tax_due                    number (numeric)               NO
+  amount_paid                    number (numeric)               NO
+  gra_reference                  string (text)                  NO
+  filed_by                       string (uuid)                  NO
+  filed_at                       string (timestamp with time zone) NO         now()
+  notes                          string (text)                  NO
+
+============================================================
+TABLE: tax_rates
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  tax_name                       string (text)                  YES
+  rate                           number (numeric)               YES
+  effective_date                 string (date)                  YES
+  is_active                      boolean (boolean)              YES        True
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: timesheet_summary
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  NO
+  employee_id                    string (uuid)                  NO
+  employee_name                  string (text)                  NO
+  employee_number                string (text)                  NO
+  department                     string (text)                  NO
+  date                           string (date)                  NO
+  week_start                     string (date)                  NO
+  project_id                     string (uuid)                  NO
+  project_name                   string (text)                  NO
+  division_name                  string (text)                  NO
+  hours_worked                   number (numeric)               NO
+  work_description               string (text)                  NO
+  billable                       boolean (boolean)              NO
+  status                         string (text)                  NO
+  submitted_at                   string (timestamp with time zone) NO
+  approved_at                    string (timestamp with time zone) NO
+  approved_by                    string (uuid)                  NO
+  approved_by_name               string (text)                  NO
+  rejected_reason                string (text)                  NO
+
+============================================================
+TABLE: timesheets
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        extensions.uuid_generate_v4()
+  employee_id                    string (uuid)                  YES
+  project_id                     string (uuid)                  YES
+  work_date                      string (date)                  YES
+  hours_worked                   number (numeric)               YES
+  description                    string (text)                  NO
+  approved_by                    string (uuid)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+  work_description               string (text)                  NO
+  status                         string (text)                  YES        draft
+  submitted_at                   string (timestamp with time zone) NO
+  approved_at                    string (timestamp with time zone) NO
+  rejected_reason                string (text)                  NO
+  week_start                     string (date)                  NO
+  billable                       boolean (boolean)              NO         True
+
+============================================================
+TABLE: trial_balance
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  account_code                   string (text)                  NO
+  account_name                   string (text)                  NO
+  account_type                   string (text)                  NO
+  total_debits                   number (numeric)               NO
+  total_credits                  number (numeric)               NO
+  net_balance                    number (numeric)               NO
+
+============================================================
+TABLE: variable_consideration
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  id                             string (uuid)                  YES        gen_random_uuid()
+  project_id                     string (uuid)                  NO
+  type                           string (text)                  YES
+  description                    string (text)                  NO
+  estimated_amount               number (numeric)               YES
+  constraint_applied             boolean (boolean)              YES        True
+  probability                    number (numeric)               NO
+  recognised_amount              number (numeric)               NO
+  effective_date                 string (date)                  NO
+  created_at                     string (timestamp with time zone) YES        now()
+
+============================================================
+TABLE: wht_certificate_summary
+============================================================
+  Column                         Type                           Required   Default
+  ------------------------------ ------------------------------ ---------- ----------------------------------------
+  subcontractor_id               string (uuid)                  NO
+  subcontractor_name             string (text)                  NO
+  subcontractor_tin              string (text)                  NO
+  tax_year                       number (numeric)               NO
+  total_gross_paid_ghs           number (numeric)               NO
+  total_wht_deducted_ghs         number (numeric)               NO
+  wht_rate                       number (numeric)               NO
+  payment_count                  integer (bigint)               NO

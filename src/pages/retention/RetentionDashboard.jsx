@@ -195,7 +195,7 @@ export default function RetentionDashboard() {
 
   return (
     <div className="py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full lg:max-w-none px-4 sm:px-6 lg:px-8">
         <div className="rounded-[1.75rem] border border-border-soft bg-slate-950/95 p-6 shadow-2xl shadow-black/30">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>

@@ -75,6 +75,9 @@
 }
 
 body.theme-light {
+  --font-sans: 'DM Sans', Inter, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
   --color-bg: #F1F5F9;
   --color-background-page: #F1F5F9;
   --color-surface: #FFFFFF;
@@ -82,6 +85,7 @@ body.theme-light {
   --color-surface-2: #F8FAFC;
   --color-surface-3: #E2E8F0;
   --color-panel: #FFFFFF;
+  --color-background-card: #FFFFFF;
   --color-panel-strong: rgba(15, 23, 42, 0.12);
   --color-border: #E2E8F0;
   --color-border-soft: rgba(15, 23, 42, 0.08);
@@ -115,11 +119,32 @@ body.theme-light {
 
   --color-info: #2563EB;
   --color-info-bg: rgba(59, 130, 246, 0.12);
+  --color-info-bg-strong: rgba(59, 130, 246, 0.20);
+  --color-info-bg-xstrong: rgba(59, 130, 246, 0.28);
   --color-info-border: rgba(59, 130, 246, 0.4);
+
+  --color-warning-bg-strong: rgba(245, 166, 35, 0.18);
+
+  --color-teal: #0F766E;
+  --color-teal-bg-strong: rgba(20, 184, 166, 0.20);
+  --color-teal-bg-xstrong: rgba(20, 184, 166, 0.28);
+  --color-divider: rgba(15, 23, 42, 0.08);
+  --color-amber-rgb: 200, 142, 42;
 
   --shadow-card: 0 12px 32px rgba(15, 23, 42, 0.08), 0 3px 10px rgba(15, 23, 42, 0.04);
   --shadow-panel: 0 6px 18px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.04);
   --shadow-elevated: 0 10px 45px rgba(15, 23, 42, 0.08), 0 5px 18px rgba(15, 23, 42, 0.04);
+  --shadow-black-soft: 0 0 0 3px rgba(20, 184, 166, 0.15);
+  --shadow-button-hover: 0 4px 12px rgba(180, 83, 9, 0.12);
+
+  --color-surface-overlay: rgba(255, 255, 255, 0.72);
+  --color-surface-overlay-strong: rgba(255, 255, 255, 0.88);
+  --color-surface-overlay-alt: rgba(255, 255, 255, 0.78);
+  --color-surface-overlay-heavy: rgba(255, 255, 255, 0.82);
+  --color-surface-overlay-xheavy: rgba(255, 255, 255, 0.90);
+  --color-surface-overlay-xxheavy: rgba(255, 255, 255, 0.92);
+  --color-panel-glass: rgba(255, 255, 255, 0.72);
+  --color-panel-glass-border: rgba(255, 255, 255, 0.45);
 
   color-scheme: light;
   background-color: var(--color-bg);

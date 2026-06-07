@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { liabilityBalance, formatGhs } from '../../lib/formatGhs'
+import { liabilityBalance, formatGhs, formatGhsCompact } from '../../lib/formatGhs'
 import ApprovalQueue from '../../components/ApprovalQueue'
 import GeneralLedger from '../../components/GeneralLedger'
 import ManagementReports from '../../components/reports/ManagementReports'
@@ -26,26 +26,48 @@ import { COMPANY } from '../../lib/company-config'
 import logo from '../../assets/ModuloDevLogo.png'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
+import KpiCard from '../../components/ui/KpiCard'
+import {
+  AlertTriangle,
+  Banknote,
+  Building2,
+  ClipboardList,
+  CreditCard,
+  FileChartColumn,
+  FileText,
+  FolderKanban,
+  Landmark,
+  LayoutDashboard,
+  ListChecks,
+  MoreHorizontal,
+  ReceiptText,
+  ScrollText,
+  Users,
+} from 'lucide-react'
 
 const TABS = [
-  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-  { id: 'approvals', label: 'Approvals', icon: '✓' },
-  { id: 'projects', label: 'Projects', icon: '📁' },
-  { id: 'clients', label: 'Clients', icon: '👥' },
-  { id: 'suppliers', label: 'Suppliers', icon: '🏢' },
-  { id: 'financials', label: 'Financials', icon: '💰' },
-  { id: 'payments-received', label: 'Payments Received', icon: '💳' },
-  { id: 'chart-of-accounts', label: 'Chart of Accounts', icon: '🧾' },
-  { id: 'revenue', label: 'Revenue', icon: '📑' },
-  { id: 'banking', label: 'Banking', icon: '🏦' },
-  { id: 'journal-history', label: 'Journals', icon: '📒' },
-  { id: 'debtors-ledger', label: 'Debtors Ledger', icon: '📋' },
-  { id: 'alerts', label: 'Alerts', icon: '🚨' },
-  { id: 'tax-centre', label: 'Tax Centre', icon: '🏛️' },
-  { id: 'reports', label: 'Reports', icon: '📈' },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'approvals', label: 'Approvals', icon: ListChecks },
+  { id: 'projects', label: 'Projects', icon: FolderKanban },
+  { id: 'clients', label: 'Clients', icon: Users },
+  { id: 'suppliers', label: 'Suppliers', icon: Building2 },
+  { id: 'financials', label: 'Financials', icon: Banknote },
+  { id: 'payments-received', label: 'Payments Received', icon: CreditCard },
+  { id: 'chart-of-accounts', label: 'Chart of Accounts', icon: ReceiptText },
+  { id: 'revenue', label: 'Revenue', icon: FileText },
+  { id: 'banking', label: 'Banking', icon: Landmark },
+  { id: 'journal-history', label: 'Journals', icon: ScrollText },
+  { id: 'debtors-ledger', label: 'Debtors Ledger', icon: ClipboardList },
+  { id: 'alerts', label: 'Alerts', icon: AlertTriangle },
+  { id: 'tax-centre', label: 'Tax Centre', icon: Landmark },
+  { id: 'reports', label: 'Reports', icon: FileChartColumn },
 ]
 
 const DIVISION_NAMES = ['Construction', 'Architecture', 'Real Estate', 'Logistics']
+
+function PortalIcon({ icon: Icon, className = 'h-4 w-4' }) {
+  return <Icon className={className} aria-hidden />
+}
 
 function pctChange(current, previous) {
   if (!previous || previous === 0) return current > 0 ? 100 : null
@@ -57,6 +79,44 @@ function monthBounds(offset = 0) {
   const start = new Date(now.getFullYear(), now.getMonth() + offset, 1)
   const end = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0, 23, 59, 59, 999)
   return { start: start.toISOString(), end: end.toISOString() }
+}
+
+function weekBounds(offset = 0) {
+  const now = new Date()
+  const date = new Date(now)
+  const dayOfWeek = date.getDay()
+  const monday = new Date(date)
+  monday.setDate(date.getDate() - ((dayOfWeek + 6) % 7) + offset * 7)
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
+  const start = new Date(monday.setHours(0, 0, 0, 0))
+  const end = new Date(sunday.setHours(23, 59, 59, 999))
+  return { start: start.toISOString(), end: end.toISOString() }
+}
+
+function dayBounds(offset = 0) {
+  const now = new Date()
+  const day = new Date(now)
+  day.setDate(now.getDate() + offset)
+  const start = new Date(day.setHours(0, 0, 0, 0))
+  const end = new Date(day.setHours(23, 59, 59, 999))
+  return { start: start.toISOString(), end: end.toISOString() }
+}
+
+function getTimeframeBounds(timeframe, offset = 0) {
+  if (timeframe === 'week') return weekBounds(offset)
+  if (timeframe === 'day') return dayBounds(offset)
+  return monthBounds(offset)
+}
+
+function getTimeframeLabels(timeframe) {
+  if (timeframe === 'day') {
+    return { current: 'Today', previous: 'Yesterday' }
+  }
+  if (timeframe === 'week') {
+    return { current: 'This Week', previous: 'Last Week' }
+  }
+  return { current: 'This Month', previous: 'Last Month' }
 }
 
 function sumInvoices(rows, field = 'gross_total_ghs') {
@@ -122,6 +182,7 @@ export default function CeoPortal() {
   const { profile, signOut } = useAuth()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [loading, setLoading] = useState(true)
+  const [timeframe, setTimeframe] = useState('month')
   const [kpiMetrics, setKpiMetrics] = useState({})
   const [divisionData, setDivisionData] = useState({})
   const [projectHealth, setProjectHealth] = useState([])
@@ -169,15 +230,19 @@ export default function CeoPortal() {
   const loadDashboardData = useCallback(async () => {
     setLoading(true)
     try {
-      const thisMonth = monthBounds(0)
-      const lastMonth = monthBounds(-1)
+      const currentPeriod = getTimeframeBounds(timeframe)
+      const previousPeriod = getTimeframeBounds(timeframe, -1)
       const sixMonthsAgo = new Date()
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5)
       sixMonthsAgo.setDate(1)
 
       const [
-        revenueThisRes,
-        revenueLastRes,
+        revenueCurrentRes,
+        revenuePreviousRes,
+        invoiceCurrentRes,
+        invoicePreviousRes,
+        timesheetCurrentRes,
+        timesheetPreviousRes,
         sentInvoicesRes,
         cashRes,
         activeProjectsRes,
@@ -193,14 +258,34 @@ export default function CeoPortal() {
           .from('invoices')
           .select('gross_total_ghs')
           .in('status', ['approved', 'sent', 'paid'])
-          .gte('created_at', thisMonth.start)
-          .lte('created_at', thisMonth.end),
+          .gte('created_at', currentPeriod.start)
+          .lte('created_at', currentPeriod.end),
         supabase
           .from('invoices')
           .select('gross_total_ghs')
           .in('status', ['approved', 'sent', 'paid'])
-          .gte('created_at', lastMonth.start)
-          .lte('created_at', lastMonth.end),
+          .gte('created_at', previousPeriod.start)
+          .lte('created_at', previousPeriod.end),
+        supabase
+          .from('invoices')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', currentPeriod.start)
+          .lte('created_at', currentPeriod.end),
+        supabase
+          .from('invoices')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', previousPeriod.start)
+          .lte('created_at', previousPeriod.end),
+        supabase
+          .from('timesheets')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', currentPeriod.start)
+          .lte('created_at', currentPeriod.end),
+        supabase
+          .from('timesheets')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', previousPeriod.start)
+          .lte('created_at', previousPeriod.end),
         supabase
           .from('invoices')
           .select('expected_receipt_ghs, created_at, due_date')
@@ -237,8 +322,12 @@ export default function CeoPortal() {
           .in('account_code', ['2102', '2103', '2104', '2105', '2106']),
       ])
 
-      const revenueThisMonth = sumInvoices(revenueThisRes.data)
-      const revenueLastMonth = sumInvoices(revenueLastRes.data)
+      const revenueCurrent = sumInvoices(revenueCurrentRes.data)
+      const revenuePrevious = sumInvoices(revenuePreviousRes.data)
+      const invoiceCount = invoiceCurrentRes.count ?? 0
+      const invoicePreviousCount = invoicePreviousRes.count ?? 0
+      const timesheetCount = timesheetCurrentRes.count ?? 0
+      const timesheetPreviousCount = timesheetPreviousRes.count ?? 0
 
       const sentInvoices = sentInvoicesRes.data ?? []
       const outstandingReceivables = sentInvoices.reduce((s, r) => s + Number(r.expected_receipt_ghs || 0), 0)
@@ -257,6 +346,7 @@ export default function CeoPortal() {
         ? `${new Date(payrollRun.period_start).toLocaleDateString('en-GH', { month: 'short', year: 'numeric' })}`
         : null
 
+      const timeframeLabels = getTimeframeLabels(timeframe)
       const taxMap = {}
       ;(taxRes.data ?? []).forEach((r) => {
         taxMap[r.account_code] = liabilityBalance(r.balance)
@@ -266,14 +356,36 @@ export default function CeoPortal() {
         division: p.division,
       }))
 
+      const timeframeSuffix =
+        timeframeLabels.current === 'Today'
+          ? 'Today'
+          : timeframeLabels.current === 'This Week'
+          ? 'This Week'
+          : 'This Month'
+      const taxExposure = Object.values(taxMap).reduce((sum, value) => sum + Number(value || 0), 0)
+      const revenueTrendPct = pctChange(revenueCurrent, revenuePrevious)
+      const revenueTrendLabel = revenueTrendPct == null ? 'No prior period' : `${revenueTrendPct >= 0 ? '+' : ''}${revenueTrendPct.toFixed(1)}%`
+
       setKpiMetrics({
-        revenueThisMonth,
-        revenueTrend: pctChange(revenueThisMonth, revenueLastMonth),
+        revenueCurrent,
+        revenueTrend: revenueTrendPct,
+        revenueTrendLabel,
+        revenueLabel: `Revenue ${timeframeSuffix}`,
+        revenueSubLabel: `vs ${timeframeLabels.previous}`,
+        invoiceCount,
+        invoiceTrend: pctChange(invoiceCount, invoicePreviousCount),
+        invoiceLabel: `Invoices ${timeframeSuffix}`,
+        invoiceSubLabel: `vs ${timeframeLabels.previous}`,
+        timesheetCount,
+        timesheetTrend: pctChange(timesheetCount, timesheetPreviousCount),
+        timesheetsLabel: `Timesheets ${timeframeSuffix}`,
+        timesheetsSubLabel: `vs ${timeframeLabels.previous}`,
         outstandingReceivables,
         receivablesOverdue,
         receivablesTrend: null,
         cashPosition,
         cashTrend: null,
+        taxExposure,
         activeProjects: activeProjectsRes.count ?? 0,
         projectsTrend: null,
         pendingApprovals: pendingRes.count ?? 0,
@@ -290,12 +402,14 @@ export default function CeoPortal() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [timeframe])
 
   useEffect(() => {
-    const initialize = async () => {
-      await loadDashboardData()
-      // load bank accounts for CEO banking read-only view
+    loadDashboardData()
+  }, [loadDashboardData])
+
+  useEffect(() => {
+    const loadBankAccounts = async () => {
       try {
         const { data: accounts } = await supabase.from('bank_accounts').select('*').order('account_name')
         setBankAccounts(accounts || [])
@@ -316,15 +430,15 @@ export default function CeoPortal() {
         console.warn('Failed to load bank accounts for CEO view', err)
       }
     }
-    initialize()
-  }, [loadDashboardData])
+    loadBankAccounts()
+  }, [])
 
   return (
     <div className="portal-shell min-h-screen w-full overflow-x-hidden">
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-8 lg:px-8">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:max-w-none lg:px-8 lg:py-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-[260px_minmax(0,1fr)]">
           {/* Desktop sidebar */}
-          <aside className="portal-sidebar hidden lg:flex lg:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl shadow-black/20">
+          <aside className="portal-sidebar hidden md:flex md:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl shadow-black/20">
             <div className="mb-6 shrink-0">
               <div className="inline-flex items-center gap-3 rounded-3xl bg-amber-bg px-4 py-3 text-sm font-semibold text-amber-200">
                 <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
@@ -364,7 +478,7 @@ export default function CeoPortal() {
           {/* Main */}
           <main className="portal-main portal-main-with-tabs min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0 space-y-6 lg:space-y-8">
             {/* Mobile header */}
-            <div className="mb-4 flex flex-wrap items-start justify-between gap-3 lg:hidden">
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <p className="portal-eyebrow uppercase tracking-[0.2em] text-slate-500">CEO Command Centre</p>
                 <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-white truncate">
@@ -385,7 +499,70 @@ export default function CeoPortal() {
 
             {activeTab === 'dashboard' && (
               <>
-                <KpiStrip metrics={kpiMetrics} loading={loading} />
+                <section className="rounded-3xl border border-white/10 bg-white/5 p-4 sm:p-6 lg:p-8 shadow-sm">
+                  <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="portal-section-eyebrow uppercase tracking-[0.24em] text-slate-500">Executive attention</p>
+                      <h2 className="text-lg font-semibold text-white">Top priorities</h2>
+                    </div>
+                    <p className="text-sm text-slate-400">Click any tile to navigate to the relevant CEO view.</p>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    <KpiCard
+                      title="Cash position"
+                      value={formatGhsCompact(kpiMetrics.cashPosition)}
+                      loading={loading}
+                      icon={Banknote}
+                      accent="text-emerald-300"
+                      actionLabel="View"
+                      onClick={() => setActiveTab('banking')}
+                    />
+                    <KpiCard
+                      title="Receivables risk"
+                      value={formatGhsCompact(kpiMetrics.outstandingReceivables)}
+                      loading={loading}
+                      icon={AlertTriangle}
+                      accent="text-amber-300"
+                      actionLabel="Review"
+                      onClick={() => setActiveTab('debtors-ledger')}
+                    />
+                    <KpiCard
+                      title="Pending approvals"
+                      value={String(kpiMetrics.pendingApprovals ?? 0)}
+                      loading={loading}
+                      icon={ListChecks}
+                      accent="text-blue-300"
+                      actionLabel="Approve"
+                      onClick={() => setActiveTab('approvals')}
+                    />
+                    <KpiCard
+                      title="Revenue trend"
+                      value={kpiMetrics.revenueTrendLabel || '—'}
+                      loading={loading}
+                      icon={FileChartColumn}
+                      accent="text-sky-300"
+                      actionLabel="Explore"
+                      onClick={() => setActiveTab('revenue')}
+                    />
+                    <KpiCard
+                      title="Tax exposure"
+                      value={formatGhsCompact(kpiMetrics.taxExposure)}
+                      loading={loading}
+                      icon={ReceiptText}
+                      accent="text-violet-300"
+                      actionLabel="Analyse"
+                      onClick={() => setActiveTab('tax-centre')}
+                    />
+                  </div>
+                </section>
+
+                <KpiStrip
+                  metrics={kpiMetrics}
+                  loading={loading}
+                  timeframe={timeframe}
+                  onTimeframeChange={setTimeframe}
+                />
 
                 {/* Approvals: desktop only on dashboard scroll; mobile uses tab */}
                 <section id="pending-approvals" className="hidden lg:block" aria-hidden={activeTab !== 'dashboard'}>
@@ -419,7 +596,7 @@ export default function CeoPortal() {
             {activeTab === 'approvals' && (
               <section>
                 <SectionHeader title="Pending approvals" subtitle="Review and approve invoices" />
-                <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6 lg:p-8">
                   <ApprovalQueue />
                 </div>
               </section>
@@ -432,7 +609,7 @@ export default function CeoPortal() {
             )}
 
             {activeTab === 'financials' && (
-              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6 lg:p-8">
                 <SectionHeader title="General ledger" subtitle="Read-only view" />
                 <GeneralLedger readOnly />
               </section>
@@ -457,7 +634,7 @@ export default function CeoPortal() {
             )}
 
             {activeTab === 'banking' && (
-              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+              <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6 lg:p-8">
                 <SectionHeader title="Banking" subtitle="Bank accounts (read-only)" />
                 <div className="w-full overflow-x-auto">
                   <table className="w-full min-w-[720px] text-sm text-slate-200">
@@ -569,7 +746,7 @@ export default function CeoPortal() {
       </div>
 
       {/* Mobile bottom tab bar */}
-      <nav className="portal-mobile-nav lg:hidden" aria-label="CEO navigation">
+      <nav className="portal-mobile-nav md:hidden" aria-label="CEO navigation">
         <div className="mx-auto flex max-w-lg justify-around px-1">
           {visibleTabs.map((tab) => (
             <button
@@ -581,7 +758,7 @@ export default function CeoPortal() {
               }`}
             >
               <span className="text-base leading-none" aria-hidden>
-                {tab.icon}
+                <PortalIcon icon={tab.icon} />
               </span>
               <span>{tab.label}</span>
             </button>
@@ -594,7 +771,7 @@ export default function CeoPortal() {
             }`}
           >
             <span className="text-base leading-none" aria-hidden>
-              ⋯
+              <MoreHorizontal className="h-4 w-4" aria-hidden />
             </span>
             <span>More</span>
           </button>
@@ -609,7 +786,7 @@ export default function CeoPortal() {
             aria-label="Close menu"
             onClick={() => setMoreOpen(false)}
           />
-          <div className="portal-drawer-sheet lg:hidden">
+          <div className="portal-drawer-sheet md:hidden">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-white">More</h3>
               <button
@@ -632,7 +809,7 @@ export default function CeoPortal() {
                   }}
                   className="min-touch flex items-center gap-3 rounded-2xl border border-border-soft bg-white/5 px-4 py-3 text-left text-sm text-slate-200"
                 >
-                  <span aria-hidden>{tab.icon}</span>
+                  <span aria-hidden><PortalIcon icon={tab.icon} /></span>
                   {tab.label}
                 </button>
               ))}
