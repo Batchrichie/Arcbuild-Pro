@@ -422,7 +422,7 @@ export default function TaxCentre({ readOnly = false }) {
                     <button
                       type="button"
                       onClick={() => openMarkModal(row)}
-                      className="mt-5 inline-flex w-full items-center justify-center rounded-full border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-100 transition hover:bg-amber-500/20"
+                      className="mt-5 inline-flex w-full items-center justify-center rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 transition"
                     >
                       Mark as Filed
                     </button>
@@ -489,7 +489,7 @@ export default function TaxCentre({ readOnly = false }) {
                   <button
                     type="button"
                     onClick={handleVatMarkLink}
-                    className="min-touch rounded-full border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-100 transition hover:bg-amber-500/20"
+                    className="min-touch rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 transition"
                   >
                     Mark as Filed
                   </button>
