@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import InviteToPortal from '../../components/InviteToPortal'
 import { getClientById, getClientAgeing } from '../../services/clientService'
 
 const STATUS_STYLE = {
@@ -23,6 +24,8 @@ export default function ClientDetail({ clientId: clientIdProp, onBack }) {
   const [ageing, setAgeing]   = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState(null)
+  const [inviteMessage, setInviteMessage] = useState(null)
+  const [inviteError, setInviteError] = useState(null)
 
   useEffect(() => {
     async function load() {
@@ -74,6 +77,25 @@ export default function ClientDetail({ clientId: clientIdProp, onBack }) {
         <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_STYLE[client.status] ?? ''}`}>
           {client.status}
         </span>
+      </div>
+
+      <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
+        <InviteToPortal
+          email={client.contact_email}
+          inviteData={{ role: 'client' }}
+          buttonText="Invite client to portal"
+          successMessage={`Invite sent to ${client.contact_email}`}
+          onSuccess={() => {
+            setInviteMessage(`Invite sent to ${client.contact_email}`)
+            setInviteError(null)
+          }}
+          onError={(message) => {
+            setInviteError(message)
+            setInviteMessage(null)
+          }}
+        />
+        {inviteMessage && <p className="mt-3 text-sm text-emerald-300">{inviteMessage}</p>}
+        {inviteError && <p className="mt-3 text-sm text-rose-300">{inviteError}</p>}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

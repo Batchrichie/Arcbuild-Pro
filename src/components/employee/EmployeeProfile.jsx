@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import InviteToPortal from '../InviteToPortal'
 import { useEmployee } from '../../context/EmployeeContext'
 import { useAuth } from '../../context/AuthContext'
 import { maskAccount, maskSsnit, maskTin } from '../../lib/employee-utils'
@@ -84,6 +85,14 @@ export default function EmployeeProfile() {
         <Field label="Email" value={email} />
         <Field label="Phone" value={profile?.phone} />
       </section>
+
+      <InviteToPortal
+        email={email}
+        inviteData={{ role: 'employee' }}
+        buttonText="Invite employee to portal"
+        successMessage={`Invite sent to ${email}`}
+        className="rounded-2xl border border-border-soft bg-white/5 p-4"
+      />
 
       <section className="space-y-4 rounded-2xl border border-border-soft bg-white/5 p-4">
         <h3 className="font-semibold text-white">Employment</h3>
