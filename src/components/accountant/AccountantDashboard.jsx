@@ -140,7 +140,7 @@ export default function AccountantDashboard({ onNavigate, onJournalSelect }) {
   }, [load])
 
   return (
-    <div className="space-y-8 bg-gray-100 dark:bg-slate-950 p-6 rounded-3xl">
+    <div className="space-y-8">
       <div>
         <p className="portal-section-eyebrow uppercase tracking-[0.24em]">Today&apos;s work</p>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Action dashboard</h2>

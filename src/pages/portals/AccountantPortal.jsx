@@ -519,7 +519,7 @@ export default function AccountantPortal() {
               </div>
             )}
 
-            <div className="w-full rounded-3xl bg-white/5 dark:bg-slate-950/70 p-4 sm:p-6 lg:p-8">
+            <div className="w-full rounded-3xl bg-gray-100 dark:bg-slate-950 p-4 sm:p-6 lg:p-8">
               {activeView !== 'dashboard' && (
                 <>
                   <p className="portal-section-eyebrow uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Workspace</p>

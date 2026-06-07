@@ -45,7 +45,7 @@ export default function ActionQueue({ title, subtitle, items = [], loading = fal
           items.map((item, index) => {
             const Icon = item.icon
             const isLastOdd = items.length % 2 === 1 && index === items.length - 1
-            const rowBg = index % 2 === 0 ? 'bg-gray-50 dark:bg-slate-800/60' : 'bg-white dark:bg-slate-900/40'
+            const rowBg = index % 2 === 0 ? 'bg-slate-50 dark:bg-slate-800/60' : 'bg-slate-100 dark:bg-slate-900/40'
             return (
               <button
                 key={item.id}
