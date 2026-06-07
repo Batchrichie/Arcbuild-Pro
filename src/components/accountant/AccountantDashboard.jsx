@@ -192,7 +192,7 @@ export default function AccountantDashboard({ onNavigate, onJournalSelect }) {
               type="button"
               onClick={card.onClick}
               disabled={loading}
-              className={`group flex h-[72px] items-center justify-between gap-3 rounded-3xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 px-3 text-left transition hover:border-slate-500/70 hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 disabled:cursor-wait disabled:opacity-80 ${card.accent}`}
+              className={`group flex h-[72px] items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 px-3 text-left transition hover:border-slate-500/70 hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 disabled:cursor-wait disabled:opacity-80 ${card.accent}`}
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div className="inline-flex h-10 w-10 items-center justify-center rounded-3xl bg-gray-50 dark:bg-slate-800 text-amber-300">

@@ -17,7 +17,7 @@ export default function ActionQueue({ title, subtitle, items = [], loading = fal
     <div className="rounded-3xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 shadow-xl shadow-black/10 overflow-hidden">
       <div className="bg-blue-600 dark:bg-blue-700 text-white rounded-t-lg px-4 py-2">
         <p className="text-[14px] font-medium">{title}</p>
-        {subtitle ? <p className="mt-1 text-[12px] text-white/80">{subtitle}</p> : null}
+        {subtitle ? <p className="mt-1 text-blue-100 dark:text-blue-200 text-sm">{subtitle}</p> : null}
       </div>
 
       <div className="p-4 grid grid-cols-2 gap-3">
@@ -45,7 +45,7 @@ export default function ActionQueue({ title, subtitle, items = [], loading = fal
           items.map((item, index) => {
             const Icon = item.icon
             const isLastOdd = items.length % 2 === 1 && index === items.length - 1
-            const rowBg = index % 2 === 0 ? 'bg-slate-50 dark:bg-slate-800/60' : 'bg-slate-100 dark:bg-slate-900/40'
+            const rowBg = 'bg-gray-50 dark:bg-slate-800/60'
             return (
               <button
                 key={item.id}
@@ -64,7 +64,7 @@ export default function ActionQueue({ title, subtitle, items = [], loading = fal
                     ) : null}
                   </div>
                 </div>
-                <span className="rounded-full bg-gray-100/90 px-2.5 py-1 text-sm font-semibold text-gray-900 dark:bg-slate-900/80 dark:text-white">{item.value}</span>
+                <span className="rounded-full bg-blue-100 text-blue-700 dark:bg-slate-700 dark:text-white font-semibold text-sm px-2 py-0.5 min-w-[24px] text-center">{item.value}</span>
                 {item.actionLabel ? (
                   <span className="inline-flex rounded-full bg-white/5 dark:bg-slate-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-300 transition group-hover:bg-white/10">
                     {item.actionLabel}

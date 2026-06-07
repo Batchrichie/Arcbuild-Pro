@@ -52,7 +52,7 @@ export default function TaxLiabilitiesPanel({ balances, loading }) {
                 <button
                   type="button"
                   onClick={() => markFiled(code)}
-                  className="min-touch shrink-0 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1.5 text-sm font-medium text-teal-200 hover:bg-teal-500/20"
+                  className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600"
                 >
                   Mark as Filed
                 </button>

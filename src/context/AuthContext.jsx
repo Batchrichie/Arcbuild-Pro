@@ -8,6 +8,7 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null)   // profiles table row
   const [role, setRole]       = useState(null)   // role string shortcut
   const [loading, setLoading] = useState(true)   // true until session resolved
+  const [sessionExpired, setSessionExpired] = useState(false)
 
   // Fetch the profiles row for a given auth user id
   async function fetchProfile(userId) {
@@ -25,30 +26,44 @@ export function AuthProvider({ children }) {
   }
 
   // Called whenever session changes (mount, login, logout, token refresh)
-  async function handleSessionChange(session) {
+  async function handleSessionChange(session, event = null, error = null) {
     if (session?.user) {
       setUser(session.user)
       const profileData = await fetchProfile(session.user.id)
       setProfile(profileData)
       setRole(profileData?.role ? String(profileData.role).toLowerCase() : null)
+      setSessionExpired(false)
     } else {
       setUser(null)
       setProfile(null)
       setRole(null)
+      setSessionExpired(!!error)
     }
     setLoading(false)
   }
 
   useEffect(() => {
-    // Restore existing session on mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      handleSessionChange(session)
-    })
+    async function initializeSession() {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) {
+          setSessionExpired(true)
+          handleSessionChange(null, null, error)
+          return
+        }
+        handleSessionChange(session)
+      } catch (err) {
+        setSessionExpired(true)
+        handleSessionChange(null, null, err)
+      }
+    }
+
+    initializeSession()
 
     // Listen for login / logout / token refresh events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        handleSessionChange(session)
+      (event, session) => {
+        handleSessionChange(session, event)
       }
     )
 
@@ -61,7 +76,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, role, loading, signOut }}>
+    <AuthContext.Provider value={{ user, profile, role, loading, sessionExpired, signOut }}>
       {children}
     </AuthContext.Provider>
   )
