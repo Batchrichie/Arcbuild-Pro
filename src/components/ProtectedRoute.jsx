@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { roleHomeRoutes } from '../lib/roleRoutes'
 
 /**
  * ProtectedRoute
@@ -11,11 +12,11 @@ import { useAuth } from '../context/AuthContext'
  * Behaviour:
  *   loading             → show spinner (session not yet resolved)
  *   no session          → redirect to /login
- *   role not allowed    → redirect to /unauthorized
+ *   role not allowed    → redirect to role home if valid, otherwise /unauthorized
  *   role allowed        → render children
  */
 export default function ProtectedRoute({ allowedRoles, children }) {
-  const { user, role, loading } = useAuth()
+  const { user, role, loading, sessionExpired } = useAuth()
 
   if (loading) {
     return (
@@ -31,10 +32,15 @@ export default function ProtectedRoute({ allowedRoles, children }) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />
+    const redirectPath = sessionExpired ? '/login?reason=session_expired' : '/login'
+    return <Navigate to={redirectPath} replace />
   }
 
   if (!allowedRoles.includes(role)) {
+    const homeRoute = roleHomeRoutes[role]
+    if (homeRoute) {
+      return <Navigate to={homeRoute} replace />
+    }
     return <Navigate to="/unauthorized" replace />
   }
 

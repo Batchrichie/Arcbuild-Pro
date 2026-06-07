@@ -1,22 +1,14 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { COMPANY } from '../lib/company-config'
 import logo from '../assets/ModuloDevLogo.png'
 import ThemeToggle from '../components/ui/ThemeToggle'
-
-// Role → portal route mapping
-const ROLE_ROUTES = {
-  ceo:             '/ceo',
-  accountant:      '/accountant',
-  project_manager: '/pm',
-  hr_manager:      '/hr',
-  employee:        '/employee',
-  client:          '/client',
-}
+import { roleHomeRoutes } from '../lib/roleRoutes'
 
 export default function Login() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -50,7 +42,7 @@ export default function Login() {
         return
       }
 
-      const destination = ROLE_ROUTES[profile.role] ?? '/unauthorized'
+      const destination = roleHomeRoutes[profile.role] ?? '/unauthorized'
       navigate(destination, { replace: true })
 
     } catch {
@@ -112,6 +104,14 @@ export default function Login() {
             </div>
             <ThemeToggle className="inline-flex shrink-0" />
           </div>
+
+          {searchParams.get('reason') === 'session_expired' && (
+            <div className="mb-6 rounded-3xl border border-amber-900/40 bg-amber-950/40 p-4">
+              <p className="text-amber-200 text-sm leading-relaxed">
+                Your session expired. Please sign in again to continue.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="mb-6 rounded-3xl border border-red-900/40 bg-red-950/40 p-4">
