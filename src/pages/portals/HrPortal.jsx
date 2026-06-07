@@ -15,6 +15,7 @@ import HeadcountReport from '../../components/hr/HeadcountReport'
 import TimesheetApproval from '../../components/TimesheetApproval'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
+import { BarChart3, BriefcaseBusiness, Palmtree, MoreHorizontal, Users } from 'lucide-react'
 
 const NAV_SECTIONS = [
   {
@@ -52,11 +53,11 @@ const NAV_SECTIONS = [
 ]
 
 const MOBILE_TABS = [
-  { id: 'employees', label: 'Employees', icon: '👥' },
-  { id: 'payroll', label: 'Payroll', icon: '💼' },
-  { id: 'leave', label: 'Leave', icon: '🏖️' },
-  { id: 'reports', label: 'Reports', icon: '📊' },
-  { id: 'more', label: 'More', icon: '⋯' },
+  { id: 'employees', label: 'Employees', icon: Users },
+  { id: 'payroll', label: 'Payroll', icon: BriefcaseBusiness },
+  { id: 'leave', label: 'Leave', icon: Palmtree },
+  { id: 'reports', label: 'Reports', icon: BarChart3 },
+  { id: 'more', label: 'More', icon: MoreHorizontal },
 ]
 
 const VIEW_TITLES = {
@@ -72,6 +73,10 @@ const VIEW_TITLES = {
   'leave-balances': 'Leave Balances',
   'cost-report': 'Employee Cost Report',
   headcount: 'Headcount Report',
+}
+
+function PortalIcon({ icon: Icon, className = 'h-4 w-4' }) {
+  return <Icon className={className} aria-hidden />
 }
 
 const MOBILE_MAP = {
@@ -156,9 +161,9 @@ export default function HrPortal() {
 
   return (
     <div className="portal-shell min-h-screen w-full overflow-x-hidden">
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-8 lg:px-8">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside className="portal-sidebar hidden lg:flex lg:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl">
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:max-w-none lg:px-8 lg:py-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-[260px_minmax(0,1fr)]">
+          <aside className="portal-sidebar hidden md:flex md:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl">
             <div className="mb-6 inline-flex items-center gap-3 rounded-3xl bg-violet-500/15 px-4 py-3 text-sm font-semibold text-violet-200">
               <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
               {COMPANY.shortName}
@@ -196,7 +201,7 @@ export default function HrPortal() {
           </aside>
 
           <main className="portal-main portal-main-with-tabs min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">
-            <div className="mb-4 flex flex-wrap items-start justify-between gap-3 lg:hidden">
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <h1 className="text-xl sm:text-2xl font-semibold text-white truncate">{VIEW_TITLES[activeView]}</h1>
               </div>
@@ -210,12 +215,12 @@ export default function HrPortal() {
                 <h2 className="text-2xl font-semibold text-white">{VIEW_TITLES[activeView]}</h2>
               </div>
             )}
-            <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">{renderView()}</div>
+            <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6 lg:p-8">{renderView()}</div>
           </main>
         </div>
       </div>
 
-      <nav className="portal-mobile-nav lg:hidden">
+      <nav className="portal-mobile-nav md:hidden">
         <div className="mx-auto flex max-w-lg justify-around px-1">
           {MOBILE_TABS.map((tab) => (
             <button
@@ -226,7 +231,7 @@ export default function HrPortal() {
                 mobileTab === tab.id ? 'text-violet-300' : 'text-slate-500'
               }`}
             >
-              <span className="text-base">{tab.icon}</span>
+              <span className="text-base"><PortalIcon icon={tab.icon} /></span>
               {tab.label}
             </button>
           ))}

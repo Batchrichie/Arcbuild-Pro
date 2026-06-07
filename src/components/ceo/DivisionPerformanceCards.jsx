@@ -11,7 +11,7 @@ const DIVISIONS = [
 export default function DivisionPerformanceCards({ divisionData, loading }) {
   if (loading) {
     return (
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
         {DIVISIONS.map((d) => (
           <div key={d.name} className="h-64 animate-pulse rounded-3xl border border-border-soft bg-panel" />
         ))}
@@ -20,7 +20,7 @@ export default function DivisionPerformanceCards({ divisionData, loading }) {
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
       {DIVISIONS.map((div) => {
         const stats = divisionData[div.name] || {
           revenueMonth: 0,

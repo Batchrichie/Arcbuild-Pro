@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { Building2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { ClientProvider, useClient } from '../../context/ClientContext'
 import { COMPANY } from '../../lib/company-config'
 import logo from '../../assets/ModuloDevLogo.png'
 import ThemeToggle from '../../components/ui/ThemeToggle'
+import EmptyState from '../../components/ui/EmptyState'
 import { useTheme } from '../../context/ThemeContext'
 import ClientProjects from '../../components/client/ClientProjects'
 import ClientInvoices from '../../components/client/ClientInvoices'
@@ -25,12 +27,13 @@ function ClientPortalContent() {
   const [projectId, setProjectId] = useState(null)
 
   const displayName = client?.name || profile?.full_name || 'Client'
-  const { setTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
+  const previousThemeRef = useRef(theme)
 
   const render = () => {
     switch (tab) {
       case 'projects':
-        return <ClientProjects selectedProjectId={projectId} onSelectProject={setProjectId} />
+        return <ClientProjects selectedProjectId={projectId} onSelectProject={setProjectId} onSwitchTab={setTab} />
       case 'invoices':
         return <ClientInvoices />
       case 'documents':
@@ -43,14 +46,9 @@ function ClientPortalContent() {
   }
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem('arcbuild_theme')
-      if (stored !== 'light' && stored !== 'dark') {
-        setTheme('light')
-      }
-    } catch {
-      /* best effort */
-    }
+    previousThemeRef.current = theme
+    setTheme('light')
+    return () => setTheme(previousThemeRef.current)
   }, [setTheme])
 
   useEffect(() => {
@@ -60,7 +58,7 @@ function ClientPortalContent() {
   return (
     <div className="portal-shell min-h-screen w-full overflow-x-hidden bg-slate-50 text-slate-900">
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3">
             <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-xl object-cover" />
             <div className="hidden sm:block">
@@ -110,7 +108,7 @@ function ClientPortalContent() {
       {menuOpen && (
         <>
           <button type="button" className="fixed inset-0 z-50 bg-black/30 md:hidden" aria-label="Close" onClick={() => setMenuOpen(false)} />
-          <div className="client-drawer fixed right-0 top-0 z-[60] flex h-full w-[min(100%,280px)] flex-col bg-white p-6 shadow-xl md:hidden">
+          <div className="client-drawer fixed right-0 top-0 z-60 flex h-full w-[min(100%,280px)] flex-col bg-white p-6 shadow-xl md:hidden">
             <div className="mb-6 flex items-center justify-between">
               <p className="font-semibold text-slate-900">Menu</p>
               <button type="button" onClick={() => setMenuOpen(false)} className="text-slate-500">Close</button>
@@ -143,9 +141,15 @@ function ClientPortalContent() {
         </>
       )}
 
-      <main className="w-full min-w-0 overflow-x-hidden pb-24 lg:pb-0 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="w-full min-w-0 overflow-x-hidden pb-24 lg:pb-0 px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         {loading ? (
           <div className="h-48 animate-pulse rounded-2xl bg-slate-200" />
+        ) : !client ? (
+          <EmptyState
+            icon={Building2}
+            title="Client details are not available"
+            description="Please check back once your client profile has loaded or contact your account administrator."
+          />
         ) : (
           render()
         )}

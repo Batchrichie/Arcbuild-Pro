@@ -311,7 +311,7 @@ export default function FinancialStatements({ defaultTab = 'trial' }) {
         >
           <p className="mb-4 text-sm text-text-muted">As at {asAtDate}</p>
 
-          <div className="grid gap-8 lg:grid-cols-2">
+          <div className="grid gap-8 md:grid-cols-2">
             <div>
               <StatementSectionHeader>Assets</StatementSectionHeader>
               <StatementLine label="Current Assets" amount={null} bold />

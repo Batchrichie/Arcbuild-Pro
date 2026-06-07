@@ -37,6 +37,20 @@ import AlertLog from '../../components/alerts/AlertLog'
 import ManagementReports from '../../components/reports/ManagementReports'
 import ProjectRegistry from '../../pages/projects/ProjectRegistry'
 import ChartOfAccounts from '../accounts/ChartOfAccounts'
+import {
+  AlertTriangle,
+  Banknote,
+  BriefcaseBusiness,
+  Building2,
+  FileText,
+  FolderKanban,
+  HardHat,
+  Landmark,
+  LayoutDashboard,
+  MoreHorizontal,
+  ScrollText,
+  Users,
+} from 'lucide-react'
 
 const NAV_SECTIONS = [
   {
@@ -110,12 +124,12 @@ const NAV_SECTIONS = [
 ]
 
 const MOBILE_TABS = [
-  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-  { id: 'invoices', label: 'Invoices', icon: '📄' },
-  { id: 'ledger', label: 'Ledger', icon: '📒' },
-  { id: 'payroll', label: 'Payroll', icon: '💼' },
-  { id: 'projects', label: 'Projects', icon: '📁' },
-  { id: 'more', label: 'More', icon: '⋯' },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'invoices', label: 'Invoices', icon: FileText },
+  { id: 'ledger', label: 'Ledger', icon: ScrollText },
+  { id: 'payroll', label: 'Payroll', icon: BriefcaseBusiness },
+  { id: 'projects', label: 'Projects', icon: FolderKanban },
+  { id: 'more', label: 'More', icon: MoreHorizontal },
 ]
 
 const MOBILE_SUB_NAV = {
@@ -145,14 +159,18 @@ const MOBILE_SUB_NAV = {
   ],
 }
 
+function PortalIcon({ icon: Icon, className = 'h-4 w-4' }) {
+  return <Icon className={className} aria-hidden />
+}
+
 const MORE_DRAWER_ITEMS = [
-  { id: 'tax-centre', label: 'Tax Centre', icon: '🏛️' },
-  { id: 'alert-log', label: 'Alerts', icon: '🚨' },
-  { id: 'asset-register', label: 'Asset Register', icon: '🏗️' },
-  { id: 'subcontractors', label: 'Subcontractors', icon: '👷' },
-  { id: 'clients', label: 'Clients', icon: '👥' },
-  { id: 'suppliers', label: 'Suppliers', icon: '🏢' },
-  { id: 'fx-rates', label: 'FX Rates', icon: '💱' },
+  { id: 'tax-centre', label: 'Tax Centre', icon: Landmark },
+  { id: 'alert-log', label: 'Alerts', icon: AlertTriangle },
+  { id: 'asset-register', label: 'Asset Register', icon: HardHat },
+  { id: 'subcontractors', label: 'Subcontractors', icon: HardHat },
+  { id: 'clients', label: 'Clients', icon: Users },
+  { id: 'suppliers', label: 'Suppliers', icon: Building2 },
+  { id: 'fx-rates', label: 'FX Rates', icon: Banknote },
 ]
 
 const VIEW_TITLES = {
@@ -314,8 +332,8 @@ export default function AccountantPortal() {
       case 'new-journal':
         return (
           <div className="space-y-4">
-            <p className="text-sm text-slate-400 lg:hidden">Post a manual journal entry below.</p>
-            <div className="lg:hidden">
+            <p className="text-sm text-slate-400 md:hidden">Post a manual journal entry below.</p>
+            <div className="md:hidden">
               <ManualJournalForm />
             </div>
             <div className="hidden lg:block">
@@ -409,9 +427,9 @@ export default function AccountantPortal() {
 
   return (
     <div className="portal-shell min-h-screen w-full overflow-x-hidden">
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-8 lg:px-8">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside className="portal-sidebar hidden lg:flex lg:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl shadow-black/20 hover-animate panel-surface soft-gradient-overlay">
+      <div className="w-full px-6 py-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-[260px_minmax(0,1fr)]">
+          <aside className="portal-sidebar hidden md:flex md:flex-col rounded-4xl border border-border-soft p-5 shadow-2xl shadow-black/20 hover-animate panel-surface">
             <div className="mb-6">
               <div className="inline-flex items-center gap-3 rounded-3xl bg-success-bg px-4 py-3 text-sm font-semibold text-teal-200">
                 <img src={logo} alt={COMPANY.shortName} className="h-10 w-10 rounded-2xl object-cover" />
@@ -434,20 +452,20 @@ export default function AccountantPortal() {
               Dashboard
             </button>
 
-            <nav className="mt-6 max-h-[calc(100vh-16rem)] space-y-6 overflow-y-auto pr-1">
+            <nav className="mt-6 max-h-[calc(100vh-16rem)] overflow-y-auto pr-1">
               {NAV_SECTIONS.map((section) => (
-                <div key={section.title}>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{section.title}</p>
-                  <div className="space-y-1">
+                <div key={section.title} className="pt-5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] opacity-45 text-slate-300">{section.title}</p>
+                  <div className="mt-3 space-y-1">
                     {section.items.map((item) => (
                       <button
                         key={item.id}
                         type="button"
                         onClick={() => navigate(item.id)}
-                        className={`min-touch w-full rounded-xl border px-3 py-2.5 text-left text-sm transition ${
+                        className={`min-touch w-full rounded-xl border-l-4 border-transparent px-3 py-2.5 text-left text-sm transition ${
                           activeView === item.id
-                            ? 'border-teal-400/40 bg-teal-500/12 text-teal-100'
-                            : 'border-transparent text-slate-400 hover:border-border-soft hover:bg-white/5 hover:text-slate-200'
+                            ? 'border-teal-400 bg-white/5 text-teal-100'
+                            : 'border-transparent text-slate-400 hover:border-slate-600 hover:bg-white/5 hover:text-slate-200'
                         }`}
                       >
                         {item.label}
@@ -465,7 +483,7 @@ export default function AccountantPortal() {
           </aside>
 
           <main className="portal-main portal-main-with-tabs min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">
-            <div className="mb-4 flex flex-wrap items-start justify-between gap-3 lg:hidden">
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <p className="portal-eyebrow uppercase tracking-[0.2em] text-slate-500">Accountant</p>
                 <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-white truncate">{VIEW_TITLES[activeView] || 'Workspace'}</h1>
@@ -483,7 +501,7 @@ export default function AccountantPortal() {
             </div>
 
             {showMobileSubNav && (
-              <div className="mb-4 flex gap-2 overflow-x-auto lg:hidden">
+              <div className="mb-4 -mx-4 flex gap-2 overflow-x-auto px-4 pb-2 md:hidden">
                 {MOBILE_SUB_NAV[mobileTab].map((item) => (
                   <button
                     key={item.id}
@@ -501,12 +519,12 @@ export default function AccountantPortal() {
               </div>
             )}
 
-            <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+            <div className="w-full rounded-3xl bg-white/5 dark:bg-slate-950/70 p-4 sm:p-6 lg:p-8">
               {activeView !== 'dashboard' && (
-                <div className="mb-6 hidden lg:block">
-                  <p className="portal-section-eyebrow uppercase tracking-[0.24em]">Workspace</p>
-                  <h2 className="mt-1 text-2xl font-semibold text-white">{VIEW_TITLES[activeView]}</h2>
-                </div>
+                <>
+                  <p className="portal-section-eyebrow uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Workspace</p>
+                  <h2 className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">{VIEW_TITLES[activeView]}</h2>
+                </>
               )}
               {renderContent()}
             </div>
@@ -514,7 +532,7 @@ export default function AccountantPortal() {
         </div>
       </div>
 
-      <nav className="portal-mobile-nav lg:hidden" aria-label="Accountant navigation">
+      <nav className="portal-mobile-nav md:hidden" aria-label="Accountant navigation">
         <div className="mx-auto flex max-w-lg justify-around px-1">
           {MOBILE_TABS.map((tab) => (
             <button
@@ -526,7 +544,7 @@ export default function AccountantPortal() {
               }`}
             >
               <span className="text-base leading-none" aria-hidden>
-                {tab.icon}
+                <PortalIcon icon={tab.icon} />
               </span>
               <span>{tab.label}</span>
             </button>
@@ -537,7 +555,7 @@ export default function AccountantPortal() {
       {moreOpen && (
         <>
           <button type="button" className="portal-drawer-backdrop" aria-label="Close menu" onClick={() => setMoreOpen(false)} />
-          <div className="portal-drawer-sheet lg:hidden">
+          <div className="portal-drawer-sheet md:hidden">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-white">More</h3>
               <button type="button" onClick={() => setMoreOpen(false)} className="text-sm text-slate-400">
@@ -553,7 +571,7 @@ export default function AccountantPortal() {
                   onClick={() => navigate(item.id)}
                   className="min-touch flex items-center gap-3 rounded-2xl border border-border-soft bg-white/5 px-4 py-3 text-left text-sm text-slate-200"
                 >
-                  <span aria-hidden>{item.icon}</span>
+                  <span aria-hidden><PortalIcon icon={item.icon} /></span>
                   {item.label}
                 </button>
               ))}

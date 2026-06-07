@@ -160,7 +160,7 @@ export default function SitePhotoUpload() {
               onClick={() => setFullscreen(photo)}
               className="mb-3 block w-full break-inside-avoid overflow-hidden rounded-xl border border-border-soft text-left"
             >
-              <img src={photo.file_url} alt={photo.description || photo.file_name} className="w-full object-cover" />
+              <img src={photo.file_url} alt={photo.description || photo.file_name} className="max-h-48 w-full object-cover" />
               <div className="bg-black/60 px-2 py-2 text-xs text-slate-200">
                 <p>{photo.document_date || photo.created_at?.split('T')[0]}</p>
                 {photo.description && <p className="mt-0.5 line-clamp-2 opacity-90">{photo.description}</p>}

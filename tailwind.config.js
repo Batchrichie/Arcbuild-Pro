@@ -53,6 +53,13 @@ export default defineConfig({
         elevated: 'var(--color-elevated)',
         inset: 'var(--color-inset)',
       },
+      fontFamily: {
+        sans: ['var(--font-sans)'],
+        mono: ['var(--font-mono)'],
+      },
+      borderRadius: {
+        '4xl': '2rem',
+      },
       zIndex: {
         'portal-nav': 'var(--z-portal-nav)',
         'portal-backdrop': 'var(--z-portal-backdrop)',

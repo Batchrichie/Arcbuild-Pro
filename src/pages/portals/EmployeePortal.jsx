@@ -11,14 +11,15 @@ import TimesheetEntry from '../../components/TimesheetEntry'
 import Modal from '../../components/ui/Modal'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
+import { Banknote, CircleDollarSign, ClipboardPenLine, Home, Palmtree, UserCircle } from 'lucide-react'
 
 const TABS = [
-  { id: 'home', label: 'Home', icon: '🏠' },
-  { id: 'timesheets', label: 'Timesheets', icon: '📝' },
-  { id: 'payslips', label: 'Payslips', icon: '💵' },
-  { id: 'leave', label: 'Leave', icon: '🏖️' },
-  { id: 'loans', label: 'Loans', icon: '🏦' },
-  { id: 'profile', label: 'Profile', icon: '👤' },
+  { id: 'home', label: 'Home', icon: Home },
+  { id: 'timesheets', label: 'Timesheets', icon: ClipboardPenLine },
+  { id: 'payslips', label: 'Payslips', icon: CircleDollarSign },
+  { id: 'leave', label: 'Leave', icon: Palmtree },
+  { id: 'loans', label: 'Loans', icon: Banknote },
+  { id: 'profile', label: 'Profile', icon: UserCircle },
 ]
 
 const TITLES = {
@@ -28,6 +29,10 @@ const TITLES = {
   leave: 'Leave',
   loans: 'Loans',
   profile: 'Profile',
+}
+
+function PortalIcon({ icon: Icon, className = 'h-5 w-5' }) {
+  return <Icon className={className} aria-hidden />
 }
 
 function EmployeePortalContent() {
@@ -45,10 +50,20 @@ function EmployeePortalContent() {
     setTab('payslips')
   }
 
+  const goTimesheets = () => {
+    setTab('timesheets')
+    setTimesheetOpen(true)
+  }
+
+  const goLeave = () => {
+    setTab('leave')
+    setLeaveOpen(true)
+  }
+
   const render = () => {
     switch (tab) {
       case 'home':
-        return <EmployeeHome onViewPayslip={goPayslip} />
+        return <EmployeeHome onViewPayslip={goPayslip} onOpenTimesheet={goTimesheets} onOpenLeave={goLeave} />
       case 'payslips':
         return <EmployeePayslips initialLineId={payslipLineId} onClearInitial={() => setPayslipLineId(null)} />
       case 'leave':
@@ -80,9 +95,9 @@ function EmployeePortalContent() {
 
   return (
     <div className="portal-shell min-h-screen w-full overflow-x-hidden">
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside className="portal-sidebar hidden lg:flex lg:flex-col rounded-3xl border border-border-soft p-4">
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:max-w-none lg:px-8 lg:py-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-[260px_minmax(0,1fr)]">
+          <aside className="portal-sidebar hidden md:flex md:flex-col rounded-3xl border border-border-soft p-4">
             <p className="portal-eyebrow text-slate-500">Employee</p>
             <p className="mt-1 truncate font-semibold text-white">{profile?.full_name}</p>
             <nav className="mt-6 space-y-1">
@@ -107,7 +122,7 @@ function EmployeePortalContent() {
           </aside>
 
           <main className="portal-main portal-employee-main min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">
-            <div className="mb-4 flex flex-wrap items-start justify-between gap-3 lg:hidden">
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <h1 className="text-xl sm:text-2xl font-semibold text-white truncate">{TITLES[tab]}</h1>
               </div>
@@ -116,12 +131,12 @@ function EmployeePortalContent() {
                 <ThemeToggle className="self-start" />
               </div>
             </div>
-            <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">{render()}</div>
+            <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6 lg:p-8">{render()}</div>
           </main>
         </div>
       </div>
 
-      <nav className="portal-mobile-nav" aria-label="Employee navigation">
+      <nav className="portal-mobile-nav md:hidden" aria-label="Employee navigation">
         <div className="mx-auto flex max-w-lg justify-around px-1">
           {TABS.map((t) => (
             <button
@@ -132,7 +147,7 @@ function EmployeePortalContent() {
                 tab === t.id ? 'text-orange-300' : 'text-slate-500'
               }`}
             >
-              <span className="text-lg leading-none" aria-hidden>{t.icon}</span>
+              <span className="text-lg leading-none" aria-hidden><PortalIcon icon={t.icon} /></span>
               <span>{t.label}</span>
             </button>
           ))}

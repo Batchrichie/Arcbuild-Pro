@@ -90,10 +90,16 @@ export default function ScrollableSelect({
     const spaceBelow = window.innerHeight - rect.bottom
     const spaceAbove = rect.top
     const openUpward = spaceBelow < PANEL_MAX_HEIGHT && spaceAbove > spaceBelow
+    const viewportPadding = 8
+    const maxPanelWidth = Math.max(0, window.innerWidth - viewportPadding * 2)
+    const minPanelWidth = Math.min(PANEL_MIN_WIDTH, maxPanelWidth)
+    const width = Math.min(Math.max(rect.width, minPanelWidth), maxPanelWidth)
+    const overflowRight = rect.left + width - (window.innerWidth - viewportPadding)
+    const left = Math.max(viewportPadding, rect.left - Math.max(0, overflowRight))
 
     setPanelPos({
-      left: rect.left,
-      width: Math.max(rect.width, PANEL_MIN_WIDTH),
+      left,
+      width,
       top: openUpward ? rect.top - 4 : rect.bottom + 4,
       transform: openUpward ? 'translateY(-100%)' : undefined,
     })
