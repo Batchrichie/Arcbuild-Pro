@@ -36,21 +36,27 @@ export default function ProjectFinanceDashboard({
           // Filter projects by current PM's assignments
           const result = await supabase
             .from('project_assignments')
-            .select('project_id, projects(id,name,division_id,division_name,status,created_at)')
+            .select('project_id, projects(id,name,division_id,status,created_at,division:divisions(name))')
             .eq('profile_id', currentUserProfileId)
 
-          data = result.data?.map(pa => pa.projects) || []
+          data = (result.data || []).map((pa) => ({
+            ...pa.projects,
+            division_name: pa.projects?.division?.name || '',
+          }))
           err = result.error
         } else {
           // Load all active projects for other roles
           const result = await supabase
             .from('projects')
-            .select('id,name,division_id,division_name,status,created_at')
+            .select('id,name,division_id,status,created_at,division:divisions(name)')
             .eq('status', 'active')
             .order('created_at', { ascending: false })
             .limit(50)
 
-          data = result.data
+          data = (result.data || []).map((project) => ({
+            ...project,
+            division_name: project.division?.name || '',
+          }))
           err = result.error
         }
 
