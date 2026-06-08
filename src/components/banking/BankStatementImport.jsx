@@ -51,7 +51,11 @@ export default function BankStatementImport() {
   }, [])
 
   async function loadBankAccounts() {
-    const { data, error: err } = await supabase.from('bank_accounts').select('*').order('account_name')
+    const { data, error: err } = await supabase
+      .from('bank_accounts')
+      .select('id,account_name,bank_name,gl_account_code')
+      .order('account_name')
+      .limit(50)
     if (err) {
       console.error('Failed to load bank accounts', err)
       setError('Unable to load bank accounts.')

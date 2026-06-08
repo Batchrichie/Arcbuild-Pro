@@ -43,7 +43,7 @@ export default function GeneralLedger({ readOnly = false }) {
     setSelectedJournal({ loading: true })
     const { data, error } = await supabase
       .from('ledger_entries')
-      .select('*')
+      .select('id, journal_entry_id, account_code, account_name, debit_amount, credit_amount, description, created_at')
       .eq('journal_entry_id', journalId)
       .order('created_at', { ascending: true })
 

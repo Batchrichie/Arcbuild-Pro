@@ -18,7 +18,11 @@ export default function CeoBankAccountsView() {
   async function loadAccounts() {
     setLoading(true)
     try {
-      const { data: accountData, error: accountError } = await supabase.from('bank_accounts').select('*').order('account_name')
+      const { data: accountData, error: accountError } = await supabase
+        .from('bank_accounts')
+        .select('id, account_name, account_number, bank_name, currency, current_balance')
+        .order('account_name')
+        .limit(50)
       if (accountError) throw accountError
       setAccounts(accountData || [])
 

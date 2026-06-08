@@ -57,6 +57,10 @@ export default defineConfig({
         sans: ['var(--font-sans)'],
         mono: ['var(--font-mono)'],
       },
+      fontSize: {
+        base: ['15px', '1.6'],
+        lg: ['16px', '1.6'],
+      },
       borderRadius: {
         '4xl': '2rem',
       },

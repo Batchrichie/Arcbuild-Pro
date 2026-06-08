@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useEmployee } from '../../context/EmployeeContext'
 import { formatGhs } from '../../lib/formatGhs'
@@ -7,117 +8,120 @@ import { firstName, greeting } from '../../lib/employee-utils'
 
 export default function EmployeeHome({ onViewPayslip, onOpenTimesheet, onOpenLeave }) {
   const { employee, profile } = useEmployee()
-  const [stats, setStats] = useState({ netPay: null, leaveRemaining: null, loanOutstanding: 0 })
-  const [upcomingLeave, setUpcomingLeave] = useState([])
-  const [recentLine, setRecentLine] = useState(null)
-  const [leaveSummary, setLeaveSummary] = useState([])
-  const [timesheetRows, setTimesheetRows] = useState([])
-  const [announcements, setAnnouncements] = useState([])
-  const [loanSummary, setLoanSummary] = useState({ activeCount: 0, outstanding: 0, nextDeduction: null })
-  const [loading, setLoading] = useState(true)
 
-  const load = useCallback(async () => {
-    if (!employee?.id) return
-    setLoading(true)
-    const today = new Date().toISOString().split('T')[0]
-    const year = new Date().getFullYear()
+  const { data, isLoading } = useQuery({
+    queryKey: ['employee-personal-hub', employee?.id, profile?.email],
+    queryFn: async () => {
+      if (!employee?.id) return null
+      
+      const today = new Date().toISOString().split('T')[0]
+      const year = new Date().getFullYear()
 
-    const [lineRes, leaveRes, upcomingRes, leaveRowsRes, loansRes, timesheetRes, alertsRes, entitlement] = await Promise.all([
-      supabase
-        .from('payroll_lines')
-        .select('id, basic_salary, paye, net_pay, payroll_run_id, created_at')
-        .eq('employee_id', employee.id)
-        .order('created_at', { ascending: false })
-        .limit(1),
-      supabase
-        .from('leave_requests')
-        .select('days_requested')
-        .eq('employee_id', employee.id)
-        .eq('status', 'approved')
-        .eq('leave_type', 'annual')
-        .gte('start_date', `${year}-01-01`)
-        .lte('end_date', `${year}-12-31`),
-      supabase
-        .from('leave_requests')
-        .select('leave_type, start_date, end_date, days_requested')
-        .eq('employee_id', employee.id)
-        .eq('status', 'approved')
-        .gte('start_date', today)
-        .order('start_date', { ascending: true })
-        .limit(3),
-      supabase
-        .from('leave_requests')
-        .select('leave_type, days_requested')
-        .eq('employee_id', employee.id)
-        .eq('status', 'approved')
-        .gte('start_date', `${year}-01-01`)
-        .lte('end_date', `${year}-12-31`),
-      supabase
-        .from('staff_loans')
-        .select('outstanding_balance, monthly_deduction, start_date')
-        .eq('employee_id', employee.id)
-        .eq('status', 'active')
-        .order('start_date', { ascending: true }),
-      supabase
-        .from('timesheets')
-        .select('id, status, work_date, hours_worked, submitted_at')
-        .eq('employee_id', employee.id)
-        .in('status', ['draft', 'submitted'])
-        .order('work_date', { ascending: false })
-        .limit(5),
-      ...(profile?.email
-        ? [
-            supabase
-              .from('alert_log')
-              .select('id, subject, message, alert_type, sent_at')
-              .or(`recipient_role.eq.employee,recipient_email.eq.${profile.email}`)
-              .order('sent_at', { ascending: false })
-              .limit(3),
-          ]
-        : [
-            supabase
-              .from('alert_log')
-              .select('id, subject, message, alert_type, sent_at')
-              .eq('recipient_role', 'employee')
-              .order('sent_at', { ascending: false })
-              .limit(3),
-          ]),
-      entitlement,
-    ])
+      const [lineRes, leaveRes, upcomingRes, leaveRowsRes, loansRes, timesheetRes, alertsRes, entitlement] = await Promise.all([
+        supabase
+          .from('payroll_lines')
+          .select('id, basic_salary, paye, net_pay, payroll_run_id, created_at')
+          .eq('employee_id', employee.id)
+          .order('created_at', { ascending: false })
+          .limit(1),
+        supabase
+          .from('leave_requests')
+          .select('days_requested')
+          .eq('employee_id', employee.id)
+          .eq('status', 'approved')
+          .eq('leave_type', 'annual')
+          .gte('start_date', `${year}-01-01`)
+          .lte('end_date', `${year}-12-31`),
+        supabase
+          .from('leave_requests')
+          .select('leave_type, start_date, end_date, days_requested')
+          .eq('employee_id', employee.id)
+          .eq('status', 'approved')
+          .gte('start_date', today)
+          .order('start_date', { ascending: true })
+          .limit(3),
+        supabase
+          .from('leave_requests')
+          .select('leave_type, days_requested')
+          .eq('employee_id', employee.id)
+          .eq('status', 'approved')
+          .gte('start_date', `${year}-01-01`)
+          .lte('end_date', `${year}-12-31`),
+        supabase
+          .from('staff_loans')
+          .select('outstanding_balance, monthly_deduction, start_date')
+          .eq('employee_id', employee.id)
+          .eq('status', 'active')
+          .order('start_date', { ascending: true }),
+        supabase
+          .from('timesheets')
+          .select('id, status, work_date, hours_worked, submitted_at')
+          .eq('employee_id', employee.id)
+          .in('status', ['draft', 'submitted'])
+          .order('work_date', { ascending: false })
+          .limit(5),
+        ...(profile?.email
+          ? [
+              supabase
+                .from('alert_log')
+                .select('id, subject, message, alert_type, sent_at')
+                .or(`recipient_role.eq.employee,recipient_email.eq.${profile.email}`)
+                .order('sent_at', { ascending: false })
+                .limit(5),
+            ]
+          : [
+              supabase
+                .from('alert_log')
+                .select('id, subject, message, alert_type, sent_at')
+                .eq('recipient_role', 'employee')
+                .order('sent_at', { ascending: false })
+                .limit(5),
+            ]),
+        fetchAnnualLeaveEntitlement(employee.id),
+      ])
 
-    const taken = (leaveRes.data ?? []).reduce((s, r) => s + (r.days_requested || 0), 0)
-    const loanList = loansRes.data ?? []
-    const loanTotal = loanList.reduce((s, r) => s + Number(r.outstanding_balance || 0), 0)
-    const nextDeduction = loanList[0]?.monthly_deduction ?? null
-    const line = lineRes.data?.[0] ?? null
+      const taken = (leaveRes.data ?? []).reduce((s, r) => s + (r.days_requested || 0), 0)
+      const loanList = loansRes.data ?? []
+      const loanTotal = loanList.reduce((s, r) => s + Number(r.outstanding_balance || 0), 0)
+      const nextDeduction = loanList[0]?.monthly_deduction ?? null
+      const line = lineRes.data?.[0] ?? null
 
-    const leaveGroups = (leaveRowsRes.data ?? []).reduce((acc, row) => {
-      const type = row.leave_type || 'Other'
-      acc[type] = (acc[type] || 0) + Number(row.days_requested || 0)
-      return acc
-    }, {})
+      const leaveGroups = (leaveRowsRes.data ?? []).reduce((acc, row) => {
+        const type = row.leave_type || 'Other'
+        acc[type] = (acc[type] || 0) + Number(row.days_requested || 0)
+        return acc
+      }, {})
 
-    setStats({
-      netPay: line?.net_pay ?? null,
-      leaveRemaining: Math.max(0, entitlement - taken),
-      loanOutstanding: loanTotal,
-    })
-    setUpcomingLeave(upcomingRes.data ?? [])
-    setRecentLine(line)
-    setLeaveSummary(Object.entries(leaveGroups).map(([leave_type, days]) => ({ leave_type, days })))
-    setLoanSummary({
-      activeCount: loanList.length,
-      outstanding: loanTotal,
-      nextDeduction,
-    })
-    setTimesheetRows(timesheetRes.data ?? [])
-    setAnnouncements(alertsRes.data ?? [])
-    setLoading(false)
-  }, [employee?.id, profile?.email])
+      return {
+        stats: {
+          netPay: line?.net_pay ?? null,
+          leaveRemaining: Math.max(0, entitlement - taken),
+          loanOutstanding: loanTotal,
+        },
+        upcomingLeave: upcomingRes.data ?? [],
+        recentLine: line,
+        leaveSummary: Object.entries(leaveGroups).map(([leave_type, days]) => ({ leave_type, days })),
+        loanSummary: {
+          activeCount: loanList.length,
+          outstanding: loanTotal,
+          nextDeduction,
+        },
+        timesheetRows: timesheetRes.data ?? [],
+        announcements: alertsRes.data ?? [],
+      }
+    },
+    enabled: !!employee?.id,
+    staleTime: 1000 * 60 * 2,
+  })
 
-  useEffect(() => {
-    load()
-  }, [load])
+  const stats = data?.stats || { netPay: null, leaveRemaining: 0, loanOutstanding: 0 }
+  const upcomingLeave = data?.upcomingLeave || []
+  const recentLine = data?.recentLine || null
+  const leaveSummary = data?.leaveSummary || []
+  const loanSummary = data?.loanSummary || { activeCount: 0, outstanding: 0, nextDeduction: null }
+  const timesheetRows = data?.timesheetRows || []
+  const announcements = data?.announcements || []
+  const loading = isLoading
 
   const pendingDrafts = useMemo(
     () => timesheetRows.filter((row) => row.status === 'draft').length,
@@ -187,7 +191,7 @@ export default function EmployeeHome({ onViewPayslip, onOpenTimesheet, onOpenLea
               value: formatGhs(loanSummary.outstanding),
               detail: loanSummary.activeCount ? `${loanSummary.activeCount} active loan(s)` : 'No active loan',
             }].map((card) => (
-              <div key={card.label} className="kpi-card">
+              <div key={card.label} className={`kpi-card ${loading ? 'animate-pulse bg-slate-700' : ''}`}>
                 <p className="portal-eyebrow text-slate-500">{card.label}</p>
                 <p className="mt-2 text-xl font-semibold text-orange-200">{card.value}</p>
                 <p className="mt-2 text-sm text-slate-400">{card.detail}</p>
@@ -268,18 +272,24 @@ export default function EmployeeHome({ onViewPayslip, onOpenTimesheet, onOpenLea
           <section className="rounded-3xl border border-border-soft bg-white/5 p-5">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-white">Announcements</h3>
-                <p className="mt-1 text-sm text-slate-400">Latest company notices for employees.</p>
+                <h3 className="text-lg font-semibold text-white">Recent announcements</h3>
+                <p className="mt-1 text-sm text-slate-400">Latest company notices.</p>
               </div>
             </div>
             <div className="mt-4 space-y-3">
-              {announcements.length === 0 ? (
+              {loading ? (
+                <>
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-20 animate-pulse rounded-2xl bg-slate-700" />
+                  ))}
+                </>
+              ) : announcements.length === 0 ? (
                 <p className="text-sm text-slate-400">No announcements at the moment.</p>
               ) : (
                 announcements.map((note) => (
                   <article key={note.id} className="rounded-2xl border border-white/10 bg-slate-950/70 p-4">
                     <p className="text-sm font-semibold text-white">{note.subject || note.alert_type || 'Update'}</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-300">{note.message || 'No details available.'}</p>
+                    <p className="mt-2 line-clamp-2 text-sm text-slate-300">{note.message || 'No details available.'}</p>
                     <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">{new Date(note.sent_at).toLocaleDateString('en-GH')}</p>
                   </article>
                 ))

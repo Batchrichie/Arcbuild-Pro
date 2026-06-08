@@ -1,24 +1,39 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { COMPANY } from '../../lib/company-config'
 import logo from '../../assets/ModuloDevLogo.png'
 import { PmProjectProvider, usePmProject } from '../../context/PmProjectContext'
 import PmDashboard from '../../components/pm/PmDashboard'
-import SitePhotoUpload from '../../components/pm/SitePhotoUpload'
-import IssueLog from '../../components/pm/IssueLog'
-import DailyProgressReport from '../../components/pm/DailyProgressReport'
-import ClientRegistry from '../../pages/clients/ClientRegistry'
-import ProjectRegistry from '../../pages/projects/ProjectRegistry'
-import MilestoneManager from '../../components/MilestoneManager'
-import CostEntryForm from '../../components/CostEntryForm'
-import ProjectCostLedger from '../../components/ProjectCostLedger'
-import PaymentCertificateForm from '../../components/PaymentCertificateForm'
-import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
-import TimesheetApproval from '../../components/TimesheetApproval'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
 import Modal from '../../components/ui/Modal'
 import { Banknote, Camera, LayoutDashboard, MoreHorizontal, Target } from 'lucide-react'
+
+// Lazy load heavy components
+const SitePhotoUpload = lazy(() => import('../../components/pm/SitePhotoUpload'))
+const IssueLog = lazy(() => import('../../components/pm/IssueLog'))
+const DailyProgressReport = lazy(() => import('../../components/pm/DailyProgressReport'))
+const ClientRegistry = lazy(() => import('../../pages/clients/ClientRegistry'))
+const ProjectRegistry = lazy(() => import('../../pages/projects/ProjectRegistry'))
+const MilestoneManager = lazy(() => import('../../components/MilestoneManager'))
+const CostEntryForm = lazy(() => import('../../components/CostEntryForm'))
+const ProjectCostLedger = lazy(() => import('../../components/ProjectCostLedger'))
+const PaymentCertificateForm = lazy(() => import('../../components/PaymentCertificateForm'))
+const ProjectFinanceDashboard = lazy(() => import('../../components/ProjectFinanceDashboard'))
+const TimesheetApproval = lazy(() => import('../../components/TimesheetApproval'))
+
+// Component skeleton loader
+function PortalComponentLoader() {
+  return (
+    <div className="flex h-96 w-full items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-600">
+      <div className="text-center">
+        <div className="mb-3 inline-flex h-10 w-10 animate-spin rounded-full border-3 border-slate-200 border-t-slate-900 dark:border-slate-600 dark:border-t-white"></div>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Loading panel...</p>
+      </div>
+    </div>
+  )
+}
+
 
 const NAV_SECTIONS = [
   {
@@ -165,22 +180,26 @@ function PmPortalContent() {
         )
       case 'milestones':
         return (
-          <MilestoneManager
-            userRole="project_manager"
-            userId={profile?.id}
-            projectId={selectedProjectId}
-            hideProjectSelector
-          />
+          <Suspense fallback={<PortalComponentLoader />}>
+            <MilestoneManager
+              userRole="project_manager"
+              userId={profile?.id}
+              projectId={selectedProjectId}
+              hideProjectSelector
+            />
+          </Suspense>
         )
       case 'mark-complete':
         return (
-          <MilestoneManager
-            userRole="project_manager"
-            userId={profile?.id}
-            projectId={selectedProjectId}
-            hideProjectSelector
-            inProgressOnly
-          />
+          <Suspense fallback={<PortalComponentLoader />}>
+            <MilestoneManager
+              userRole="project_manager"
+              userId={profile?.id}
+              projectId={selectedProjectId}
+              hideProjectSelector
+              inProgressOnly
+            />
+          </Suspense>
         )
       case 'log-cost':
         return (
@@ -193,16 +212,22 @@ function PmPortalContent() {
         )
       case 'cost-ledger':
         return (
-          <ProjectCostLedger
-            userRole="project_manager"
-            userId={profile?.id}
-            projectId={selectedProjectId}
-            initialCostType={ledgerCategory}
-            hideProjectSelector
-          />
+          <Suspense fallback={<PortalComponentLoader />}>
+            <ProjectCostLedger
+              userRole="project_manager"
+              userId={profile?.id}
+              projectId={selectedProjectId}
+              initialCostType={ledgerCategory}
+              hideProjectSelector
+            />
+          </Suspense>
         )
       case 'project-list':
-        return <ProjectRegistry />
+        return (
+          <Suspense fallback={<PortalComponentLoader />}>
+            <ProjectRegistry />
+          </Suspense>
+        )
       case 'payment-cert':
         return (
           <div>
@@ -213,15 +238,35 @@ function PmPortalContent() {
           </div>
         )
       case 'site-photos':
-        return <SitePhotoUpload />
+        return (
+          <Suspense fallback={<PortalComponentLoader />}>
+            <SitePhotoUpload />
+          </Suspense>
+        )
       case 'timesheet-approvals':
-        return <TimesheetApproval />
+        return (
+          <Suspense fallback={<PortalComponentLoader />}>
+            <TimesheetApproval />
+          </Suspense>
+        )
       case 'reports':
-        return <DailyProgressReport />
+        return (
+          <Suspense fallback={<PortalComponentLoader />}>
+            <DailyProgressReport />
+          </Suspense>
+        )
       case 'issues':
-        return <IssueLog />
+        return (
+          <Suspense fallback={<PortalComponentLoader />}>
+            <IssueLog />
+          </Suspense>
+        )
       case 'clients':
-        return <ClientRegistry />
+        return (
+          <Suspense fallback={<PortalComponentLoader />}>
+            <ClientRegistry />
+          </Suspense>
+        )
       default:
         return null
     }
@@ -242,14 +287,14 @@ function PmPortalContent() {
             <nav className="mt-6 max-h-[calc(100vh-14rem)] space-y-5 overflow-y-auto">
               {NAV_SECTIONS.map((section) => (
                 <div key={section.title}>
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-500">{section.title}</p>
+                  <p className="mb-1 text-[10px] lg:text-[11px] font-semibold uppercase tracking-wider text-slate-500">{section.title}</p>
                   <div className="space-y-1">
                     {section.items.map((item) => (
                       <button
                         key={item.id}
                         type="button"
                         onClick={() => navigate(item.id)}
-                        className={`min-touch w-full rounded-xl px-3 py-2.5 text-left text-sm ${
+                        className={`min-touch w-full rounded-xl px-3 py-2.5 text-left text-sm lg:text-[15px] ${
                           activeView === item.id
                             ? 'border border-cyan-400/20 bg-cyan-500/15 text-cyan-100'
                             : 'text-slate-200 hover:bg-white/5 hover:text-slate-100'
@@ -271,7 +316,7 @@ function PmPortalContent() {
           <main className="portal-main portal-main-with-tabs min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">
             <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl font-semibold text-white truncate">{VIEW_TITLES[activeView]}</h1>
+                <h1 className="text-2xl lg:text-3xl font-semibold text-white truncate">{VIEW_TITLES[activeView]}</h1>
               </div>
               <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <button type="button" onClick={signOut} className="text-sm text-slate-400">

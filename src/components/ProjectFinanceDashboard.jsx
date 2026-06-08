@@ -36,7 +36,7 @@ export default function ProjectFinanceDashboard({
           // Filter projects by current PM's assignments
           const result = await supabase
             .from('project_assignments')
-            .select('project_id, projects(*)')
+            .select('project_id, projects(id,name,division_id,division_name,status,created_at)')
             .eq('profile_id', currentUserProfileId)
 
           data = result.data?.map(pa => pa.projects) || []
@@ -45,9 +45,10 @@ export default function ProjectFinanceDashboard({
           // Load all active projects for other roles
           const result = await supabase
             .from('projects')
-            .select('*')
+            .select('id,name,division_id,division_name,status,created_at')
             .eq('status', 'active')
             .order('created_at', { ascending: false })
+            .limit(50)
 
           data = result.data
           err = result.error
@@ -82,7 +83,7 @@ export default function ProjectFinanceDashboard({
         setLoading(true)
         const { data, error: err } = await supabase
           .from('project_finance_summary')
-          .select('*')
+          .select('id,project_id,contract_value_ghs,materials_budget_ghs,labour_budget_ghs,subcontractor_budget_ghs,equipment_budget_ghs,other_budget_ghs,materials_cost_ghs,labour_cost_ghs,subcontractor_cost_ghs,equipment_cost_ghs,other_cost_ghs,budget_remaining_ghs,financial_completion_pct,total_retention_held,contract_id')
           .eq('project_id', selectedProject)
           .single()
 
@@ -129,9 +130,10 @@ export default function ProjectFinanceDashboard({
       try {
         const { data, error: err } = await supabase
           .from('milestones')
-          .select('*')
+          .select('id,title,percentage_complete,status,due_date')
           .eq('project_id', selectedProject)
           .order('due_date', { ascending: true })
+          .limit(50)
 
         if (err) throw err
         setMilestones(data || [])
@@ -191,7 +193,7 @@ export default function ProjectFinanceDashboard({
       // Refresh finance data
       const { data } = await supabase
         .from('project_finance_summary')
-        .select('*')
+        .select('id,project_id,contract_value_ghs,materials_budget_ghs,labour_budget_ghs,subcontractor_budget_ghs,equipment_budget_ghs,other_budget_ghs,materials_cost_ghs,labour_cost_ghs,subcontractor_cost_ghs,equipment_cost_ghs,other_cost_ghs,budget_remaining_ghs,financial_completion_pct,total_retention_held,contract_id')
         .eq('project_id', selectedProject)
         .single()
 

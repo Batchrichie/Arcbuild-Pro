@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useClient } from '../../context/ClientContext'
 import { formatGhs, PROJECT_STATUS_STYLE, MILESTONE_STATUS_STYLE, publicStorageUrl } from '../../lib/client-utils'
+import ClientLanding from './ClientLanding'
 
 function financialCompletion(totalInvoiced, contractValue) {
   const cv = Number(contractValue) || 0
@@ -102,26 +103,31 @@ export default function ClientProjects({ selectedProjectId, onSelectProject, onS
       .order('name')
 
     const rows = data ?? []
-    const withMeta = await Promise.all(
-      rows.map(async (p) => {
-        const { data: inv } = await supabase
-          .from('invoices')
-          .select('gross_total_ghs, status, created_at, expected_receipt_ghs')
-          .eq('project_id', p.id)
-          .in('status', ['approved', 'sent', 'paid'])
-        const invoices = inv ?? []
-        const totalInvoiced = invoices.reduce((s, i) => s + Number(i.gross_total_ghs || 0), 0)
-        const lastInvoice = invoices.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
-        return {
-          ...p,
-          totalInvoiced,
-          completionPct: financialCompletion(totalInvoiced, p.contract_value),
-          lastInvoiceDate: lastInvoice?.created_at
-            ? new Date(lastInvoice.created_at).toLocaleDateString('en-GH')
-            : '—',
-        }
-      })
-    )
+    // Fetch invoices for all projects in one request (avoid N+1)
+    const { data: invAll } = await supabase
+      .from('invoices')
+      .select('gross_total_ghs,status,created_at,expected_receipt_ghs,project_id')
+      .in('project_id', projectIds)
+      .in('status', ['approved', 'sent', 'paid'])
+      .limit(50)
+
+    const invMap = {}
+    ;(invAll || []).forEach((inv) => {
+      if (!invMap[inv.project_id]) invMap[inv.project_id] = []
+      invMap[inv.project_id].push(inv)
+    })
+
+    const withMeta = rows.map((p) => {
+      const invoices = invMap[p.id] || []
+      const totalInvoiced = invoices.reduce((s, i) => s + Number(i.gross_total_ghs || 0), 0)
+      const lastInvoice = invoices.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
+      return {
+        ...p,
+        totalInvoiced,
+        completionPct: financialCompletion(totalInvoiced, p.contract_value),
+        lastInvoiceDate: lastInvoice?.created_at ? new Date(lastInvoice.created_at).toLocaleDateString('en-GH') : '—',
+      }
+    })
     setProjects(withMeta)
     setLoading(false)
     await loadOverview(withMeta)
@@ -133,23 +139,25 @@ export default function ClientProjects({ selectedProjectId, onSelectProject, onS
       if (!projectId) return
       const { data: project } = await supabase
         .from('projects')
-        .select('*, division:divisions(name)')
+        .select('id,name,status,contract_value,division:divisions(name),description')
         .eq('id', projectId)
         .single()
 
       const [ms, docs, inv] = await Promise.all([
-        supabase.from('milestones').select('*').eq('project_id', projectId).order('due_date', { ascending: true }),
+        supabase.from('milestones').select('id,title,percentage_complete,status,due_date').eq('project_id', projectId).order('due_date', { ascending: true }).limit(50),
         supabase
           .from('documents')
-          .select('*')
+          .select('id,file_url,file_name,document_type,document_date,description,content,project_id,created_at')
           .eq('project_id', projectId)
           .in('document_type', ['site_photo', 'daily_report'])
-          .order('document_date', { ascending: false }),
+          .order('document_date', { ascending: false })
+          .limit(50),
         supabase
           .from('invoices')
           .select('gross_total_ghs, status, expected_receipt_ghs')
           .eq('project_id', projectId)
-          .in('status', ['approved', 'sent', 'paid']),
+          .in('status', ['approved', 'sent', 'paid'])
+          .limit(50),
       ])
 
       const invoices = inv.data ?? []
@@ -280,7 +288,7 @@ export default function ClientProjects({ selectedProjectId, onSelectProject, onS
   if (!selectedProjectId && projects.length > 1) {
     return (
       <div className="space-y-8">
-        {overviewSection}
+        <ClientLanding />
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-slate-900">My projects</h2>
           <div className="grid gap-4 sm:grid-cols-2">

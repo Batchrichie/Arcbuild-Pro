@@ -14,12 +14,13 @@ export default function JournalDrillDown({ journalId, onClose }) {
       setLoading(true)
       try {
         const [{ data: entry }, { data: ledgerLines }] = await Promise.all([
-          supabase.from('journal_entries').select('*').eq('id', journalId).single(),
+          supabase.from('journal_entries').select('id,entry_number,entry_date,description').eq('id', journalId).single(),
           supabase
             .from('ledger_entries')
-            .select('*')
+            .select('id,account_code,account_name,debit_amount,credit_amount,description')
             .eq('journal_entry_id', journalId)
-            .order('created_at', { ascending: true }),
+            .order('created_at', { ascending: true })
+            .limit(50),
         ])
         setHeader(entry)
         setLines(ledgerLines ?? [])

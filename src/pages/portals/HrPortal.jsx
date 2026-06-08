@@ -181,7 +181,7 @@ export default function HrPortal() {
                         key={item.id}
                         type="button"
                         onClick={() => navigate(item.id)}
-                        className={`min-touch w-full rounded-xl px-3 py-2.5 text-left text-sm ${
+                        className={`min-touch w-full rounded-xl px-3 py-2.5 text-left text-sm lg:text-[15px] ${
                           activeView === item.id
                             ? 'bg-violet-500/15 text-violet-100'
                             : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
@@ -203,7 +203,7 @@ export default function HrPortal() {
           <main className="portal-main portal-main-with-tabs min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">
             <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl font-semibold text-white truncate">{VIEW_TITLES[activeView]}</h1>
+                <h1 className="text-2xl lg:text-3xl font-semibold text-white truncate">{VIEW_TITLES[activeView]}</h1>
               </div>
               <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <button type="button" onClick={signOut} className="text-sm text-slate-400">Sign out</button>

@@ -1,42 +1,57 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import InvoiceList from '../../components/InvoiceList'
-import SupplierRegistry from '../../pages/suppliers/SupplierRegistry'
-import SupplierDetail from '../../pages/suppliers/SupplierDetail'
-import ClientRegistry from '../../pages/clients/ClientRegistry'
-import ClientDetail from '../../pages/clients/ClientDetail'
-import InvoiceForm from '../../components/InvoiceForm'
-import Modal from '../../components/ui/Modal'
-import GeneralLedger from '../../components/GeneralLedger'
-import FinancialStatements from '../../components/FinancialStatements'
-import RevenueRecognitionDashboard from '../../pages/revenue/RevenueRecognitionDashboard'
-import FxRateManager from '../../components/FxRateManager'
-import PaymentsReceived from '../payments/PaymentsReceived'
-import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
-import ProjectCostLedger from '../../components/ProjectCostLedger'
-import MilestoneInvoiceQueue from '../../components/MilestoneInvoiceQueue'
-import PayrollRunManager from '../../components/PayrollRunManager'
-import SubcontractorRegistry from '../../components/SubcontractorRegistry'
-import AssetRegister from '../../components/AssetRegister'
 import AccountantDashboard from '../../components/accountant/AccountantDashboard'
-import PayeSchedule from '../../components/accountant/PayeSchedule'
-import SsnitSchedule from '../../components/accountant/SsnitSchedule'
-import BankAccountRegistry from '../../components/banking/BankAccountRegistry'
-import BankStatementImport from '../../components/banking/BankStatementImport'
-import ReconciliationWorkspace from '../../components/banking/ReconciliationWorkspace'
-import TaxCentre from '../../components/tax/TaxCentre'
-import JournalDrillDown from '../../components/accountant/JournalDrillDown'
-import ManualJournalForm from '../../components/accounting/ManualJournalForm'
-import ManualJournalList from '../../components/accounting/ManualJournalList'
+import Modal from '../../components/ui/Modal'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
 import { COMPANY } from '../../lib/company-config'
 import logo from '../../assets/ModuloDevLogo.png'
-import DebtorsLedger from '../../components/accounting/DebtorsLedger'
-import AlertLog from '../../components/alerts/AlertLog'
-import ManagementReports from '../../components/reports/ManagementReports'
-import ProjectRegistry from '../../pages/projects/ProjectRegistry'
-import ChartOfAccounts from '../accounts/ChartOfAccounts'
+
+// Lazy load all heavy components
+const InvoiceList = lazy(() => import('../../components/InvoiceList'))
+const InvoiceForm = lazy(() => import('../../components/InvoiceForm'))
+const SupplierRegistry = lazy(() => import('../../pages/suppliers/SupplierRegistry'))
+const SupplierDetail = lazy(() => import('../../pages/suppliers/SupplierDetail'))
+const ClientRegistry = lazy(() => import('../../pages/clients/ClientRegistry'))
+const ClientDetail = lazy(() => import('../../pages/clients/ClientDetail'))
+const GeneralLedger = lazy(() => import('../../components/GeneralLedger'))
+const FinancialStatements = lazy(() => import('../../components/FinancialStatements'))
+const RevenueRecognitionDashboard = lazy(() => import('../../pages/revenue/RevenueRecognitionDashboard'))
+const FxRateManager = lazy(() => import('../../components/FxRateManager'))
+const PaymentsReceived = lazy(() => import('../payments/PaymentsReceived'))
+const ProjectFinanceDashboard = lazy(() => import('../../components/ProjectFinanceDashboard'))
+const ProjectCostLedger = lazy(() => import('../../components/ProjectCostLedger'))
+const MilestoneInvoiceQueue = lazy(() => import('../../components/MilestoneInvoiceQueue'))
+const PayrollRunManager = lazy(() => import('../../components/PayrollRunManager'))
+const SubcontractorRegistry = lazy(() => import('../../components/SubcontractorRegistry'))
+const AssetRegister = lazy(() => import('../../components/AssetRegister'))
+const PayeSchedule = lazy(() => import('../../components/accountant/PayeSchedule'))
+const SsnitSchedule = lazy(() => import('../../components/accountant/SsnitSchedule'))
+const BankAccountRegistry = lazy(() => import('../../components/banking/BankAccountRegistry'))
+const BankStatementImport = lazy(() => import('../../components/banking/BankStatementImport'))
+const ReconciliationWorkspace = lazy(() => import('../../components/banking/ReconciliationWorkspace'))
+const TaxCentre = lazy(() => import('../../components/tax/TaxCentre'))
+const JournalDrillDown = lazy(() => import('../../components/accountant/JournalDrillDown'))
+const ManualJournalForm = lazy(() => import('../../components/accounting/ManualJournalForm'))
+const ManualJournalList = lazy(() => import('../../components/accounting/ManualJournalList'))
+const DebtorsLedger = lazy(() => import('../../components/accounting/DebtorsLedger'))
+const AlertLog = lazy(() => import('../../components/alerts/AlertLog'))
+const ManagementReports = lazy(() => import('../../components/reports/ManagementReports'))
+const ProjectRegistry = lazy(() => import('../../pages/projects/ProjectRegistry'))
+const ChartOfAccounts = lazy(() => import('../accounts/ChartOfAccounts'))
+
+// Component skeleton loader
+function PortalComponentLoader() {
+  return (
+    <div className="flex h-96 w-full items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-600">
+      <div className="text-center">
+        <div className="mb-3 inline-flex h-10 w-10 animate-spin rounded-full border-3 border-slate-200 border-t-slate-900 dark:border-slate-600 dark:border-t-white"></div>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Loading panel...</p>
+      </div>
+    </div>
+  )
+}
+
 import {
   AlertTriangle,
   Banknote,
@@ -336,7 +351,7 @@ export default function AccountantPortal() {
             <div className="md:hidden">
               <ManualJournalForm />
             </div>
-            <div className="hidden lg:block">
+            <div className="hidden md:block">
               <button
                 type="button"
                 onClick={() => setCreateJournalOpen(true)}
@@ -455,14 +470,14 @@ export default function AccountantPortal() {
             <nav className="mt-6 max-h-[calc(100vh-16rem)] overflow-y-auto pr-1">
               {NAV_SECTIONS.map((section) => (
                 <div key={section.title} className="pt-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] opacity-45 text-slate-300">{section.title}</p>
+                  <p className="text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.1em] opacity-45 text-slate-300">{section.title}</p>
                   <div className="mt-3 space-y-1">
                     {section.items.map((item) => (
                       <button
                         key={item.id}
                         type="button"
                         onClick={() => navigate(item.id)}
-                        className={`min-touch w-full rounded-xl border-l-4 border-transparent px-3 py-2.5 text-left text-sm transition ${
+                        className={`min-touch w-full rounded-xl border-l-4 border-transparent px-3 py-2.5 text-left text-sm lg:text-[15px] transition ${
                           activeView === item.id
                             ? 'border-teal-400 bg-white/5 text-teal-100'
                             : 'border-transparent text-slate-400 hover:border-slate-600 hover:bg-white/5 hover:text-slate-200'
@@ -486,7 +501,7 @@ export default function AccountantPortal() {
             <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <p className="portal-eyebrow uppercase tracking-[0.2em] text-slate-500">Accountant</p>
-                <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-white truncate">{VIEW_TITLES[activeView] || 'Workspace'}</h1>
+                <h1 className="mt-1 text-2xl lg:text-3xl font-semibold text-white truncate">{VIEW_TITLES[activeView] || 'Workspace'}</h1>
               </div>
               <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <ThemeToggle className="self-start" />
@@ -526,7 +541,9 @@ export default function AccountantPortal() {
                   <h2 className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">{VIEW_TITLES[activeView]}</h2>
                 </>
               )}
-              {renderContent()}
+              <Suspense fallback={<PortalComponentLoader />}>
+                {renderContent()}
+              </Suspense>
             </div>
           </main>
         </div>
@@ -580,7 +597,11 @@ export default function AccountantPortal() {
         </>
       )}
 
-      {journalDrillId && <JournalDrillDown journalId={journalDrillId} onClose={() => setJournalDrillId(null)} />}
+      {journalDrillId && (
+        <Suspense fallback={null}>
+          <JournalDrillDown journalId={journalDrillId} onClose={() => setJournalDrillId(null)} />
+        </Suspense>
+      )}
     </div>
   )
 }

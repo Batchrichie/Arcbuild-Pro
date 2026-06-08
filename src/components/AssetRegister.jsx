@@ -126,8 +126,9 @@ export default function AssetRegister({ readOnly = false, userRole, userId }) {
       setLoading(true);
       const { data, error: err } = await supabase
         .from('asset_register')
-        .select('*')
-        .order('asset_code');
+        .select('id,asset_code,asset_name,category,cost,acquisition_date,useful_life_years,project_id,division_id,division_name,asset_status,net_book_value')
+        .order('asset_code')
+        .limit(50);
 
       if (err) throw err;
       setAssets(data || []);

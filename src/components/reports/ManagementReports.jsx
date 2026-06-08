@@ -58,7 +58,10 @@ export default function ManagementReports() {
   }
 
   async function loadProjects() {
-    const { data, error } = await supabase.from('project_finance_summary').select('*')
+    const { data, error } = await supabase
+      .from('project_finance_summary')
+      .select('id,project_name,division_name,contract_value_ghs,total_invoiced_ghs,total_costs_ghs,gross_profit_ghs,status')
+      .limit(50)
     if (error) return console.warn(error)
     setProjects(data || [])
   }

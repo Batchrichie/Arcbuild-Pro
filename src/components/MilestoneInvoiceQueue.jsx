@@ -27,8 +27,9 @@ export default function MilestoneInvoiceQueue() {
       setLoading(true);
       const { data, error: err } = await supabase
         .from('milestone_invoice_queue')
-        .select('*')
-        .order('completed_date', { ascending: true });
+        .select('milestone_id,client_id,client_name,project_id,project_name,division_id,division_name,milestone_title,net_billing,retention_amount,retention_percentage,completed_date')
+        .order('completed_date', { ascending: true })
+        .limit(50);
 
       if (err) throw err;
       setQueueItems(data || []);

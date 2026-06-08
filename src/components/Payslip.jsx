@@ -19,7 +19,7 @@ export default function Payslip({ payrollLineId, employeeId, payrollRunId }) {
     try {
       setLoading(true);
 
-      let query = supabase.from('payroll_lines').select('*');
+      let query = supabase.from('payroll_lines').select('id,employee_id,payroll_run_id,basic_salary,allowances,overtime_amount,gross_pay,paye,ssnit_employee,ssnit_employer,net_pay');
       if (payrollLineId) {
         query = query.eq('id', payrollLineId).single();
       } else if (employeeId && payrollRunId) {
@@ -32,7 +32,7 @@ export default function Payslip({ payrollLineId, employeeId, payrollRunId }) {
 
       const { data: empData, error: empErr } = await supabase
         .from('employees')
-        .select('*')
+        .select('id,employee_number,job_title,department,profile_id,full_name')
         .eq('id', lineData.employee_id)
         .single();
       if (empErr) throw empErr;
@@ -40,7 +40,7 @@ export default function Payslip({ payrollLineId, employeeId, payrollRunId }) {
 
       const { data: runData, error: runErr } = await supabase
         .from('payroll_runs')
-        .select('*')
+        .select('id,period_start,period_end')
         .eq('id', lineData.payroll_run_id)
         .single();
       if (runErr) throw runErr;

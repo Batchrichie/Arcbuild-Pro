@@ -1,29 +1,27 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, lazy, Suspense } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, Banknote, Clock3, DollarSign, FileCheck, Layers, ShieldAlert } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { liabilityBalance } from '../../lib/formatGhs'
 import ActionQueue from '../ui/ActionQueue'
-import ReceivablesAgeing from './ReceivablesAgeing'
-import TaxLiabilitiesPanel from './TaxLiabilitiesPanel'
-import RecentJournalEntries from './RecentJournalEntries'
+
+// Lazy load heavy dashboard panels
+const ReceivablesAgeing = lazy(() => import('./ReceivablesAgeing'))
+const TaxLiabilitiesPanel = lazy(() => import('./TaxLiabilitiesPanel'))
+const RecentJournalEntries = lazy(() => import('./RecentJournalEntries'))
+
+// Skeleton placeholder
+function PanelSkeleton() {
+  return (
+    <div className="h-80 w-full animate-pulse rounded-2xl bg-gradient-to-br from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-600"></div>
+  )
+}
 
 export default function AccountantDashboard({ onNavigate, onJournalSelect }) {
-  const [loading, setLoading] = useState(true)
-  const [counts, setCounts] = useState({
-    pendingApproval: 0,
-    milestoneQueue: 0,
-    overdue: 0,
-    payrollDraft: 0,
-    unreconciledBank: 0,
-    taxLiabilities: 0,
-  })
-  const [ageing, setAgeing] = useState(null)
-  const [taxBalances, setTaxBalances] = useState({})
-  const [journalEntries, setJournalEntries] = useState([])
-
-  const load = useCallback(async () => {
-    setLoading(true)
-    try {
+  // useQuery for dashboard data
+  const { data, isLoading } = useQuery({
+    queryKey: ['accountant-action-counts'],
+    queryFn: async () => {
       const today = new Date()
 
       const [
@@ -112,41 +110,45 @@ export default function AccountantDashboard({ onNavigate, onJournalSelect }) {
 
       const taxLiabilityCount = (taxRes.data ?? []).filter((row) => Number(row.balance) > 0).length
 
-      setCounts({
-        pendingApproval: pendingRes.count ?? 0,
-        milestoneQueue: milestoneRes.count ?? 0,
-        overdue,
-        payrollDraft: draftPayrollRes.count ?? 0,
-        unreconciledBank: bankRes.count ?? 0,
-        taxLiabilities: taxLiabilityCount,
-      })
-      setAgeing(brackets)
-      setTaxBalances(taxMap)
-      setJournalEntries(
-        journals.map((j) => ({
-          ...j,
-          totalAmount: totalsMap.get(j.id) || 0,
-        }))
-      )
-    } catch (err) {
-      console.warn('Accountant dashboard load failed', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+      return {
+        counts: {
+          pendingApproval: pendingRes.count ?? 0,
+          milestoneQueue: milestoneRes.count ?? 0,
+          overdue,
+          payrollDraft: draftPayrollRes.count ?? 0,
+          unreconciledBank: bankRes.count ?? 0,
+          taxLiabilities: taxLiabilityCount,
+        },
+        ageing: brackets,
+        taxBalances: taxMap,
+        journalEntries: journals.map((j) => ({ ...j, totalAmount: totalsMap.get(j.id) || 0 })),
+      }
+    },
+    staleTime: 1000 * 60 * 2,
+  })
 
-  useEffect(() => {
-    load()
-  }, [load])
+  const loading = isLoading
+  const counts = data?.counts ?? {
+    pendingApproval: 0,
+    milestoneQueue: 0,
+    overdue: 0,
+    payrollDraft: 0,
+    unreconciledBank: 0,
+    taxLiabilities: 0,
+  }
+  const ageing = data?.ageing ?? null
+  const taxBalances = data?.taxBalances ?? {}
+  const journalEntries = data?.journalEntries ?? []
+
 
   return (
     <div className="space-y-8">
       <div>
         <p className="portal-section-eyebrow uppercase tracking-[0.24em]">Today&apos;s work</p>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Action dashboard</h2>
+        <h2 className="text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white">Action dashboard</h2>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           {
             id: 'pending-approval',
@@ -203,8 +205,8 @@ export default function AccountantDashboard({ onNavigate, onJournalSelect }) {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-[12px] font-medium text-gray-500 dark:text-gray-400">{card.title}</p>
-                  <p className="text-xl font-semibold text-gray-900 dark:text-white">{loading ? '—' : card.value}</p>
+                  <p className="truncate text-xs lg:text-sm font-medium text-gray-500 dark:text-gray-400">{card.title}</p>
+                  <p className="text-lg lg:text-2xl font-semibold text-gray-900 dark:text-white">{loading ? '—' : card.value}</p>
                 </div>
               </div>
               <span className="inline-flex shrink-0 rounded-full bg-white/5 dark:bg-slate-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-300 transition group-hover:bg-white/10">
@@ -268,10 +270,16 @@ export default function AccountantDashboard({ onNavigate, onJournalSelect }) {
         ]}
       />
 
-      <div className="grid gap-4 lg:grid-cols-3 items-start">
-        <ReceivablesAgeing data={ageing} loading={loading} />
-        <TaxLiabilitiesPanel balances={taxBalances} loading={loading} />
-        <RecentJournalEntries entries={journalEntries} loading={loading} onSelect={onJournalSelect} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <Suspense fallback={<PanelSkeleton />}>
+          <ReceivablesAgeing data={ageing} loading={loading} />
+        </Suspense>
+        <Suspense fallback={<PanelSkeleton />}>
+          <TaxLiabilitiesPanel balances={taxBalances} loading={loading} />
+        </Suspense>
+        <Suspense fallback={<PanelSkeleton />}>
+          <RecentJournalEntries entries={journalEntries} loading={loading} onSelect={onJournalSelect} />
+        </Suspense>
       </div>
     </div>
   )

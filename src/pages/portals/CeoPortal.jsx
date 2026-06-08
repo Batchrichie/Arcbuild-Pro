@@ -1,32 +1,50 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, lazy, Suspense } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { liabilityBalance, formatGhs, formatGhsCompact } from '../../lib/formatGhs'
-import ApprovalQueue from '../../components/ApprovalQueue'
-import GeneralLedger from '../../components/GeneralLedger'
-import ManagementReports from '../../components/reports/ManagementReports'
-import ProjectFinanceDashboard from '../../components/ProjectFinanceDashboard'
-import RevenueRecognitionDashboard from '../../pages/revenue/RevenueRecognitionDashboard'
 import KpiStrip from '../../components/ceo/KpiStrip'
-import DivisionPerformanceCards from '../../components/ceo/DivisionPerformanceCards'
 import ProjectHealthTable from '../../components/ceo/ProjectHealthTable'
 import TaxDueAlerts from '../../components/ceo/TaxDueAlerts'
-import TaxCentre from '../../components/tax/TaxCentre'
-import ManualJournalList from '../../components/accounting/ManualJournalList'
-import DebtorsLedger from '../../components/accounting/DebtorsLedger'
-import AlertLog from '../../components/alerts/AlertLog'
-import ClientRegistry from '../../pages/clients/ClientRegistry'
-import ClientDetail from '../../pages/clients/ClientDetail'
-import SupplierRegistry from '../../pages/suppliers/SupplierRegistry'
-import SupplierDetail from '../../pages/suppliers/SupplierDetail'
-import ProjectRegistry from '../../pages/projects/ProjectRegistry'
-import PaymentsReceived from '../payments/PaymentsReceived'
-import ChartOfAccounts from '../accounts/ChartOfAccounts'
-import { COMPANY } from '../../lib/company-config'
-import logo from '../../assets/ModuloDevLogo.png'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
 import KpiCard from '../../components/ui/KpiCard'
+import { COMPANY } from '../../lib/company-config'
+import logo from '../../assets/ModuloDevLogo.png'
+import ChartSkeleton from '../../components/skeletons/ChartSkeleton'
+import TableSkeleton from '../../components/skeletons/TableSkeleton'
+
+// Lazy load heavy components
+const DivisionPerformanceCards = lazy(() => import('../../components/ceo/DivisionPerformanceCards'))
+const ApprovalQueue = lazy(() => import('../../components/ApprovalQueue'))
+const GeneralLedger = lazy(() => import('../../components/GeneralLedger'))
+const ManagementReports = lazy(() => import('../../components/reports/ManagementReports'))
+const ProjectFinanceDashboard = lazy(() => import('../../components/ProjectFinanceDashboard'))
+const RevenueRecognitionDashboard = lazy(() => import('../../pages/revenue/RevenueRecognitionDashboard'))
+const TaxCentre = lazy(() => import('../../components/tax/TaxCentre'))
+const ManualJournalList = lazy(() => import('../../components/accounting/ManualJournalList'))
+const DebtorsLedger = lazy(() => import('../../components/accounting/DebtorsLedger'))
+const AlertLog = lazy(() => import('../../components/alerts/AlertLog'))
+const ClientRegistry = lazy(() => import('../../pages/clients/ClientRegistry'))
+const ClientDetail = lazy(() => import('../../pages/clients/ClientDetail'))
+const SupplierRegistry = lazy(() => import('../../pages/suppliers/SupplierRegistry'))
+const SupplierDetail = lazy(() => import('../../pages/suppliers/SupplierDetail'))
+const ProjectRegistry = lazy(() => import('../../pages/projects/ProjectRegistry'))
+const PaymentsReceived = lazy(() => import('../payments/PaymentsReceived'))
+const ChartOfAccounts = lazy(() => import('../accounts/ChartOfAccounts'))
+
+// Component skeleton loader
+function PortalComponentLoader() {
+  return (
+    <div className="flex h-96 w-full items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-600">
+      <div className="text-center">
+        <div className="mb-3 inline-flex h-10 w-10 animate-spin rounded-full border-3 border-slate-200 border-t-slate-900 dark:border-slate-600 dark:border-t-white"></div>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Loading panel...</p>
+      </div>
+    </div>
+  )
+}
+
 import {
   AlertTriangle,
   Banknote,
@@ -43,6 +61,8 @@ import {
   ReceiptText,
   ScrollText,
   Users,
+  TrendingUp,
+  Clock,
 } from 'lucide-react'
 
 const TABS = [
@@ -194,6 +214,88 @@ export default function CeoPortal() {
   const [bankBalances, setBankBalances] = useState({})
   const [moreOpen, setMoreOpen] = useState(false)
 
+  // CEO executive summary query
+  const { data: execData, isLoading: execLoading } = useQuery({
+    queryKey: ['ceo-executive-summary', timeframe],
+    queryFn: async () => {
+      const now = new Date()
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString()
+      // cash position: try bank_accounts.current_balance, fallback to balance_sheet
+      const bankRes = await supabase.from('bank_accounts').select('current_balance')
+      let cashPosition = 0
+      if (bankRes.error == null && bankRes.data && bankRes.data.length) {
+        cashPosition = bankRes.data.reduce((s, r) => s + Number(r.current_balance || 0), 0)
+      } else {
+        const cashRes = await supabase.from('balance_sheet').select('account_code, balance').in('account_code', ['1101','1102','1103','1104'])
+        cashPosition = (cashRes.data || []).reduce((s, r) => s + Number(r.balance || 0), 0)
+      }
+
+      // receivables risk: invoices sent and overdue > 30 days
+      const sentRes = await supabase.from('invoices').select('expected_receipt_ghs, due_date, created_at').eq('status', 'sent')
+      const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
+      const overdueRows = (sentRes.data || []).filter((inv) => {
+        const ref = inv.due_date || inv.created_at
+        return ref && new Date(ref).getTime() < thirtyDaysAgo
+      })
+      const receivablesRisk = overdueRows.reduce((s, r) => s + Number(r.expected_receipt_ghs || 0), 0)
+
+      // pending approvals: invoices pending_approval
+      const pendingRes = await supabase.from('invoices').select('id', { count: 'exact', head: true }).eq('status', 'pending_approval')
+      const pendingCount = pendingRes.count || 0
+
+      // revenue this month: recognised revenue from income_statement
+      const revenueRes = await supabase
+        .from('income_statement')
+        .select('amount')
+        .eq('account_type', 'revenue')
+        .gte('period_month', startOfMonth)
+        .lte('period_month', endOfMonth)
+      const revenueThisMonth = (revenueRes.data || []).reduce((s, r) => s + Number(r.amount || 0), 0)
+
+      // tax exposure
+      const taxRes = await supabase.from('balance_sheet').select('account_code, balance').in('account_code', ['2102','2103','2104','2105','2106'])
+      const taxExposure = (taxRes.data || []).reduce((s, r) => s + Number(r.balance || 0), 0)
+
+      return {
+        cashPosition,
+        receivablesRisk,
+        pendingCount,
+        revenueThisMonth,
+        taxExposure,
+      }
+    },
+    staleTime: 1000 * 60 * 2,
+  })
+
+  // Bank accounts query (used on banking tab)
+  const bankQuery = useQuery({
+    queryKey: ['ceo-bank-accounts'],
+    queryFn: async () => {
+      const { data: accounts } = await supabase
+        .from('bank_accounts')
+        .select('id,account_name,bank_name,gl_account_code,currency,account_number,current_balance')
+        .order('account_name')
+        .limit(50)
+
+      const codes = (accounts || []).map((a) => a.gl_account_code).filter(Boolean)
+      let grouped = {}
+      if (codes.length) {
+        const { data: rows } = await supabase
+          .from('account_running_balance')
+          .select('account_code,running_balance,entry_date')
+          .in('account_code', [...new Set(codes)])
+          .order('entry_date', { ascending: false })
+        ;(rows || []).forEach((r) => {
+          if (!grouped[r.account_code]) grouped[r.account_code] = r.running_balance
+        })
+      }
+
+      return { accounts: accounts || [], balances: grouped }
+    },
+    staleTime: 1000 * 60 * 2,
+  })
+
   useEffect(() => {
     try {
       document.title = `${COMPANY.appName} — CEO`
@@ -313,7 +415,7 @@ export default function CeoPortal() {
         supabase.from('projects').select('id, division:divisions(name)').eq('status', 'active'),
         supabase
           .from('project_finance_summary')
-          .select('*')
+          .select('id,project_name,division_name,contract_value_ghs,total_invoiced_ghs,total_costs_ghs,gross_profit_ghs,status,total_outstanding_ghs')
           .order('total_outstanding_ghs', { ascending: false })
           .limit(10),
         supabase
@@ -409,29 +511,11 @@ export default function CeoPortal() {
   }, [loadDashboardData])
 
   useEffect(() => {
-    const loadBankAccounts = async () => {
-      try {
-        const { data: accounts } = await supabase.from('bank_accounts').select('*').order('account_name')
-        setBankAccounts(accounts || [])
-        const codes = (accounts || []).map((a) => a.gl_account_code).filter(Boolean)
-        if (codes.length) {
-          const { data: rows } = await supabase
-            .from('account_running_balance')
-            .select('account_code,running_balance,entry_date')
-            .in('account_code', [...new Set(codes)])
-            .order('entry_date', { ascending: false })
-          const grouped = {}
-          ;(rows || []).forEach((r) => {
-            if (!grouped[r.account_code]) grouped[r.account_code] = r.running_balance
-          })
-          setBankBalances(grouped)
-        }
-      } catch (err) {
-        console.warn('Failed to load bank accounts for CEO view', err)
-      }
+    if (bankQuery.data) {
+      setBankAccounts(bankQuery.data.accounts || [])
+      setBankBalances(bankQuery.data.balances || {})
     }
-    loadBankAccounts()
-  }, [])
+  }, [bankQuery.data])
 
   return (
     <div className="portal-shell min-h-screen w-full overflow-x-hidden">
@@ -458,7 +542,7 @@ export default function CeoPortal() {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`min-touch w-full rounded-2xl border px-4 py-3 text-left text-sm font-medium transition ${
+                  className={`min-touch w-full rounded-2xl border px-4 py-3 text-left text-sm lg:text-[15px] font-medium transition ${
                     activeTab === tab.id
                       ? 'border-amber-400/40 bg-amber-bg text-amber-100'
                       : 'border-border-soft bg-white/5 text-slate-300 hover:border-amber-400/20'
@@ -481,7 +565,7 @@ export default function CeoPortal() {
             <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <p className="portal-eyebrow uppercase tracking-[0.2em] text-slate-500">CEO Command Centre</p>
-                <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-white truncate">
+                <h1 className="mt-1 text-2xl lg:text-3xl font-semibold text-white truncate">
                   {TABS.find((t) => t.id === activeTab)?.label ?? 'Dashboard'}
                 </h1>
               </div>
@@ -499,6 +583,68 @@ export default function CeoPortal() {
 
             {activeTab === 'dashboard' && (
               <>
+                <section className="rounded-3xl border border-white/10 bg-white/5 p-4 sm:p-6 lg:p-8 shadow-sm">
+                  <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="portal-section-eyebrow uppercase tracking-[0.24em] text-slate-500">Executive summary</p>
+                      <h2 className="text-lg font-semibold text-white">CEO executive summary</h2>
+                    </div>
+                    <p className="text-sm text-slate-400">Quick overview — click a card to navigate.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+                    <button type="button" onClick={() => setActiveTab('banking')} className="group flex h-24 items-center gap-3 rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 px-4 text-left transition hover:border-slate-500/70 hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 border-l-4 border-l-blue-500">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gray-50 dark:bg-slate-800 text-sky-600">
+                        <Building2 className="h-6 w-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Cash position</p>
+                        <p className="text-xl font-semibold">{execLoading ? <span className="inline-block h-5 w-20 bg-gray-200 rounded animate-pulse" /> : formatGhs(execData?.cashPosition ?? 0)}</p>
+                      </div>
+                    </button>
+
+                    <button type="button" onClick={() => setActiveTab('debtors-ledger')} className="group flex h-24 items-center gap-3 rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 px-4 text-left transition hover:border-slate-500/70 hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 border-l-4 border-l-red-500">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gray-50 dark:bg-slate-800 text-red-500">
+                        <AlertTriangle className="h-6 w-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Receivables risk</p>
+                        <p className="text-xl font-semibold">{execLoading ? <span className="inline-block h-5 w-20 bg-gray-200 rounded animate-pulse" /> : formatGhs(execData?.receivablesRisk ?? 0)}</p>
+                      </div>
+                    </button>
+
+                    <button type="button" onClick={() => setActiveTab('approvals')} className="group flex h-24 items-center gap-3 rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 px-4 text-left transition hover:border-slate-500/70 hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 border-l-4 border-l-amber-500">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gray-50 dark:bg-slate-800 text-amber-400">
+                        <Clock className="h-6 w-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Pending approvals</p>
+                        <p className="text-xl font-semibold">{execLoading ? <span className="inline-block h-5 w-8 bg-gray-200 rounded animate-pulse" /> : String(execData?.pendingCount ?? 0)}</p>
+                      </div>
+                    </button>
+
+                    <button type="button" onClick={() => setActiveTab('revenue')} className="group flex h-24 items-center gap-3 rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 px-4 text-left transition hover:border-slate-500/70 hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 border-l-4 border-l-green-500">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gray-50 dark:bg-slate-800 text-green-500">
+                        <TrendingUp className="h-6 w-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Revenue this month</p>
+                        <p className="text-xl font-semibold">{execLoading ? <span className="inline-block h-5 w-20 bg-gray-200 rounded animate-pulse" /> : formatGhs(execData?.revenueThisMonth ?? 0)}</p>
+                      </div>
+                    </button>
+
+                    <button type="button" onClick={() => setActiveTab('tax-centre')} className="group flex h-24 items-center gap-3 rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 px-4 text-left transition hover:border-slate-500/70 hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 border-l-4 border-l-orange-400">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gray-50 dark:bg-slate-800 text-orange-400">
+                        <ReceiptText className="h-6 w-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Tax exposure</p>
+                        <p className="text-xl font-semibold">{execLoading ? <span className="inline-block h-5 w-20 bg-gray-200 rounded animate-pulse" /> : formatGhs(execData?.taxExposure ?? 0)}</p>
+                      </div>
+                    </button>
+                  </div>
+                </section>
+
                 <section className="rounded-3xl border border-white/10 bg-white/5 p-4 sm:p-6 lg:p-8 shadow-sm">
                   <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
@@ -568,27 +714,41 @@ export default function CeoPortal() {
                 <section id="pending-approvals" className="hidden lg:block" aria-hidden={activeTab !== 'dashboard'}>
                   <SectionHeader title="Pending approvals" subtitle="Executive queue" />
                   <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
-                    <ApprovalQueue />
+                    <Suspense fallback={<PortalComponentLoader />}>
+                      <ApprovalQueue />
+                    </Suspense>
                   </div>
                 </section>
 
                 <section id="divisions">
                   <SectionHeader title="Division performance" subtitle="Revenue by operating unit" />
-                  <DivisionPerformanceCards divisionData={divisionData} loading={loading} />
+                  <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                    <Suspense fallback={<ChartSkeleton />}>
+                      <DivisionPerformanceCards divisionData={divisionData} loading={loading} />
+                    </Suspense>
+                  </div>
                 </section>
 
                 <section id="project-health">
                   <SectionHeader title="Project health" subtitle="Top 10 by outstanding receivables" />
-                  <ProjectHealthTable
-                    projects={projectHealth}
-                    loading={loading}
-                    onSelectProject={setSlideOverProjectId}
-                  />
+                  <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                    <Suspense fallback={<TableSkeleton />}>
+                      <ProjectHealthTable
+                        projects={projectHealth}
+                        loading={loading}
+                        onSelectProject={setSlideOverProjectId}
+                      />
+                    </Suspense>
+                  </div>
                 </section>
 
                 <section id="tax-alerts">
                   <SectionHeader title="Tax due" subtitle="Ledger balances" />
-                  <TaxDueAlerts balances={taxBalances} loading={loading} />
+                  <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
+                    <Suspense fallback={<TableSkeleton />}>
+                      <TaxDueAlerts balances={taxBalances} loading={loading} />
+                    </Suspense>
+                  </div>
                 </section>
               </>
             )}
@@ -597,7 +757,9 @@ export default function CeoPortal() {
               <section>
                 <SectionHeader title="Pending approvals" subtitle="Review and approve invoices" />
                 <div className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6 lg:p-8">
-                  <ApprovalQueue />
+                  <Suspense fallback={<PortalComponentLoader />}>
+                    <ApprovalQueue />
+                  </Suspense>
                 </div>
               </section>
             )}
@@ -611,25 +773,33 @@ export default function CeoPortal() {
             {activeTab === 'financials' && (
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6 lg:p-8">
                 <SectionHeader title="General ledger" subtitle="Read-only view" />
-                <GeneralLedger readOnly />
+                <Suspense fallback={<PortalComponentLoader />}>
+                  <GeneralLedger readOnly />
+                </Suspense>
               </section>
             )}
 
             {activeTab === 'payments-received' && (
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
-                <PaymentsReceived />
+                <Suspense fallback={<PortalComponentLoader />}>
+                  <PaymentsReceived />
+                </Suspense>
               </section>
             )}
 
             {activeTab === 'chart-of-accounts' && (
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
-                <ChartOfAccounts />
+                <Suspense fallback={<PortalComponentLoader />}>
+                  <ChartOfAccounts />
+                </Suspense>
               </section>
             )}
 
             {activeTab === 'revenue' && (
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
-                <RevenueRecognitionDashboard />
+                <Suspense fallback={<PortalComponentLoader />}>
+                  <RevenueRecognitionDashboard />
+                </Suspense>
               </section>
             )}
 
@@ -672,73 +842,91 @@ export default function CeoPortal() {
             {activeTab === 'journal-history' && (
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="Journal history" subtitle="Manual journal postings" />
-                <ManualJournalList readOnly />
+                <Suspense fallback={<PortalComponentLoader />}>
+                  <ManualJournalList readOnly />
+                </Suspense>
               </section>
             )}
 
             {activeTab === 'debtors-ledger' && (
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="Debtors Ledger" subtitle="Aged receivables" />
-                <DebtorsLedger readOnly />
+                <Suspense fallback={<PortalComponentLoader />}>
+                  <DebtorsLedger readOnly />
+                </Suspense>
               </section>
             )}
 
             {activeTab === 'alerts' && (
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="Alerts" subtitle="Smart Alert System log" />
-                <AlertLog readOnly />
+                <Suspense fallback={<PortalComponentLoader />}>
+                  <AlertLog readOnly />
+                </Suspense>
               </section>
             )}
 
             {activeTab === 'tax-centre' && (
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
-                <TaxCentre readOnly />
+                <Suspense fallback={<PortalComponentLoader />}>
+                  <TaxCentre readOnly />
+                </Suspense>
               </section>
             )}
 
             {activeTab === 'clients' && (
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="Clients" subtitle="Client registry" />
-                <ClientRegistry onViewClient={openClientDetail} />
+                <Suspense fallback={<PortalComponentLoader />}>
+                  <ClientRegistry onViewClient={openClientDetail} />
+                </Suspense>
               </section>
             )}
 
             {activeTab === 'client-detail' && (
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
-                <ClientDetail
-                  clientId={selectedClientId}
-                  onBack={() => {
-                    setSelectedClientId(null)
-                    setActiveTab('clients')
-                    setMoreOpen(false)
-                  }}
-                />
+                <Suspense fallback={<PortalComponentLoader />}>
+                  <ClientDetail
+                    clientId={selectedClientId}
+                    onBack={() => {
+                      setSelectedClientId(null)
+                      setActiveTab('clients')
+                      setMoreOpen(false)
+                    }}
+                  />
+                </Suspense>
               </section>
             )}
 
             {activeTab === 'suppliers' && (
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
                 <SectionHeader title="Suppliers" subtitle="Supplier registry" />
-                <SupplierRegistry onViewSupplier={openSupplierDetail} />
+                <Suspense fallback={<PortalComponentLoader />}>
+                  <SupplierRegistry onViewSupplier={openSupplierDetail} />
+                </Suspense>
               </section>
             )}
 
             {activeTab === 'supplier-detail' && (
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
-                <SupplierDetail
-                  supplierId={selectedSupplierId}
-                  onBack={() => {
-                    setSelectedSupplierId(null)
-                    setActiveTab('suppliers')
-                    setMoreOpen(false)
-                  }}
-                />
+                <Suspense fallback={<PortalComponentLoader />}>
+                  <SupplierDetail
+                    supplierId={selectedSupplierId}
+                    onBack={() => {
+                      setSelectedSupplierId(null)
+                      setActiveTab('suppliers')
+                      setMoreOpen(false)
+                    }}
+                  />
+                </Suspense>
               </section>
             )}
 
             {activeTab === 'reports' && (
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6">
-                <ManagementReports />
+                <Suspense fallback={<PortalComponentLoader />}>
+                  <ManagementReports />
+                </Suspense>
               </section>
             )}
           </main>

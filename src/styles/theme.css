@@ -152,6 +152,7 @@ body.theme-light {
     radial-gradient(circle at top right, var(--color-success-bg), transparent 28%),
     radial-gradient(circle at 12% 78%, var(--color-info-bg), transparent 30%),
     linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface-2) 100%);
-  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
   color: var(--color-text);
 }

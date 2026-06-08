@@ -59,6 +59,7 @@ export default function InvoiceList() {
           `id,invoice_number,currency,gross_total_ghs,expected_receipt_ghs,fx_rate_to_ghs,status,requires_approval,rejected_at,rejection_note,created_at,due_date,created_by, client:clients(name), project:projects(name), division:divisions(name)`
         )
         .order('created_at', { ascending: false })
+        .limit(100)
 
       if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter)

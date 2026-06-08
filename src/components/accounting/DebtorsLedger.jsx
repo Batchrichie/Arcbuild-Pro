@@ -82,7 +82,12 @@ export default function DebtorsLedger({ readOnly = false }) {
   const loadClientLedger = useCallback(async (clientId) => {
     if (!clientId) return
     try {
-      let q = supabase.from('debtors_ledger').select('*').eq('client_id', clientId).order('transaction_date', { ascending: true })
+      let q = supabase
+        .from('debtors_ledger')
+        .select('invoice_id,client_id,client_name,client_type,email,transaction_date,invoice_number,project_name,division_name,invoiced_amount,wht_deducted,net_receivable,amount_received,amount_outstanding,due_date,days_overdue,invoice_status')
+        .eq('client_id', clientId)
+        .order('transaction_date', { ascending: true })
+        .limit(50)
       if (filters.from) q = q.gte('transaction_date', filters.from)
       if (filters.to) q = q.lte('transaction_date', filters.to)
       if (filters.division) q = q.eq('division_name', filters.division)
@@ -105,7 +110,10 @@ export default function DebtorsLedger({ readOnly = false }) {
   const loadSummary = useCallback(async () => {
     setLoadingSummary(true)
     try {
-      let query = supabase.from('debtors_ledger').select('*')
+      let query = supabase
+        .from('debtors_ledger')
+        .select('client_id,client_name,client_type,email,invoiced_amount,amount_received,amount_outstanding,wht_deducted,days_overdue,transaction_date')
+        .limit(50)
 
       if (filters.clientId) query = query.eq('client_id', filters.clientId)
       if (filters.division) query = query.eq('division_name', filters.division)
@@ -141,8 +149,7 @@ export default function DebtorsLedger({ readOnly = false }) {
 
   useEffect(() => {
     const init = async () => {
-      await loadClients()
-      await loadSummary()
+      await Promise.all([loadClients(), loadSummary()])
     }
     init()
   }, [loadClients, loadSummary])
