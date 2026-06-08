@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { CircleAlert, CheckCircle2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 function daysUntil(dateStr) {
@@ -25,21 +27,12 @@ const STATUS_BADGE = {
 
 export default function HrDashboard({ onNavigate }) {
   const { profile } = useAuth()
-  const [loading, setLoading] = useState(true)
-  const [cards, setCards] = useState({
-    activeEmployees: 0,
-    contractsExpiring: 0,
-    leavePending: 0,
-    payrollDraft: 0,
-  })
-  const [expiring, setExpiring] = useState([])
-  const [recentLeave, setRecentLeave] = useState([])
   const [error, setError] = useState(null)
+  const queryClient = useQueryClient()
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
+  const { data, isLoading } = useQuery({
+    queryKey: ['hr-dashboard'],
+    queryFn: async () => {
       const today = new Date()
       const in60 = new Date(today)
       in60.setDate(in60.getDate() + 60)
@@ -69,24 +62,28 @@ export default function HrDashboard({ onNavigate }) {
         supabase.from('payroll_runs').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
       ])
 
-      setCards({
-        activeEmployees: activeRes.count ?? 0,
-        contractsExpiring: expiringRes.data?.length ?? 0,
-        leavePending: leavePendingRes.count ?? 0,
-        payrollDraft: payrollRes.count ?? 0,
-      })
-      setExpiring(expiringRes.data ?? [])
-      setRecentLeave(leaveRecentRes.data ?? [])
-    } catch (err) {
-      setError(err.message || 'Failed to load dashboard')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+      return {
+        cards: {
+          activeEmployees: activeRes.count ?? 0,
+          contractsExpiring: expiringRes.data?.length ?? 0,
+          leavePending: leavePendingRes.count ?? 0,
+          payrollDraft: payrollRes.count ?? 0,
+        },
+        expiring: expiringRes.data ?? [],
+        recentLeave: leaveRecentRes.data ?? [],
+      }
+    },
+    staleTime: 1000 * 60 * 2,
+  })
 
   useEffect(() => {
-    load()
-  }, [load])
+    if (data) setError(null)
+  }, [data])
+
+  const loading = isLoading
+  const cards = data?.cards ?? { activeEmployees: 0, contractsExpiring: 0, leavePending: 0, payrollDraft: 0 }
+  const expiring = data?.expiring ?? []
+  const recentLeave = data?.recentLeave ?? []
 
   const approveLeave = async (id) => {
     if (!profile?.id) return
@@ -95,7 +92,7 @@ export default function HrDashboard({ onNavigate }) {
       .update({ status: 'approved', approved_by: profile.id })
       .eq('id', id)
     if (err) setError(err.message)
-    else load()
+    else queryClient.invalidateQueries({ queryKey: ['hr-dashboard'] })
   }
 
   const rejectLeave = async (id) => {
@@ -112,7 +109,7 @@ export default function HrDashboard({ onNavigate }) {
       .update({ status: 'rejected', approved_by: profile.id })
       .eq('id', id)
     if (err) setError(err.message)
-    else load()
+    else queryClient.invalidateQueries({ queryKey: ['hr-dashboard'] })
   }
 
   const actionCards = [
@@ -126,7 +123,7 @@ export default function HrDashboard({ onNavigate }) {
     <div className="space-y-8">
       {error && <p className="text-sm text-red-300">{error}</p>}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {actionCards.map((card) => (
           <button
             key={card.label}
@@ -141,6 +138,58 @@ export default function HrDashboard({ onNavigate }) {
           </button>
         ))}
       </div>
+
+      <section className="rounded-3xl border border-white/10 bg-white/5 p-4 md:p-6 lg:p-8">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="portal-section-eyebrow uppercase tracking-[0.24em] text-slate-500">People readiness</p>
+            <h2 className="text-lg font-semibold text-white">Items requiring HR attention</h2>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <ReadinessItem
+            icon={cards.leavePending > 0 ? CircleAlert : CheckCircle2}
+            title="Leave conflicts this week"
+            subtitle="Overlapping approved leave"
+            count={cards.leavePending}
+            loading={loading}
+            onClick={() => onNavigate?.('leave-approvals')}
+          />
+          <ReadinessItem
+            icon={cards.contractsExpiring > 0 ? CircleAlert : CheckCircle2}
+            title="Expiring contracts"
+            subtitle="Within 30 days"
+            count={cards.contractsExpiring}
+            loading={loading}
+            onClick={() => onNavigate?.('compliance')}
+          />
+          <ReadinessItem
+            icon={CircleAlert}
+            title="Payroll readiness"
+            subtitle="Missing bank/tax info"
+            count={0}
+            loading={loading}
+            onClick={() => onNavigate?.('variable-pay')}
+          />
+          <ReadinessItem
+            icon={CircleAlert}
+            title="Missing employee data"
+            subtitle="Incomplete profiles"
+            count={0}
+            loading={loading}
+            onClick={() => onNavigate?.('registry')}
+          />
+          <ReadinessItem
+            icon={CircleAlert}
+            title="Compliance gaps"
+            subtitle="Missing certifications"
+            count={0}
+            loading={loading}
+            onClick={() => onNavigate?.('compliance')}
+          />
+        </div>
+      </section>
 
       <section>
         <h3 className="mb-3 text-lg font-semibold text-white">Contracts expiring soon</h3>
@@ -220,14 +269,14 @@ export default function HrDashboard({ onNavigate }) {
                           <button
                             type="button"
                             onClick={() => approveLeave(row.id)}
-                            className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-200"
+                            className="btn-primary"
                           >
                             Approve
                           </button>
                           <button
                             type="button"
                             onClick={() => rejectLeave(row.id)}
-                            className="rounded-full bg-red-500/20 px-3 py-1 text-xs font-medium text-red-300"
+                            className="btn-secondary"
                           >
                             Reject
                           </button>
@@ -242,5 +291,30 @@ export default function HrDashboard({ onNavigate }) {
         )}
       </section>
     </div>
+  )
+}
+
+function ReadinessItem({ icon: Icon, title, subtitle, count, loading, onClick }) {
+  const hasIssue = count > 0
+  const badgeColor = hasIssue ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+  const iconColor = hasIssue ? 'text-red-500' : 'text-green-500'
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-4 text-left transition hover:border-violet-400/20 hover:bg-white/10"
+    >
+      <div className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${iconColor}`}>
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="flex-1">
+        <p className="text-sm font-semibold text-white">{title}</p>
+        <p className="text-xs text-slate-400">{subtitle}</p>
+      </div>
+      <div className={`inline-flex shrink-0 items-center justify-center rounded-full px-3 py-1 text-sm font-semibold ${badgeColor}`}>
+        {loading ? '—' : count}
+      </div>
+    </button>
   )
 }

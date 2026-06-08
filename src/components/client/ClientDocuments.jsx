@@ -35,9 +35,10 @@ export default function ClientDocuments() {
 
     const { data } = await supabase
       .from('documents')
-      .select('*')
+      .select('id, file_name, file_url, project_id, document_type, document_date, created_at')
       .in('project_id', ids)
       .order('created_at', { ascending: false })
+      .limit(50)
 
     setDocs(data ?? [])
     setLoading(false)

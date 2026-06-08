@@ -38,7 +38,7 @@ export default function BankAccountRegistry() {
     setLoading(true)
     try {
       const [{ data: accountsData }, { data: cashData }] = await Promise.all([
-        supabase.from('bank_accounts').select('*').order('created_at', { ascending: false }),
+        supabase.from('bank_accounts').select('id,account_name,bank_name,account_number,currency,gl_account_code,is_active,created_at').order('created_at', { ascending: false }).limit(50),
         supabase.from('chart_of_accounts').select('account_code,account_name').in('account_code', CASH_ACCOUNTS).order('account_code'),
       ])
 

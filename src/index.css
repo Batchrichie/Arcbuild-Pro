@@ -1,5 +1,27 @@
 @import "tailwindcss";
 
+html {
+  font-size: 15px;
+}
+
+@media (min-width: 1280px) {
+  html {
+    font-size: 15.5px;
+  }
+}
+
+@media (min-width: 1536px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1920px) {
+  html {
+    font-size: 17px;
+  }
+}
+
 /* ARCBUILD PRO — Base resets */
 *, *::before, *::after {
   box-sizing: border-box;

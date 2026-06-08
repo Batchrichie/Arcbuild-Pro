@@ -14,7 +14,7 @@ export async function getLatestRates() {
 
   const { data, error } = await supabase
     .from('exchange_rates')
-    .select('*')
+    .select('currency_code, rate_to_ghs, rate_date')
     .eq('rate_date', rateDate)
 
   if (error) throw error
@@ -24,7 +24,7 @@ export async function getLatestRates() {
 export async function getRatesByDate(dateStr) {
   const { data, error } = await supabase
     .from('exchange_rates')
-    .select('*')
+    .select('currency_code, rate_to_ghs, rate_date')
     .eq('rate_date', dateStr)
 
   if (error) throw error

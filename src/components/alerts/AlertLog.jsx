@@ -45,7 +45,11 @@ export default function AlertLog({ readOnly = false }) {
   const loadLogs = useCallback(async () => {
     setLoading(true)
     try {
-      let query = supabase.from('alert_log').select('*').order('sent_at', { ascending: false })
+      let query = supabase
+        .from('alert_log')
+        .select('id,sent_at,alert_type,subject,recipient_email,related_table,related_id,delivery_status')
+        .order('sent_at', { ascending: false })
+        .limit(50)
       if (filterType) query = query.eq('alert_type', filterType)
       if (fromDate) query = query.gte('sent_at', `${fromDate}T00:00:00Z`)
       if (toDate) query = query.lte('sent_at', `${toDate}T23:59:59Z`)

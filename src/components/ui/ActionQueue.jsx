@@ -16,8 +16,8 @@ export default function ActionQueue({ title, subtitle, items = [], loading = fal
   return (
     <div className="rounded-3xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 shadow-xl shadow-black/10 overflow-hidden">
       <div className="bg-blue-600 dark:bg-blue-700 text-white rounded-t-lg px-4 py-2">
-        <p className="text-[14px] font-medium">{title}</p>
-        {subtitle ? <p className="mt-1 text-blue-100 dark:text-blue-200 text-sm">{subtitle}</p> : null}
+        <p className="text-sm lg:text-base font-medium">{title}</p>
+        {subtitle ? <p className="mt-1 text-blue-100 dark:text-blue-200 text-xs lg:text-sm">{subtitle}</p> : null}
       </div>
 
       <div className="p-4 grid grid-cols-2 gap-3">
@@ -58,9 +58,9 @@ export default function ActionQueue({ title, subtitle, items = [], loading = fal
                     {Icon ? <Icon className="h-5 w-5" /> : <span className="h-3.5 w-3.5 rounded-full bg-gray-200 dark:bg-slate-700" />}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-[12px] font-medium text-gray-500 dark:text-gray-400">{item.label}</p>
+                    <p className="truncate text-sm lg:text-base font-medium text-gray-500 dark:text-gray-400">{item.label}</p>
                     {item.detail ? (
-                      <p className="mt-1 text-[12px] text-gray-500 dark:text-gray-400 truncate">{item.detail}</p>
+                      <p className="mt-1 text-xs lg:text-sm text-gray-500 dark:text-gray-400 truncate">{item.detail}</p>
                     ) : null}
                   </div>
                 </div>

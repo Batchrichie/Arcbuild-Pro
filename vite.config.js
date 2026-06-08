@@ -19,4 +19,37 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) {
+            return 'vendor-react'
+          }
+          if (id.includes('node_modules/@supabase')) {
+            return 'vendor-supabase'
+          }
+          if (id.includes('pages/portals/AccountantPortal')) {
+            return 'portal-accountant'
+          }
+          if (id.includes('pages/portals/CeoPortal')) {
+            return 'portal-ceo'
+          }
+          if (id.includes('pages/portals/PmPortal')) {
+            return 'portal-pm'
+          }
+          if (id.includes('pages/portals/HrPortal')) {
+            return 'portal-hr'
+          }
+          if (id.includes('pages/portals/EmployeePortal')) {
+            return 'portal-employee'
+          }
+          if (id.includes('pages/portals/ClientPortal')) {
+            return 'portal-client'
+          }
+        }
+      }
+    }
+  }
 })
+

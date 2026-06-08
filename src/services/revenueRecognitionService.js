@@ -81,25 +81,34 @@ export async function getCompanyRecognitionSummary() {
   if (projErr) throw projErr
 
   const rows = []
-  for (const p of projects || []) {
-    const { data: invSum, error: invErr } = await supabase
+  const projectIds = (projects || []).map((p) => p.id)
+  if (projectIds.length > 0) {
+    const { data: invRows, error: invErr } = await supabase
       .from('invoices')
-      .select('gross_total_ghs')
-      .eq('project_id', p.id)
+      .select('project_id, gross_total_ghs')
+      .in('project_id', projectIds)
       .in('status', ['approved','sent','paid'])
 
     if (invErr) throw invErr
-    const invoiced = (invSum || []).reduce((s, r) => s + Number(r.gross_total_ghs || 0), 0)
-    const billingStatus = invoiced > (p.revenue_recognised || 0) ? 'overbilled' : (invoiced < (p.revenue_recognised || 0) ? 'underbilled' : 'on_track')
-    rows.push({
-      project_id: p.id,
-      project_name: p.name,
-      contract_value: Number(p.contract_value || 0),
-      pct_complete: Number(p.pct_complete || 0),
-      revenue_recognised: Number(p.revenue_recognised || 0),
-      invoiced,
-      billing_status: billingStatus,
+
+    const grouped = {}
+    ;(invRows || []).forEach((r) => {
+      grouped[r.project_id] = (grouped[r.project_id] || 0) + Number(r.gross_total_ghs || 0)
     })
+
+    for (const p of projects || []) {
+      const invoiced = grouped[p.id] || 0
+      const billingStatus = invoiced > (p.revenue_recognised || 0) ? 'overbilled' : (invoiced < (p.revenue_recognised || 0) ? 'underbilled' : 'on_track')
+      rows.push({
+        project_id: p.id,
+        project_name: p.name,
+        contract_value: Number(p.contract_value || 0),
+        pct_complete: Number(p.pct_complete || 0),
+        revenue_recognised: Number(p.revenue_recognised || 0),
+        invoiced,
+        billing_status: billingStatus,
+      })
+    }
   }
 
   return rows

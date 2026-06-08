@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { Building2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { ClientProvider, useClient } from '../../context/ClientContext'
@@ -7,10 +7,25 @@ import logo from '../../assets/ModuloDevLogo.png'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 import EmptyState from '../../components/ui/EmptyState'
 import { useTheme } from '../../context/ThemeContext'
-import ClientProjects from '../../components/client/ClientProjects'
-import ClientInvoices from '../../components/client/ClientInvoices'
-import ClientDocuments from '../../components/client/ClientDocuments'
-import ClientMessages from '../../components/client/ClientMessages'
+
+// Lazy load client portal components
+const ClientProjects = lazy(() => import('../../components/client/ClientProjects'))
+const ClientInvoices = lazy(() => import('../../components/client/ClientInvoices'))
+const ClientDocuments = lazy(() => import('../../components/client/ClientDocuments'))
+const ClientMessages = lazy(() => import('../../components/client/ClientMessages'))
+
+// Component skeleton loader
+function PortalComponentLoader() {
+  return (
+    <div className="flex h-96 w-full items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50">
+      <div className="text-center">
+        <div className="mb-3 inline-flex h-10 w-10 animate-spin rounded-full border-3 border-slate-200 border-t-slate-900"></div>
+        <p className="text-sm text-slate-600">Loading panel...</p>
+      </div>
+    </div>
+  )
+}
+
 
 const NAV = [
   { id: 'projects', label: 'My Projects' },
@@ -33,13 +48,29 @@ function ClientPortalContent() {
   const render = () => {
     switch (tab) {
       case 'projects':
-        return <ClientProjects selectedProjectId={projectId} onSelectProject={setProjectId} onSwitchTab={setTab} />
+        return (
+          <Suspense fallback={<PortalComponentLoader />}>
+            <ClientProjects selectedProjectId={projectId} onSelectProject={setProjectId} onSwitchTab={setTab} />
+          </Suspense>
+        )
       case 'invoices':
-        return <ClientInvoices />
+        return (
+          <Suspense fallback={<PortalComponentLoader />}>
+            <ClientInvoices />
+          </Suspense>
+        )
       case 'documents':
-        return <ClientDocuments />
+        return (
+          <Suspense fallback={<PortalComponentLoader />}>
+            <ClientDocuments />
+          </Suspense>
+        )
       case 'messages':
-        return <ClientMessages />
+        return (
+          <Suspense fallback={<PortalComponentLoader />}>
+            <ClientMessages />
+          </Suspense>
+        )
       default:
         return null
     }
@@ -126,7 +157,7 @@ function ClientPortalContent() {
                     setTab(item.id)
                     setMenuOpen(false)
                   }}
-                  className={`rounded-lg px-4 py-3 text-left text-sm font-medium ${
+                  className={`rounded-lg px-4 py-3 text-left text-sm lg:text-[15px] font-medium ${
                     tab === item.id ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-700'
                   }`}
                 >

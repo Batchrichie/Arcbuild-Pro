@@ -99,7 +99,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
       try {
         const { data, error: err } = await supabase
           .from('clients')
-          .select('*')
+          .select('id, name, client_type')
           .order('name');
 
         if (err) throw err;
@@ -126,8 +126,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
         const { data, error: err } = await supabase
           .from('projects')
           .select(`
-            *,
-            divisions(id, name)
+            id, name, project_code, divisions(id, name)
           `)
           .eq('client_id', formData.client_id)
           .eq('status', 'active')

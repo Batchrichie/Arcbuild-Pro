@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { formatGhsCompact } from '../../lib/formatGhs'
 import { budgetTrackStatus } from '../../lib/status-classes'
@@ -20,36 +21,37 @@ function milestoneStatusStyle(status, dueDate) {
 
 export default function PmDashboard({ onLogCost, onMarkMilestone, onPaymentCert, onOpenCostLedger }) {
   const { selectedProjectId } = usePmProject()
-  const [finance, setFinance] = useState(null)
-  const [contractEnd, setContractEnd] = useState(null)
-  const [milestones, setMilestones] = useState([])
-  const [pendingCostApprovals, setPendingCostApprovals] = useState(0)
-  const [loading, setLoading] = useState(false)
 
-  const load = useCallback(async () => {
-    if (!selectedProjectId) return
-    setLoading(true)
-    try {
+  const { data, isLoading } = useQuery({
+    queryKey: ['pm-risk-summary', selectedProjectId],
+    queryFn: async () => {
+      if (!selectedProjectId) return { finance: null, contractEnd: null, milestones: [], pendingCostApprovals: 0 }
       const [{ data: fin }, { data: contract }, { data: ms }, pendingCostRes] = await Promise.all([
-        supabase.from('project_finance_summary').select('*').eq('project_id', selectedProjectId).maybeSingle(),
+        supabase
+          .from('project_finance_summary')
+          .select('id,project_id,contract_value_ghs,materials_budget_ghs,labour_budget_ghs,subcontractor_budget_ghs,equipment_budget_ghs,other_budget_ghs,materials_cost_ghs,labour_cost_ghs,subcontractor_cost_ghs,equipment_cost_ghs,other_cost_ghs,budget_remaining_ghs,financial_completion_pct')
+          .eq('project_id', selectedProjectId)
+          .maybeSingle(),
         supabase.from('contracts').select('end_date').eq('project_id', selectedProjectId).maybeSingle(),
-        supabase.from('milestones').select('*').eq('project_id', selectedProjectId).order('due_date', { ascending: true }),
+        supabase.from('milestones').select('id,title,percentage_complete,status,due_date').eq('project_id', selectedProjectId).order('due_date', { ascending: true }).limit(50),
         supabase.from('project_costs').select('id', { count: 'exact', head: true }).eq('project_id', selectedProjectId).eq('status', 'pending_approval'),
       ])
-      setFinance(fin)
-      setContractEnd(contract?.end_date || null)
-      setMilestones(ms ?? [])
-      setPendingCostApprovals(pendingCostRes.count ?? 0)
-    } catch (err) {
-      console.warn('PM dashboard load failed', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [selectedProjectId])
+      return {
+        finance: fin,
+        contractEnd: contract?.end_date || null,
+        milestones: ms ?? [],
+        pendingCostApprovals: pendingCostRes.count ?? 0,
+      }
+    },
+    enabled: !!selectedProjectId,
+    staleTime: 1000 * 60 * 2,
+  })
 
-  useEffect(() => {
-    load()
-  }, [load])
+  const finance = data?.finance || null
+  const contractEnd = data?.contractEnd || null
+  const milestones = data?.milestones || []
+  const pendingCostApprovals = data?.pendingCostApprovals || 0
+  const loading = isLoading
 
   const budgetRows = COST_CATEGORIES.map((category) => {
     const budgetVal =
@@ -154,7 +156,7 @@ export default function PmDashboard({ onLogCost, onMarkMilestone, onPaymentCert,
               </div>
               <p className="text-sm text-slate-400">Click to drill into the project finance workflow.</p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <RiskCard
                 label="Budget overrun risk"
                 value={budgetOverrunPct > 0 ? `${budgetOverrunPct.toFixed(1)}%` : '0%'}
@@ -190,7 +192,7 @@ export default function PmDashboard({ onLogCost, onMarkMilestone, onPaymentCert,
             </div>
           </section>
 
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <SummaryCard label="Contract Value" value={formatGhsCompact(finance?.contract_value)} />
             <SummaryCard label="Financial Completion" progress={completion} />
             <SummaryCard
@@ -259,7 +261,7 @@ export default function PmDashboard({ onLogCost, onMarkMilestone, onPaymentCert,
             </div>
           </section>
 
-          <div className="hidden gap-3 lg:grid lg:grid-cols-3">
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-3">
             <QuickAction label="Log a Cost" onClick={onLogCost} />
             <QuickAction label="Mark Milestone Complete" onClick={onMarkMilestone} />
             <QuickAction label="Issue Payment Certificate" onClick={onPaymentCert} />
@@ -272,7 +274,7 @@ export default function PmDashboard({ onLogCost, onMarkMilestone, onPaymentCert,
 
 function SummaryCard({ label, value, valueClass = 'text-white', progress, raw }) {
   return (
-    <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
+    <div className="kpi-card">
       <p className="text-xs uppercase tracking-wide text-slate-500">{label}</p>
       {progress != null ? (
         <>
@@ -293,7 +295,7 @@ function RiskCard({ label, value, detail, statusLabel, statusClass, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="group rounded-2xl border border-white/10 bg-slate-950/80 p-4 text-left transition hover:border-emerald-400/30 hover:bg-slate-900"
+      className={`group kpi-card bg-slate-950/80 text-left transition hover:border-emerald-400/30 hover:bg-slate-900`}
     >
       <div className="flex items-center justify-between gap-3">
         <div>
@@ -312,7 +314,7 @@ function QuickAction({ label, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="min-touch rounded-2xl border border-cyan-400/30 bg-cyan-500/15 px-4 py-4 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-500/25"
+      className="kpi-card text-center bg-cyan-500/10 border-cyan-400/30"
     >
       {label}
     </button>

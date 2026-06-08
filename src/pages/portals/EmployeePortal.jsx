@@ -1,17 +1,32 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { COMPANY } from '../../lib/company-config'
 import { useAuth } from '../../context/AuthContext'
 import { EmployeeProvider } from '../../context/EmployeeContext'
 import EmployeeHome from '../../components/employee/EmployeeHome'
-import EmployeePayslips from '../../components/employee/EmployeePayslips'
-import EmployeeLeave from '../../components/employee/EmployeeLeave'
-import EmployeeLoans from '../../components/employee/EmployeeLoans'
-import EmployeeProfile from '../../components/employee/EmployeeProfile'
-import TimesheetEntry from '../../components/TimesheetEntry'
 import Modal from '../../components/ui/Modal'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
 import { Banknote, CircleDollarSign, ClipboardPenLine, Home, Palmtree, UserCircle } from 'lucide-react'
+
+// Lazy load employee portal components
+const EmployeePayslips = lazy(() => import('../../components/employee/EmployeePayslips'))
+const EmployeeLeave = lazy(() => import('../../components/employee/EmployeeLeave'))
+const EmployeeLoans = lazy(() => import('../../components/employee/EmployeeLoans'))
+const EmployeeProfile = lazy(() => import('../../components/employee/EmployeeProfile'))
+const TimesheetEntry = lazy(() => import('../../components/TimesheetEntry'))
+
+// Component skeleton loader
+function PortalComponentLoader() {
+  return (
+    <div className="flex h-96 w-full items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-600">
+      <div className="text-center">
+        <div className="mb-3 inline-flex h-10 w-10 animate-spin rounded-full border-3 border-slate-200 border-t-slate-900 dark:border-slate-600 dark:border-t-white"></div>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Loading panel...</p>
+      </div>
+    </div>
+  )
+}
+
 
 const TABS = [
   { id: 'home', label: 'Home', icon: Home },
@@ -65,26 +80,42 @@ function EmployeePortalContent() {
       case 'home':
         return <EmployeeHome onViewPayslip={goPayslip} onOpenTimesheet={goTimesheets} onOpenLeave={goLeave} />
       case 'payslips':
-        return <EmployeePayslips initialLineId={payslipLineId} onClearInitial={() => setPayslipLineId(null)} />
+        return (
+          <Suspense fallback={<PortalComponentLoader />}>
+            <EmployeePayslips initialLineId={payslipLineId} onClearInitial={() => setPayslipLineId(null)} />
+          </Suspense>
+        )
       case 'leave':
         return (
           <div>
             <button type="button" onClick={() => setLeaveOpen(true)} className="rounded-lg bg-cyan-500 px-4 py-2 text-white">Apply for leave</button>
             <Modal open={leaveOpen} onClose={() => setLeaveOpen(false)} title="Leave application" size="md">
-              <EmployeeLeave />
+              <Suspense fallback={<PortalComponentLoader />}>
+                <EmployeeLeave />
+              </Suspense>
             </Modal>
           </div>
         )
       case 'loans':
-        return <EmployeeLoans />
+        return (
+          <Suspense fallback={<PortalComponentLoader />}>
+            <EmployeeLoans />
+          </Suspense>
+        )
       case 'profile':
-        return <EmployeeProfile />
+        return (
+          <Suspense fallback={<PortalComponentLoader />}>
+            <EmployeeProfile />
+          </Suspense>
+        )
       case 'timesheets':
         return (
           <div>
             <button type="button" onClick={() => setTimesheetOpen(true)} className="rounded-lg bg-amber-500 px-4 py-2 text-white">New timesheet</button>
             <Modal open={timesheetOpen} onClose={() => setTimesheetOpen(false)} title="Timesheet entry" size="xl">
-              <TimesheetEntry />
+              <Suspense fallback={<PortalComponentLoader />}>
+                <TimesheetEntry />
+              </Suspense>
             </Modal>
           </div>
         )
@@ -106,7 +137,7 @@ function EmployeePortalContent() {
                   key={t.id}
                   type="button"
                   onClick={() => setTab(t.id)}
-                  className={`min-touch w-full rounded-xl px-3 py-2.5 text-left text-sm ${
+                  className={`min-touch w-full rounded-xl px-3 py-2.5 text-left text-sm lg:text-[15px] ${
                     tab === t.id ? 'bg-orange-500/15 text-orange-100' : 'text-slate-400 hover:bg-white/5'
                   }`}
                 >
@@ -124,7 +155,7 @@ function EmployeePortalContent() {
           <main className="portal-main portal-employee-main min-w-0 w-full overflow-x-hidden pb-24 lg:pb-0">
             <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl font-semibold text-white truncate">{TITLES[tab]}</h1>
+                <h1 className="text-2xl lg:text-3xl font-semibold text-white truncate">{TITLES[tab]}</h1>
               </div>
               <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <button type="button" onClick={signOut} className="text-sm text-slate-400">Sign out</button>

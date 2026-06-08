@@ -28,7 +28,11 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
   }, [selectedAccountId])
 
   async function loadAccounts() {
-    const { data, error } = await supabase.from('bank_accounts').select('*').order('account_name')
+    const { data, error } = await supabase
+      .from('bank_accounts')
+      .select('id,account_name,bank_name,gl_account_code,account_number,currency,is_active')
+      .order('account_name')
+      .limit(50)
     if (error) {
       console.error('Failed to load bank accounts', error)
       return
@@ -42,7 +46,7 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
     try {
       const account = bankAccounts.find((item) => item.id === selectedAccountId)
       const [transactionsRes, glRes, balanceRes] = await Promise.all([
-        supabase.from('bank_transactions').select('*').eq('bank_account_id', selectedAccountId).order('transaction_date', { ascending: true }),
+        supabase.from('bank_transactions').select('id,bank_account_id,transaction_date,description,debit_amount,credit_amount,match_status,matched_ledger_entry_id').eq('bank_account_id', selectedAccountId).order('transaction_date', { ascending: true }).limit(50),
         account?.gl_account_code
           ? supabase.from('ledger_entries').select('id,journal_entry_id,account_code,debit,credit,description').eq('account_code', account.gl_account_code).order('created_at', { ascending: false }).limit(200)
           : Promise.resolve({ data: [] }),

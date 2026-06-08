@@ -16,9 +16,10 @@ export default function EmployeeLoans() {
     setLoading(true)
     const { data } = await supabase
       .from('staff_loans')
-      .select('*')
+      .select('id, loan_amount, outstanding_balance, status, start_date, monthly_deduction')
       .eq('employee_id', employee.id)
       .order('start_date', { ascending: false })
+      .limit(50)
 
     const rows = data ?? []
     setActive(rows.filter((r) => r.status === 'active'))

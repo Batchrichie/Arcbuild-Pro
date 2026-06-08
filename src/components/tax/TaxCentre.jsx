@@ -98,9 +98,10 @@ export default function TaxCentre({ readOnly = false }) {
     setCalendarLoading(true)
     const { data, error } = await supabase
       .from('tax_calendar')
-      .select('*')
+      .select('id,tax_type,period_start,period_end,status,description')
       .order('period_start', { ascending: false })
       .order('tax_type', { ascending: true })
+      .limit(50)
 
     if (error) {
       console.error('Failed to load tax calendar', error.message)
@@ -133,7 +134,10 @@ export default function TaxCentre({ readOnly = false }) {
   }, [vatPeriod])
 
   const loadWhtSummary = useCallback(async () => {
-    const { data, error } = await supabase.from('wht_certificate_summary').select('*')
+    const { data, error } = await supabase
+      .from('wht_certificate_summary')
+      .select('subcontractor_name,tin,total_gross_paid,wht_rate,total_wht_deducted,payment_count,year')
+      .limit(50)
     if (error) {
       console.error('Failed to load WHT summary', error.message)
       setWhtRows([])
@@ -149,6 +153,7 @@ export default function TaxCentre({ readOnly = false }) {
       .from('tax_filings')
       .select('id, tax_type, period_start, period_end, filed_at, gra_reference, net_tax_due, amount_paid, filed_by(id, full_name)')
       .order('filed_at', { ascending: false })
+      .limit(50)
 
     if (error) {
       console.error('Failed to load filing history', error.message)
