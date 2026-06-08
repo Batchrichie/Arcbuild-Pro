@@ -159,6 +159,10 @@ const MOBILE_SUB_NAV = {
     { id: 'new-journal', label: 'New Journal' },
     { id: 'journal-history', label: 'History' },
     { id: 'financial-statements', label: 'Statements' },
+    { id: 'chart-of-accounts', label: 'Chart of Accounts' },
+    { id: 'management-reports', label: 'Reports' },
+    { id: 'debtors-ledger', label: 'Debtors Ledger' },
+    { id: 'revenue-recognition', label: 'Revenue Recognition' },
     { id: 'bank-accounts', label: 'Bank Accounts' },
     { id: 'import-statement', label: 'Import' },
     { id: 'reconciliation', label: 'Reconciliation' },
@@ -169,6 +173,7 @@ const MOBILE_SUB_NAV = {
     { id: 'ssnit-schedule', label: 'SSNIT' },
   ],
   projects: [
+    { id: 'projects', label: 'Projects' },
     { id: 'project-finance', label: 'Finance' },
     { id: 'cost-ledger', label: 'Costs' },
   ],
@@ -233,10 +238,10 @@ function viewFromMobileTab(tab, currentView) {
 function mobileTabForView(view) {
   if (view === 'dashboard') return 'dashboard'
   if (['invoice-list', 'create-invoice', 'milestone-queue', 'payments-received'].includes(view)) return 'invoices'
-  if (['general-ledger', 'journal-history', 'new-journal', 'financial-statements', 'trial-balance', 'bank-accounts', 'import-statement', 'reconciliation'].includes(view))
+  if (['general-ledger', 'journal-history', 'new-journal', 'financial-statements', 'trial-balance', 'chart-of-accounts', 'management-reports', 'debtors-ledger', 'revenue-recognition', 'bank-accounts', 'import-statement', 'reconciliation'].includes(view))
     return 'ledger'
   if (['payroll-runs', 'paye-schedule', 'ssnit-schedule'].includes(view)) return 'payroll'
-  if (['project-finance', 'cost-ledger'].includes(view)) return 'projects'
+  if (['projects', 'project-finance', 'cost-ledger'].includes(view)) return 'projects'
   if (MORE_DRAWER_ITEMS.some((i) => i.id === view)) return 'more'
   return 'invoices'
 }
