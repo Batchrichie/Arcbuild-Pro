@@ -11,19 +11,31 @@ export default function ConfirmResetPassword() {
   useEffect(() => {
     const verifyToken = async () => {
       try {
+        const code = searchParams.get('code')
         const token_hash = searchParams.get('token_hash')
+        const token = searchParams.get('token')
         const type = searchParams.get('type')
 
-        if (!token_hash || !type) {
+        if (code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+          if (exchangeError) {
+            setError('Invalid or expired invite link. Please request a new one.')
+            setLoading(false)
+            return
+          }
+          navigate('/auth/update-password', { replace: true })
+          return
+        }
+
+        if (!type || (!token_hash && !token)) {
           setError('Invalid or missing token. Please request a new password reset link.')
           setLoading(false)
           return
         }
 
-        // Verify the OTP token
         const { error: verifyError } = await supabase.auth.verifyOtp({
           type,
-          token_hash,
+          token_hash: token_hash || token,
         })
 
         if (verifyError) {
@@ -32,7 +44,6 @@ export default function ConfirmResetPassword() {
           return
         }
 
-        // Token is valid, redirect to password update page
         navigate('/auth/update-password', { replace: true })
       } catch (err) {
         setError(err.message || 'An error occurred. Please try again.')
