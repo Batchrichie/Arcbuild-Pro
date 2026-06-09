@@ -135,8 +135,9 @@ export default function InvoiceForm({ onSave, initialData = null }) {
         if (err) throw err;
         setProjects(data);
       } catch (err) {
-        setError('Failed to load projects');
-        console.error(err);
+        const message = err?.message || err?.details || JSON.stringify(err) || 'Unknown error';
+        setError(`Failed to load projects: ${message}`);
+        console.error('Failed to load projects:', err);
       }
     };
 
@@ -435,6 +436,16 @@ export default function InvoiceForm({ onSave, initialData = null }) {
       const user = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Resolve the `profiles.id` for the current auth user. Some tables
+      // (eg. invoices.created_by) expect the profile UUID, not the auth UID.
+      const { data: profileRow, error: profileErr } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.data?.user?.id)
+        .single();
+
+      const createdById = profileRow?.id || user.data?.user?.id;
+
       // Prepare invoice data for the base invoice record.
       const retentionWithheld = taxes.gross_total * (Number(formData.retention_rate || 0) / 100);
       const netPayable = taxes.gross_total - retentionWithheld;
@@ -466,7 +477,7 @@ export default function InvoiceForm({ onSave, initialData = null }) {
         status: 'draft',
         requires_approval: requiresApproval,
         approval_threshold_at_creation: approvalThreshold,
-        created_by: user.data.user.id,
+        created_by: createdById,
         notes: formData.notes,
         apply_tax: applyTax,
       };

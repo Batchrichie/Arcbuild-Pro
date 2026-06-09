@@ -14,7 +14,7 @@ function maskAccountNumber(value) {
 }
 
 export default function BankAccountRegistry() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const [accounts, setAccounts] = useState([])
   const [cashAccounts, setCashAccounts] = useState([])
   const [balances, setBalances] = useState({})
@@ -108,7 +108,7 @@ export default function BankAccountRegistry() {
         currency: form.currency,
         gl_account_code: form.gl_account_code,
         opening_balance: Number(form.opening_balance) || 0,
-        created_by: user.id,
+        created_by: profile?.id || user.id,
       }
       const { error: insertError } = await supabase.from('bank_accounts').insert([payload])
       if (insertError) throw insertError
