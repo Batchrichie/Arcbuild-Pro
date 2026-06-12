@@ -1,0 +1,296 @@
+/* ===== LOGIN PAGE STYLES ===== */
+
+.login-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top, rgba(249, 115, 22, 0.1), transparent 28%),
+    linear-gradient(180deg, #020202 0%, #09090b 100%);
+  color: #ffffff;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body {
+  background: #020202;
+  color: #ffffff;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* ===== NOISE ===== */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ===== DARK MODE DEFAULTS ===== */
+.brand-panel {
+  background: linear-gradient(to right, rgba(2,2,2,0.94) 0%, rgba(2,2,2,0.75) 50%, rgba(2,2,2,0.35) 100%),
+    url('https://picsum.photos/seed/construction-ghana-steel/1600/1000.jpg') center/cover no-repeat;
+  transition: background 0.5s ease;
+}
+
+.form-glow {
+  background: radial-gradient(ellipse at center, rgba(249,115,22,0.06) 0%, transparent 68%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(22px);
+  transition: background 0.5s ease, border-color 0.5s ease;
+}
+
+.right-panel-bg {
+  background: #020202;
+  transition: background 0.5s ease, box-shadow 0.5s ease;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 30px 80px rgba(0, 0, 0, 0.25);
+}
+
+.input-field {
+  background: #09090b;
+  border-color: #27272a;
+  color: #ffffff;
+  border-radius: 1rem;
+  padding: 0.95rem 1rem;
+  transition: all 0.3s ease;
+}
+.input-field::placeholder { color: #52525b; }
+.input-field:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249,115,22,0.14);
+  outline: none;
+}
+
+.brand-h1 { color: #facc15; transition: color 0.5s ease; }
+.brand-sub { color: #fbbf24; transition: color 0.5s ease; }
+.tagline  { color: #d4d4d8; transition: color 0.5s ease; }
+.form-label { color: #71717a; transition: color 0.5s ease; }
+.form-hint  { color: #71717a; transition: color 0.5s ease; }
+.input-icon { color: #52525b; transition: color 0.5s ease; }
+.divider-line { background: #27272a; transition: background 0.5s ease; }
+.divider-text { color: #52525b; transition: color 0.5s ease; }
+.signup-text { color: #52525b; transition: color 0.5s ease; }
+.copyright   { color: #d4d4d8; transition: color 0.5s ease; }
+.pill-border  { border-color: rgba(255,255,255,0.12); transition: border-color 0.5s ease; }
+.pill-text    { color: #f8fafc; transition: color 0.5s ease; }
+.pill-icon    { color: #f8fafc; transition: color 0.5s ease; }
+.social-border { border-color: #27272a; transition: border-color 0.5s ease; }
+.social-text   { color: #a1a1aa; transition: color 0.5s ease; }
+.toast-bg {
+  background: #18181b;
+  border-color: #27272a;
+  transition: all 0.5s ease;
+  --toast-text: #d4d4d8;
+}
+
+/* ===== LIGHT MODE ===== */
+body.light-mode,
+body.light-mode .login-container {
+  background: #f4f4f5;
+  color: #09090b;
+}
+
+body.light-mode .brand-panel {
+  background: linear-gradient(to right, rgba(244,244,245,0.96) 0%, rgba(244,244,245,0.85) 50%, rgba(244,244,245,0.5) 100%),
+    url('https://picsum.photos/seed/construction-ghana-steel/1600/1000.jpg') center/cover no-repeat;
+}
+
+body.light-mode .form-glow {
+  background: radial-gradient(ellipse at center, rgba(249,115,22,0.06) 0%, transparent 70%);
+}
+
+body.light-mode .right-panel-bg { background: #f4f4f5; }
+body.light-mode .input-field { background: #ffffff; border-color: #d4d4d8; color: #09090b; }
+body.light-mode .input-field::placeholder { color: #a1a1aa; }
+body.light-mode .input-field:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+body.light-mode .brand-h1 { color: #b45309; }
+body.light-mode .brand-sub { color: #d97706; }
+body.light-mode .tagline  { color: #27272a; }
+body.light-mode .form-label { color: #52525b; }
+body.light-mode .form-hint  { color: #71717a; }
+body.light-mode .input-icon { color: #6b7280; }
+body.light-mode .divider-line { background: #d4d4d8; }
+body.light-mode .divider-text { color: #6b7280; }
+body.light-mode .signup-text { color: #4b5563; }
+body.light-mode .copyright   { color: #6b7280; }
+body.light-mode .pill-border  { border-color: #d1d5db; }
+body.light-mode .pill-text    { color: #111827; }
+body.light-mode .pill-icon    { color: #374151; }
+body.light-mode .social-border { border-color: #d4d4d8; }
+body.light-mode .social-text   { color: #52525b; }
+body.light-mode .toast-bg {
+  background: #ffffff;
+  border-color: #d4d4d8;
+  --toast-text: #27272a;
+}
+body.light-mode .noise-overlay { opacity: 0.015; }
+
+/* ===== BUTTON ===== */
+.btn-glow {
+  box-shadow: 0 10px 30px -5px rgba(249,115,22,0.25);
+  transition: all 0.3s ease;
+}
+.btn-glow:hover:not(:disabled) {
+  box-shadow: 0 15px 40px -5px rgba(249,115,22,0.35);
+  background: #fb923c;
+}
+
+/* ===== CATEGORY PILLS ===== */
+.category-pill { transition: all 0.3s ease; }
+.category-pill:hover { border-color: #52525b !important; color: #a1a1aa !important; }
+body.light-mode .category-pill:hover { border-color: #a1a1aa !important; color: #27272a !important; }
+
+/* ===== SOCIAL BUTTONS ===== */
+.social-btn { transition: all 0.2s ease; }
+.social-btn:hover { border-color: #52525b !important; background: rgba(39,39,42,0.3); }
+body.light-mode .social-btn:hover { border-color: #a1a1aa !important; background: rgba(0,0,0,0.04); }
+
+/* ===== THEME TOGGLE ===== */
+.theme-toggle {
+  width: 48px;
+  height: 26px;
+  min-height: 0;
+  border-radius: 13px;
+  cursor: pointer;
+  position: relative;
+  border: none;
+  padding: 0;
+  background: #27272a;
+  transition: background 0.4s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  line-height: 0;
+}
+
+.toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #a1a1aa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), background 0.4s ease;
+  overflow: hidden;
+}
+
+body.light-mode .theme-toggle {
+  background: #f97316;
+}
+
+body.light-mode .toggle-knob {
+  transform: translateX(20px);
+  background: #ffffff;
+}
+
+.moon-icon,
+.sun-icon {
+  position: absolute;
+  transition: opacity 0.3s ease;
+  line-height: 0;
+  pointer-events: none;
+}
+
+.moon-icon {
+  color: #4b5563;
+  opacity: 1;
+}
+
+.sun-icon {
+  color: #facc15;
+  opacity: 0;
+}
+
+body.light-mode .moon-icon {
+  opacity: 0;
+}
+
+body.light-mode .sun-icon {
+  opacity: 1;
+}
+
+/* ===== REVEAL ANIMATION ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: revealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes revealUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+.delay-6 { animation-delay: 0.6s; }
+.delay-7 { animation-delay: 0.7s; }
+.delay-8 { animation-delay: 0.8s; }
+
+/* ===== CUSTOM CHECKBOX ===== */
+.custom-checkbox {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #3f3f46;
+  border-radius: 4px;
+  background: #09090b;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+}
+body.light-mode .custom-checkbox { border-color: #d4d4d8; background: #ffffff; }
+.custom-checkbox:checked { background: #f97316; border-color: #f97316; }
+.custom-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 4.5px;
+  top: 1.5px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ===== PASSWORD TOGGLE ===== */
+.password-toggle {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  background: none;
+  border: none;
+  color: #52525b;
+}
+.password-toggle:hover { color: #a1a1aa; }
+body.light-mode .password-toggle { color: #a1a1aa; }
+body.light-mode .password-toggle:hover { color: #52525b; }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #020202; }
+::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
+body.light-mode ::-webkit-scrollbar-track { background: #f4f4f5; }
+body.light-mode ::-webkit-scrollbar-thumb { background: #d4d4d8; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .split-layout { flex-direction: column; }
+  .brand-panel {
+    min-height: 280px;
+    background: linear-gradient(to bottom, rgba(2,2,2,0.85) 0%, rgba(2,2,2,0.5) 100%),
+      url('https://picsum.photos/seed/construction-ghana-steel/1600/1000.jpg') center/cover no-repeat;
+  }
+  body.light-mode .brand-panel {
+    background: linear-gradient(to bottom, rgba(244,244,245,0.9) 0%, rgba(244,244,245,0.6) 100%),
+      url('https://picsum.photos/seed/construction-ghana-steel/1600/1000.jpg') center/cover no-repeat;
+  }
+  .category-grid { display: none; }
+}
+
+@media (max-width: 768px) {
+  .brand-panel { min-height: 200px; }
+  .brand-h1 { font-size: 2.5rem; }
+  .category-grid { display: none; }
+}

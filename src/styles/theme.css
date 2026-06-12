@@ -7,7 +7,7 @@
   --color-surface: #111827;
   --color-background-surface: #111827;
   --color-surface-2: #151f2d;
-  --color-surface-3: #1f2937;
+  --color-surface-3: #263247;
   --color-panel: rgba(255, 255, 255, 0.05);
   --color-background-card: rgba(255, 255, 255, 0.05);
   --color-panel-strong: rgba(255, 255, 255, 0.08);
@@ -51,7 +51,7 @@
   --color-warning-bg-strong: rgba(251, 146, 60, 0.18);
   --color-warning-border: rgba(245, 166, 35, 0.24);
 
-  --color-teal: #14B8A6;
+  --color-teal: #378ADD;
   --color-teal-bg-strong: rgba(20, 184, 166, 0.26);
   --color-teal-bg-xstrong: rgba(20, 184, 166, 0.32);
   --color-divider: rgba(255, 255, 255, 0.08);
@@ -93,8 +93,8 @@ body.theme-light {
 
   --color-text: #0F172A;
   --color-text-primary: #0F172A;
-  --color-text-secondary: #64748B;
-  --color-text-muted: #64748B;
+  --color-text-secondary: #475569;
+  --color-text-muted: #475569;
   --color-text-muted-strong: #94A3B8;
   --color-text-placeholder: #94A3B8;
 
@@ -104,7 +104,7 @@ body.theme-light {
   --color-amber-border: rgba(200, 142, 42, 0.24);
   --color-amber-text: #111827;
 
-  --color-success: #14B8A6;
+  --color-success: #0F766E;
   --color-success-bg: rgba(20, 184, 166, 0.12);
   --color-success-border: rgba(20, 184, 166, 0.35);
 
