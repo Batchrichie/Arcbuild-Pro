@@ -95,7 +95,7 @@ export async function getClientStatement(clientId) {
       .order('created_at', { ascending: true }),
     supabase
       .from('invoice_payments')
-      .select('id, invoice_id, payment_date, payment_reference, payment_account_code, payment_account_name, amount_ghs, journal_entry_id, recorded_by, notes, created_at, invoice:invoices(invoice_number)')
+      .select('id, invoice_id, payment_date, payment_reference, payment_account_code, payment_account_name, amount_ghs, journal_entry_id, recorded_by, notes, created_at, invoice:invoices(invoice_number), journal:journal_entries(status)')
       .eq('client_id', clientId)
       .order('payment_date', { ascending: true }),
   ])
@@ -108,6 +108,42 @@ export async function getClientStatement(clientId) {
     client,
     invoices: invoices ?? [],
     payments: payments ?? [],
+  }
+}
+
+export async function voidPayment(paymentId, currentUserId, reason) {
+  if (!paymentId) throw new Error('Payment ID is required.')
+  if (!reason || !reason.trim()) throw new Error('Reason is required to void a payment.')
+
+  const profileId = await resolveProfileId(currentUserId)
+
+  const { data, error } = await supabase.rpc('void_payment', {
+    payment_id_param: paymentId,
+    reason_param: reason.trim(),
+    actor_uuid: profileId,
+  })
+
+  // Handle DB-level error codes gracefully
+  if (error) {
+    // Surface a friendly message for known DB error code
+    if (error?.message && error.message.includes('PMT_ALREADY_VOID')) {
+      throw new Error('This payment has already been voided.')
+    }
+    throw error
+  }
+
+  if (!data?.success) {
+    // Map known DB error payloads to readable messages
+    if (data?.error && data.error.includes('PMT_ALREADY_VOID')) {
+      throw new Error('This payment has already been voided.')
+    }
+    throw new Error(data?.error || 'Failed to void payment.')
+  }
+
+  // Return updated payment and journal summary when available
+  return {
+    payment: data.payment ?? null,
+    journalSummary: data.journal_summary ?? null,
   }
 }
 
@@ -240,7 +276,6 @@ export async function recordPayment({
     source_id: invoiceIds.length === 1 ? invoiceIds[0] : null,
     created_by: profileId,
     posted_by: profileId,
-    is_posted: true,
   }
 
   const { data: journalEntry, error: journalError } = await supabase

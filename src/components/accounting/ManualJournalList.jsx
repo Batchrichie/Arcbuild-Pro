@@ -34,13 +34,13 @@ export default function ManualJournalList({ readOnly = false }) {
     try {
       let query = supabase
         .from('journal_entries')
-        .select('id,entry_number,entry_date,description,reference,posted_by,is_reversed,source_type,profiles!posted_by(full_name)', { count: 'exact' })
+        .select('id,entry_number,entry_date,description,reference,posted_by,status,source_type,profiles!posted_by(full_name)', { count: 'exact' })
         .eq('source_type', 'manual')
 
       if (filters.from) query = query.gte('entry_date', filters.from)
       if (filters.to) query = query.lte('entry_date', filters.to)
-      if (filters.status === 'active') query = query.is('is_reversed', false)
-      if (filters.status === 'reversed') query = query.is('is_reversed', true)
+      if (filters.status === 'active') query = query.eq('status', 'POSTED')
+      if (filters.status === 'reversed') query = query.eq('status', 'REVERSED')
       if (filters.postedBy) query = query.eq('posted_by', filters.postedBy)
       if (filters.search) {
         const escaped = filters.search.replace(/'/g, "''")
@@ -228,7 +228,7 @@ export default function ManualJournalList({ readOnly = false }) {
               ) : (
                 entries.map((entry) => {
                   const postedByName = entry.profiles?.full_name || 'Unknown'
-                  const isReversed = entry.is_reversed
+                  const isReversed = entry.status === 'REVERSED'
                   return (
                     <tr
                       key={entry.id}

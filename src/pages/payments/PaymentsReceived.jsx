@@ -8,6 +8,7 @@ import {
   getClientStatement,
   getPaymentAccounts,
   recordPayment,
+  voidPayment,
 } from '../../services/paymentService'
 
 const STATUS_BADGES = {
@@ -48,6 +49,11 @@ export default function PaymentsReceived() {
   const [statementBalance, setStatementBalance] = useState(0)
   const [statementLoading, setStatementLoading] = useState(false)
   const [statementError, setStatementError] = useState(null)
+  const [voidModalOpen, setVoidModalOpen] = useState(false)
+  const [voidTarget, setVoidTarget] = useState(null)
+  const [voidReason, setVoidReason] = useState('')
+  const [voidError, setVoidError] = useState('')
+  const [voidLoading, setVoidLoading] = useState(false)
 
   const { generateReceipt } = usePaymentReceipt()
 
@@ -250,6 +256,8 @@ export default function PaymentsReceived() {
           invoiceNumber: payment.invoice?.invoice_number ?? '—',
           debit: 0,
           credit: Number(payment.amount_ghs || 0),
+          journalStatus: payment.journal?.status || null,
+          paymentRow: payment,
         }))),
       ].sort((a, b) => {
         if (a.date === b.date) {
@@ -283,6 +291,34 @@ export default function PaymentsReceived() {
     setStatementClient(null)
     setStatementRows([])
     setStatementBalance(0)
+  }
+
+  async function confirmVoid() {
+    if (!voidTarget) return
+    if (!voidReason || voidReason.trim().length < 5) {
+      setVoidError('Reason is required and must be at least 5 characters.')
+      return
+    }
+    if (!profile?.id) {
+      setVoidError('Unable to identify your profile. Please sign in again.')
+      return
+    }
+
+    setVoidLoading(true)
+    setVoidError('')
+    try {
+      await voidPayment(voidTarget.id, profile.id, voidReason.trim())
+      setVoidModalOpen(false)
+      setVoidTarget(null)
+      setSuccessMessage('Payment voided successfully.')
+      await loadDebtors()
+      await loadClientStatement(statementClient?.id)
+    } catch (err) {
+      console.error('Failed to void payment', err)
+      setVoidError(err.message || 'Unable to void payment.')
+    } finally {
+      setVoidLoading(false)
+    }
   }
 
   return (
@@ -497,6 +533,58 @@ export default function PaymentsReceived() {
           </div>
         </div>
       )}
+      {voidModalOpen && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-2xl rounded-3xl border border-border-soft bg-slate-900/95 shadow-2xl shadow-black/40">
+            <div className="flex items-start justify-between gap-4 border-b border-border-soft px-6 py-5">
+              <div>
+                <h2 className="text-xl font-semibold text-white">Void Payment</h2>
+                <p className="text-sm text-slate-400">Provide a reason to void this payment. This will be recorded in the audit log.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setVoidModalOpen(false); setVoidTarget(null); setVoidError('') }}
+                className="rounded-full border border-border-soft bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10 transition"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="space-y-4 px-6 py-6">
+              <p className="text-sm text-slate-300">Payment: {voidTarget?.payment_reference ?? voidTarget?.payment_reference}</p>
+              <label className="portal-label block space-y-2">
+                <span>Reason</span>
+                <textarea
+                  rows={4}
+                  value={voidReason}
+                  onChange={(e) => setVoidReason(e.target.value)}
+                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
+                  placeholder="Enter a reason (required)"
+                />
+              </label>
+              {voidError && <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{voidError}</div>}
+
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setVoidModalOpen(false); setVoidTarget(null); setVoidError('') }}
+                  className="rounded-xl border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 hover:bg-white/10 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmVoid}
+                  disabled={voidLoading}
+                  className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-100 hover:bg-rose-500/20 disabled:opacity-60"
+                >
+                  {voidLoading ? 'Voiding…' : 'Confirm Void'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {statementOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -533,6 +621,7 @@ export default function PaymentsReceived() {
                       <th className="px-4 py-3">Debit</th>
                       <th className="px-4 py-3">Credit</th>
                       <th className="px-4 py-3">Balance</th>
+                      <th className="px-4 py-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -549,10 +638,27 @@ export default function PaymentsReceived() {
                         <tr key={`${row.type}-${index}`} className="border-b border-border-soft hover:bg-white/5 transition">
                           <td className="px-4 py-4">{row.date}</td>
                           <td className="px-4 py-4">{row.description}</td>
-                          <td className="px-4 py-4">{row.invoiceNumber}</td>
-                          <td className="px-4 py-4">{row.debit ? new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(row.debit) : '—'}</td>
-                          <td className="px-4 py-4">{row.credit ? new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(row.credit) : '—'}</td>
-                          <td className="px-4 py-4">{new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(row.balance)}</td>
+                              <td className="px-4 py-4">{row.invoiceNumber}</td>
+                              <td className="px-4 py-4">{row.debit ? new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(row.debit) : '—'}</td>
+                              <td className="px-4 py-4">{row.credit ? new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(row.credit) : '—'}</td>
+                              <td className="px-4 py-4">{new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(row.balance)}</td>
+                              <td className="px-4 py-4">
+                                {row.type === 'payment' && (
+                                  <div className="flex items-center gap-2">
+                                    {row.journalStatus === 'REVERSED' ? (
+                                      <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold bg-rose-500/15 text-rose-200">VOID</span>
+                                    ) : row.journalStatus === 'POSTED' ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => { setVoidTarget(row.paymentRow); setVoidReason(''); setVoidError(''); setVoidModalOpen(true) }}
+                                        className="min-touch rounded-full border border-border-soft bg-white/5 px-3 py-2 text-xs text-slate-200 transition hover:border-rose-400/30 hover:text-rose-200"
+                                      >
+                                        Void
+                                      </button>
+                                    ) : null}
+                                  </div>
+                                )}
+                              </td>
                         </tr>
                       ))
                     )}
