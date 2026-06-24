@@ -2,8 +2,8 @@
   --font-sans: 'DM Sans', Inter, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
-  --color-bg: #090c12;
-  --color-background-page: #090c12;
+  --color-bg: #111827;
+  --color-background-page: #111827;
   --color-surface: #111827;
   --color-background-surface: #111827;
   --color-surface-2: #151f2d;
@@ -46,10 +46,10 @@
   --color-info-bg-xstrong: rgba(56, 138, 221, 0.32);
   --color-info-border: rgba(59, 130, 246, 0.2);
 
-  --color-warning: #F5A623;
-  --color-warning-bg: rgba(245, 166, 35, 0.12);
-  --color-warning-bg-strong: rgba(251, 146, 60, 0.18);
-  --color-warning-border: rgba(245, 166, 35, 0.24);
+  --color-void: #f87171;
+  --color-void-bg: rgba(248, 113, 113, 0.16);
+  --color-void-border: rgba(248, 113, 113, 0.28);
+  --color-void-text: #fee2e2;
 
   --color-teal: #378ADD;
   --color-teal-bg-strong: rgba(20, 184, 166, 0.26);
@@ -111,6 +111,11 @@ body.theme-light {
   --color-warning: #F5A623;
   --color-warning-bg: rgba(245, 166, 35, 0.12);
   --color-warning-border: rgba(245, 166, 35, 0.4);
+
+  --color-void: #991b1b;
+  --color-void-bg: rgba(239, 68, 68, 0.12);
+  --color-void-border: rgba(239, 68, 68, 0.28);
+  --color-void-text: #7f1d1d;
 
   --color-surface-light: #F8FAFC;
   --color-danger: #AB1F1F;

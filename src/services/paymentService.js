@@ -1,4 +1,6 @@
 import { supabase } from '../lib/supabase'
+import { parseDbError } from '../lib/dbErrorMessage'
+import { createApprovalRequest } from './approvalService'
 
 async function resolveProfileId(userId) {
   if (userId) {
@@ -95,8 +97,9 @@ export async function getClientStatement(clientId) {
       .order('created_at', { ascending: true }),
     supabase
       .from('invoice_payments')
-      .select('id, invoice_id, payment_date, payment_reference, payment_account_code, payment_account_name, amount_ghs, journal_entry_id, recorded_by, notes, created_at, invoice:invoices(invoice_number)')
+      .select('id, invoice_id, payment_date, payment_reference, payment_account_code, payment_account_name, amount_ghs, journal_entry_id, recorded_by, notes, created_at, invoice:invoices(invoice_number), journal:journal_entries(status)')
       .eq('client_id', clientId)
+      .eq('journal.status', 'POSTED')
       .order('payment_date', { ascending: true }),
   ])
 
@@ -108,6 +111,42 @@ export async function getClientStatement(clientId) {
     client,
     invoices: invoices ?? [],
     payments: payments ?? [],
+  }
+}
+
+export async function voidPayment(paymentId, currentUserId, reason) {
+  if (!paymentId) throw new Error('Payment ID is required.')
+  if (!reason || !reason.trim()) throw new Error('Reason is required to void a payment.')
+
+  const profileId = await resolveProfileId(currentUserId)
+
+  const { data, error } = await supabase.rpc('void_payment', {
+    payment_id_param: paymentId,
+    reason_param: reason.trim(),
+    actor_uuid: profileId,
+  })
+
+  // Handle DB-level error codes gracefully
+  if (error) {
+    // Surface a friendly message for known DB error code
+    if (error?.message && error.message.includes('PMT_ALREADY_VOID')) {
+      throw new Error('This payment has already been voided.')
+    }
+    throw error
+  }
+
+  if (!data?.success) {
+    // Map known DB error payloads to readable messages
+    if (data?.error && data.error.includes('PMT_ALREADY_VOID')) {
+      throw new Error('This payment has already been voided.')
+    }
+    throw new Error(data?.error || 'Failed to void payment.')
+  }
+
+  // Return updated payment and journal summary when available
+  return {
+    payment: data.payment ?? null,
+    journalSummary: data.journal_summary ?? null,
   }
 }
 
@@ -197,7 +236,7 @@ export async function recordPayment({
   const invoiceIds = [...new Set(allocations.map((allocation) => allocation.invoiceId))]
   const { data: invoices, error: invoiceFetchError } = await supabase
     .from('invoices')
-    .select('id, invoice_number, balance_due, expected_receipt_ghs, amount_paid, client_id, project_id, division_id, currency, status')
+    .select('id, invoice_number, balance_due, expected_receipt_ghs, amount_paid, client_id, project_id, division_id, currency, status, requires_approval')
     .in('id', invoiceIds)
 
   if (invoiceFetchError) throw invoiceFetchError
@@ -232,6 +271,8 @@ export async function recordPayment({
   }
 
   const profileId = await resolveProfileId(recordedBy)
+  const needsApproval = allocations.some((allocation) => invoiceById[allocation.invoiceId]?.requires_approval === true)
+
   const journalEntryPayload = {
     entry_date: paymentDate,
     description: `Payment received — ${paymentReference}`,
@@ -240,7 +281,8 @@ export async function recordPayment({
     source_id: invoiceIds.length === 1 ? invoiceIds[0] : null,
     created_by: profileId,
     posted_by: profileId,
-    is_posted: true,
+    status: needsApproval ? 'DRAFT' : 'POSTED',
+    is_posted: !needsApproval,
   }
 
   const { data: journalEntry, error: journalError } = await supabase
@@ -249,7 +291,7 @@ export async function recordPayment({
     .select('id')
     .single()
 
-  if (journalError) throw journalError
+  if (journalError) throw new Error(parseDbError(journalError))
   if (!journalEntry?.id) throw new Error('Failed to create payment journal entry.')
 
   const ledgerEntriesPayload = [
@@ -342,13 +384,16 @@ export async function recordPayment({
     }
   }
 
-  const { error: ledgerEntriesError } = await supabase
-    .from('ledger_entries')
-    .insert(ledgerEntriesPayload)
+  if (!needsApproval) {
+    const { error: ledgerEntriesError } = await supabase
+      .from('ledger_entries')
+      .insert(ledgerEntriesPayload)
 
-  if (ledgerEntriesError) throw ledgerEntriesError
+    if (ledgerEntriesError) throw ledgerEntriesError
+  }
 
   const insertedPayments = []
+  const approvalRequests = []
 
   for (const allocation of allocations) {
     const invoice = invoiceById[allocation.invoiceId]
@@ -379,31 +424,42 @@ export async function recordPayment({
 
     if (paymentError) throw paymentError
 
-    const invoiceUpdatePayload = {
-      amount_paid: newAmountPaid,
-      balance_due: newBalanceDue,
-      last_payment_date: paymentDate,
-      last_payment_reference: paymentReference,
-      status: newStatus,
+    if (!needsApproval) {
+      const invoiceUpdatePayload = {
+        amount_paid: newAmountPaid,
+        balance_due: newBalanceDue,
+        last_payment_date: paymentDate,
+        last_payment_reference: paymentReference,
+        status: newStatus,
+      }
+
+      if (newStatus === 'paid') {
+        invoiceUpdatePayload.payment_date = paymentDate
+        invoiceUpdatePayload.payment_reference = paymentReference
+      }
+
+      if (allocation.invoice.status === 'sent' && newStatus === 'paid' && Number(allocation.invoice.amount_paid ?? 0) === 0) {
+        invoiceUpdatePayload.fx_gain_loss_ghs = allocation.amount - Number(allocation.invoice.expected_receipt_ghs ?? 0)
+      }
+
+      const { error: invoiceUpdateError } = await supabase
+        .from('invoices')
+        .update(invoiceUpdatePayload)
+        .eq('id', allocation.invoiceId)
+
+      if (invoiceUpdateError) throw invoiceUpdateError
     }
-
-    if (newStatus === 'paid') {
-      invoiceUpdatePayload.payment_date = paymentDate
-      invoiceUpdatePayload.payment_reference = paymentReference
-    }
-
-    if (allocation.invoice.status === 'sent' && newStatus === 'paid' && Number(allocation.invoice.amount_paid ?? 0) === 0) {
-      invoiceUpdatePayload.fx_gain_loss_ghs = allocation.amount - Number(allocation.invoice.expected_receipt_ghs ?? 0)
-    }
-
-    const { error: invoiceUpdateError } = await supabase
-      .from('invoices')
-      .update(invoiceUpdatePayload)
-      .eq('id', allocation.invoiceId)
-
-    if (invoiceUpdateError) throw invoiceUpdateError
 
     insertedPayments.push(paymentRow)
+
+    if (needsApproval) {
+      const approval = await createApprovalRequest({
+        entityType: 'payment',
+        entityId: paymentRow.id,
+        submittedBy: profileId,
+      })
+      approvalRequests.push(approval)
+    }
   }
 
   const auditPayload = {
@@ -431,5 +487,7 @@ export async function recordPayment({
   return {
     journalEntryId: journalEntry.id,
     payments: insertedPayments,
+    pendingApproval: needsApproval,
+    approvalRequests,
   }
 }

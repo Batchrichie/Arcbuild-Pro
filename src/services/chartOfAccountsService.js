@@ -130,7 +130,7 @@ async function getOpeningBalanceJournalId(accountId) {
     .select('id')
     .eq('source_type', OPENING_BALANCE_SOURCE_TYPE)
     .eq('source_id', accountId)
-    .eq('is_reversed', false)
+    .eq('status', 'POSTED')
     .maybeSingle()
 
   if (error) throw error

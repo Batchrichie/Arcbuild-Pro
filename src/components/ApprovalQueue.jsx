@@ -188,11 +188,11 @@ export default function ApprovalQueue() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-border-soft bg-surface px-6 py-6 shadow-xl shadow-black/10">
+      <div className="rounded-3xl border border-border-soft bg-portal-elevated px-6 py-6 shadow-xl shadow-black/10">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-white">Pending Approvals</h1>
-            <p className="mt-1 text-sm text-slate-400">
+            <h1 className="text-2xl font-semibold text-portal-primary">Pending Approvals</h1>
+            <p className="mt-1 text-sm text-portal-muted">
               {profile?.full_name ?? 'CEO'} portal — {pendingCount} invoice(s) waiting review.
             </p>
           </div>
@@ -204,71 +204,71 @@ export default function ApprovalQueue() {
       </div>
 
       {error && (
-        <div className="rounded-3xl border border-danger/20 bg-danger-bg px-4 py-3 text-sm text-danger">
+        <div className="rounded-3xl border border-danger-border bg-danger-bg px-4 py-3 text-sm text-danger">
           {error}
         </div>
       )}
 
-      <div className="overflow-hidden rounded-3xl border border-border-soft bg-surface-2 shadow-xl shadow-black/10">
+      <div className="overflow-hidden rounded-3xl border border-border-soft bg-portal-input shadow-xl shadow-black/10">
         <div className="overflow-x-auto">
-          <table className="min-w-full dark-table text-sm text-slate-200">
+          <table className="min-w-full dark-table text-sm text-portal-primary">
             <thead>
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Invoice</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Client</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Project</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Division</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Amount</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Submitted By</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Submitted Date</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">Actions</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-portal-muted">Invoice</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-portal-muted">Client</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-portal-muted">Project</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-portal-muted">Division</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-portal-muted">Amount</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-portal-muted">Submitted By</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-portal-muted">Submitted Date</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wide text-portal-muted">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-10 text-center text-sm text-slate-400">
+                  <td colSpan="8" className="px-6 py-10 text-center text-sm text-portal-muted">
                     Loading pending invoices...
                   </td>
                 </tr>
               ) : invoices.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="px-6 py-10">
-                    <div className="mx-auto flex max-w-xl flex-col items-center justify-center gap-4 rounded-3xl border border-success/20 bg-success-bg px-6 py-10 text-center text-slate-200">
+                    <div className="mx-auto flex max-w-xl flex-col items-center justify-center gap-4 rounded-3xl border border-success-border bg-success-bg px-6 py-10 text-center text-success">
                       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-success/20 text-success">
                         ✓
                       </div>
-                      <p className="text-lg font-semibold">All approvals are clear</p>
-                      <p className="max-w-sm text-sm text-slate-400">No invoices are waiting for CEO action right now. Great work keeping the pipeline moving.</p>
+                      <p className="text-lg font-semibold text-portal-primary">All approvals are clear</p>
+                      <p className="max-w-sm text-sm text-portal-muted">No invoices are waiting for CEO action right now. Great work keeping the pipeline moving.</p>
                     </div>
                   </td>
                 </tr>
               ) : (
                 invoices.map((invoice) => (
-                  <tr key={invoice.id} className="border-t border-border-soft hover:bg-surface-overlay">
-                    <td className="px-6 py-4 text-sm text-slate-200">{invoice.invoice_number}</td>
-                    <td className="px-6 py-4 text-sm text-slate-200">{invoice.client?.name || 'Unknown'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-200">{invoice.project?.name || 'Unassigned'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-200">{invoice.division?.name || 'Unknown'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-200">
+                  <tr key={invoice.id} className="border-t border-border-soft hover:bg-portal-overlay">
+                    <td className="px-6 py-4 text-sm text-portal-primary">{invoice.invoice_number}</td>
+                    <td className="px-6 py-4 text-sm text-portal-primary">{invoice.client?.name || 'Unknown'}</td>
+                    <td className="px-6 py-4 text-sm text-portal-primary">{invoice.project?.name || 'Unassigned'}</td>
+                    <td className="px-6 py-4 text-sm text-portal-primary">{invoice.division?.name || 'Unknown'}</td>
+                    <td className="px-6 py-4 text-sm text-portal-primary">
                       {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'GHS', minimumFractionDigits: 2 }).format(Number(invoice.gross_total_ghs ?? 0))}
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-200">{invoice.submitted_by}</td>
-                    <td className="px-6 py-4 text-sm text-slate-200">{new Date(invoice.created_at).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 text-sm text-slate-200">
+                    <td className="px-6 py-4 text-sm text-portal-primary">{invoice.submitted_by}</td>
+                    <td className="px-6 py-4 text-sm text-portal-primary">{new Date(invoice.created_at).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 text-sm text-portal-primary">
                       <div className="flex flex-wrap gap-2">
                         <StatusBadge status="pending_approval" />
                         <button
                           type="button"
                           onClick={() => handleApprove(invoice)}
-                          className="min-touch rounded-full bg-success px-4 py-2 text-sm font-semibold text-white hover:bg-success/90"
+                          className="min-touch rounded-full bg-success px-4 py-2 text-sm font-semibold text-portal-primary hover:bg-portal-success"
                         >
                           Approve
                         </button>
                         <button
                           type="button"
                           onClick={() => openRejectModal(invoice)}
-                          className="min-touch rounded-full bg-danger px-4 py-2 text-sm font-semibold text-white hover:bg-danger/90"
+                          className="min-touch rounded-full bg-danger px-4 py-2 text-sm font-semibold text-portal-primary hover:bg-portal-danger"
                         >
                           Reject
                         </button>
@@ -283,34 +283,34 @@ export default function ApprovalQueue() {
       </div>
 
       {selectedInvoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-border-soft bg-slate-950 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-portal-backdrop p-4 backdrop-blur-sm">
+          <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-border-soft bg-portal-surface-2 shadow-2xl">
             <div className="flex items-center justify-between border-b border-border-soft px-6 py-4">
               <div>
-                <h2 className="text-xl font-semibold text-white">Reject Invoice</h2>
-                <p className="text-sm text-slate-400">{selectedInvoice.invoice_number}</p>
+                <h2 className="text-xl font-semibold text-portal-primary">Reject Invoice</h2>
+                <p className="text-sm text-portal-muted">{selectedInvoice.invoice_number}</p>
               </div>
               <button
                 type="button"
                 onClick={closeRejectModal}
-                className="rounded-full border border-border-soft px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:bg-white/5"
+                className="rounded-full border border-border-soft px-4 py-2 text-sm text-portal-muted transition hover:border-portal-soft hover:bg-portal-overlay"
               >
                 Close
               </button>
             </div>
 
             <div className="space-y-5 p-6">
-              <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 text-sm text-amber-300">
+              <div className="rounded-2xl border border-portal-warning bg-portal-warning p-4 text-sm text-portal-warning">
                 Rejection reason is required. Minimum 10 characters.
               </div>
 
-              <label className="space-y-2 text-sm text-slate-300">
-                <span className="block text-xs uppercase tracking-[0.16em] text-slate-400">Rejection Reason</span>
+              <label className="space-y-2 text-sm text-portal-primary">
+                <span className="block text-xs uppercase tracking-[0.16em] text-portal-muted">Rejection Reason</span>
                 <textarea
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
                   rows="5"
-                  className="w-full rounded-xl border border-border-soft bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-red-400/50 focus:bg-white/10 outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-portal-input px-3 py-2 text-sm text-portal-primary placeholder-text-muted focus:border-danger focus:outline-none focus:ring-2 focus:ring-danger/20"
                 />
               </label>
 
@@ -324,14 +324,14 @@ export default function ApprovalQueue() {
                 <button
                   type="button"
                   onClick={closeRejectModal}
-                  className="rounded-xl border border-border-soft bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10"
+                  className="rounded-xl border border-border-soft bg-portal-overlay px-4 py-2 text-sm font-medium text-portal-muted transition hover:border-border hover:bg-surface-overlay"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={submitRejection}
-                  className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-300 transition hover:border-red-500/50 hover:bg-red-500/20"
+                  className="rounded-xl border border-danger-border bg-danger-bg px-4 py-2 text-sm font-semibold text-danger transition hover:border-danger hover:bg-danger-bg-strong"
                 >
                   Reject Invoice
                 </button>

@@ -51,7 +51,7 @@ export default function JournalDrillDown({ journalId, onClose }) {
           <p className="text-sm text-text-muted">
             {header?.entry_date} — {header?.description}
           </p>
-          <p className="mt-1 text-sm font-semibold text-teal">Total: GHS {formatGhs(totalDebit)}</p>
+          <p className="mt-1 text-sm font-semibold text-portal-info">Total: GHS {formatGhs(totalDebit)}</p>
           <div className="portal-table-scroll portal-table-wrap mt-4 rounded-2xl border border-border-soft">
             <table className="dark-table min-w-[480px] text-sm">
               <thead>

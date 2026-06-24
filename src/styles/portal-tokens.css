@@ -16,6 +16,11 @@
   --z-portal-modal: 80;
   --z-portal-toast: 90;
 
+  --color-void: var(--color-void);
+  --color-void-bg: var(--color-void-bg);
+  --color-void-border: var(--color-void-border);
+  --color-void-text: var(--color-void-text);
+
   /* Typography scale */
   --type-eyebrow-size: 0.875rem;
   --type-eyebrow-tracking: 0.2em;
@@ -26,6 +31,46 @@
   --type-h2-size: 1.5rem;
   --type-h1-size: 1.875rem;
   --type-kpi-size: 1.875rem;
+}
+
+.text-portal-success {
+  color: var(--color-success);
+}
+
+.text-portal-warning {
+  color: var(--color-warning);
+}
+
+.text-portal-danger {
+  color: var(--color-danger);
+}
+
+.text-portal-info {
+  color: var(--color-info);
+}
+
+.bg-portal-warning {
+  background-color: var(--color-warning-bg);
+}
+
+.bg-portal-danger {
+  background-color: var(--color-danger-bg);
+}
+
+.bg-portal-info {
+  background-color: var(--color-info-bg);
+}
+
+.bg-portal-success {
+  background-color: var(--color-success-bg);
+}
+
+.bg-portal-backdrop {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.bg-portal-surface-gradient {
+  background-image: linear-gradient(135deg, var(--color-surface-2), var(--color-surface));
 }
 
 /* —— Color utilities —— */
@@ -50,6 +95,9 @@
 .bg-portal-overlay {
   background-color: var(--color-surface-overlay);
 }
+.bg-portal-void {
+  background-color: var(--color-void-bg);
+}
 
 .text-portal-primary {
   color: var(--color-text-primary);
@@ -69,6 +117,21 @@
 }
 .border-portal-soft {
   border-color: var(--color-border-soft);
+}
+.border-portal-void {
+  border-color: var(--color-void-border);
+}
+.border-portal-success {
+  border-color: var(--color-success-border);
+}
+.border-portal-warning {
+  border-color: var(--color-warning-border);
+}
+.border-portal-danger {
+  border-color: var(--color-danger-border);
+}
+.border-portal-info {
+  border-color: var(--color-info-border);
 }
 
 /* —— Typography utilities —— */
@@ -130,16 +193,48 @@
   color: var(--color-text-primary);
 }
 
-@media (min-width: 640px) {
-  .portal-h1 {
-    font-size: 2rem;
-  }
-  .portal-kpi-value {
-    font-size: 1.875rem;
-  }
+.badge-portal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
 }
 
-/* —— Layout: tables —— */
+.badge-portal-success {
+  background-color: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  color: var(--color-success);
+}
+
+.badge-portal-warning {
+  background-color: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  color: var(--color-warning);
+}
+
+.badge-portal-danger {
+  background-color: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
+}
+
+.badge-portal-info {
+  background-color: var(--color-info-bg);
+  border: 1px solid var(--color-info-border);
+  color: var(--color-info);
+}
+
+.badge-portal-void {
+  background-color: var(--color-void-bg);
+  border: 1px solid var(--color-void-border);
+  color: var(--color-void-text);
+}
+
 .portal-table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;

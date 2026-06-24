@@ -23,10 +23,14 @@ const STATUS_MAP = {
     label: 'Rejected',
     className: 'bg-danger-bg text-red-200 border border-danger-border',
   },
+  void: {
+    label: 'Void',
+    className: 'bg-void-bg text-void-text border border-void-border',
+  },
 }
 
 export default function StatusBadge({ status, className = '' }) {
-  const config = STATUS_MAP[status] || {
+  const config = STATUS_MAP[status] || STATUS_MAP[status?.toLowerCase?.()] || {
     label: status?.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()) || 'Unknown',
     className: 'bg-surface-2 text-text-muted-strong border border-border',
   }
