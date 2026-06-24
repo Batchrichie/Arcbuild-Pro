@@ -50,62 +50,62 @@ export default function TimesheetReport() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-4xl border border-border-soft bg-slate-950/80 p-6">
+      <div className="rounded-4xl border border-border-soft bg-portal-input p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-white">Timesheet Summary</h2>
-            <p className="text-sm text-slate-400">Review recent employee time submissions across the business.</p>
+            <h2 className="text-xl font-semibold text-portal-primary">Timesheet Summary</h2>
+            <p className="text-sm text-portal-muted">Review recent employee time submissions across the business.</p>
           </div>
           <button
             type="button"
             onClick={loadSummary}
-            className="rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-200"
+            className="rounded-full border border-border-soft bg-portal-overlay px-4 py-2 text-sm text-portal-muted"
           >
             Refresh
           </button>
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-3xl bg-slate-900 p-4">
-            <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Submitted</p>
-            <p className="mt-3 text-3xl font-semibold text-white">{metrics.submitted}</p>
+          <div className="rounded-3xl bg-portal-surface p-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-portal-muted">Submitted</p>
+            <p className="mt-3 text-3xl font-semibold text-portal-primary">{metrics.submitted}</p>
           </div>
-          <div className="rounded-3xl bg-slate-900 p-4">
-            <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Approved</p>
-            <p className="mt-3 text-3xl font-semibold text-white">{metrics.approved}</p>
+          <div className="rounded-3xl bg-portal-surface p-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-portal-muted">Approved</p>
+            <p className="mt-3 text-3xl font-semibold text-portal-primary">{metrics.approved}</p>
           </div>
-          <div className="rounded-3xl bg-slate-900 p-4">
-            <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Rejected</p>
-            <p className="mt-3 text-3xl font-semibold text-white">{metrics.rejected}</p>
+          <div className="rounded-3xl bg-portal-surface p-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-portal-muted">Rejected</p>
+            <p className="mt-3 text-3xl font-semibold text-portal-primary">{metrics.rejected}</p>
           </div>
-          <div className="rounded-3xl bg-slate-900 p-4">
-            <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Total hours</p>
-            <p className="mt-3 text-3xl font-semibold text-white">{metrics.hours.toFixed(2)}</p>
+          <div className="rounded-3xl bg-portal-surface p-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-portal-muted">Total hours</p>
+            <p className="mt-3 text-3xl font-semibold text-portal-primary">{metrics.hours.toFixed(2)}</p>
           </div>
-          <div className="rounded-3xl bg-slate-900 p-4">
-            <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Billable hours</p>
-            <p className="mt-3 text-3xl font-semibold text-white">{metrics.billableHours.toFixed(2)}</p>
+          <div className="rounded-3xl bg-portal-surface p-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-portal-muted">Billable hours</p>
+            <p className="mt-3 text-3xl font-semibold text-portal-primary">{metrics.billableHours.toFixed(2)}</p>
           </div>
         </div>
       </div>
 
-      {error && <p className="rounded-3xl border border-rose-500/20 bg-rose-500/5 p-4 text-sm text-rose-200">{error}</p>}
+      {error && <p className="rounded-3xl border border-portal-danger bg-portal-danger/10 p-4 text-sm text-portal-danger">{error}</p>}
 
-      <div className="overflow-x-auto rounded-4xl border border-border-soft bg-slate-950/80 p-4">
+      <div className="overflow-x-auto rounded-4xl border border-border-soft bg-portal-input p-4">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-slate-400">Latest 200 timesheet records from the summary view.</p>
+          <p className="text-sm text-portal-muted">Latest 200 timesheet records from the summary view.</p>
           <button
             type="button"
             onClick={() => downloadCsv('timesheet_summary.csv', rows)}
             disabled={!rows.length}
-            className="rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-200 disabled:opacity-50"
+            className="rounded-full border border-border-soft bg-portal-overlay px-4 py-2 text-sm text-portal-muted disabled:opacity-50"
           >
             Export CSV
           </button>
         </div>
 
-        <table className="min-w-full text-left text-sm text-slate-200">
-          <thead className="bg-slate-900 text-slate-400">
+        <table className="min-w-full text-left text-sm text-portal-primary">
+          <thead className="bg-portal-surface text-portal-muted">
             <tr>
               <th className="px-4 py-3">Date</th>
               <th className="px-4 py-3">Employee</th>
@@ -119,18 +119,18 @@ export default function TimesheetReport() {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan="7" className="px-4 py-8 text-center text-slate-500">No timesheet summary rows available.</td>
+                <td colSpan="7" className="px-4 py-8 text-center text-portal-muted">No timesheet summary rows available.</td>
               </tr>
             ) : (
               rows.map((row) => (
-                <tr key={row.id} className="border-t border-slate-800">
-                  <td className="px-4 py-3 text-slate-200">{row.date}</td>
-                  <td className="px-4 py-3 text-slate-200">{row.employee_name}</td>
-                  <td className="px-4 py-3 text-slate-200">{row.project_name}</td>
-                  <td className="px-4 py-3 text-slate-200">{row.hours_worked}</td>
-                  <td className="px-4 py-3 text-slate-200">{row.billable ? 'Yes' : 'No'}</td>
-                  <td className="px-4 py-3 text-slate-200 capitalize">{row.status}</td>
-                  <td className="px-4 py-3 text-slate-200">{row.approved_by_name || '—'}</td>
+                <tr key={row.id} className="border-t border-border-soft">
+                  <td className="px-4 py-3 text-portal-primary">{row.date}</td>
+                  <td className="px-4 py-3 text-portal-primary">{row.employee_name}</td>
+                  <td className="px-4 py-3 text-portal-primary">{row.project_name}</td>
+                  <td className="px-4 py-3 text-portal-primary">{row.hours_worked}</td>
+                  <td className="px-4 py-3 text-portal-primary">{row.billable ? 'Yes' : 'No'}</td>
+                  <td className="px-4 py-3 text-portal-primary capitalize">{row.status}</td>
+                  <td className="px-4 py-3 text-portal-primary">{row.approved_by_name || '—'}</td>
                 </tr>
               ))
             )}

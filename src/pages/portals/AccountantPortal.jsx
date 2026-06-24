@@ -34,9 +34,13 @@ const TaxCentre = lazy(() => import('../../components/tax/TaxCentre'))
 const JournalDrillDown = lazy(() => import('../../components/accountant/JournalDrillDown'))
 const ManualJournalForm = lazy(() => import('../../components/accounting/ManualJournalForm'))
 const ManualJournalList = lazy(() => import('../../components/accounting/ManualJournalList'))
+const PeriodManagement = lazy(() => import('../../components/accounting/PeriodManagement'))
+const SubledgerReconciliationReport = lazy(() => import('../../components/accounting/SubledgerReconciliationReport'))
 const DebtorsLedger = lazy(() => import('../../components/accounting/DebtorsLedger'))
 const AlertLog = lazy(() => import('../../components/alerts/AlertLog'))
 const ManagementReports = lazy(() => import('../../components/reports/ManagementReports'))
+const ProjectGlReport = lazy(() => import('../../components/reports/ProjectGlReport'))
+const DivisionPeriodGlReport = lazy(() => import('../../components/reports/DivisionPeriodGlReport'))
 const ProjectRegistry = lazy(() => import('../../pages/projects/ProjectRegistry'))
 const ChartOfAccounts = lazy(() => import('../accounts/ChartOfAccounts'))
 
@@ -82,6 +86,8 @@ const NAV_SECTIONS = [
     items: [
       { id: 'new-journal', label: 'New Journal' },
       { id: 'journal-history', label: 'Journal History' },
+      { id: 'period-management', label: 'Period Management' },
+      { id: 'subledger-reconciliation', label: 'Subledger Reconciliation' },
     ],
   },
   {
@@ -90,6 +96,8 @@ const NAV_SECTIONS = [
       { id: 'chart-of-accounts', label: 'Chart of Accounts' },
       { id: 'general-ledger', label: 'General Ledger' },
       { id: 'management-reports', label: 'Management Reports' },
+      { id: 'project-gl-report', label: 'Project GL Report' },
+      { id: 'division-period-report', label: 'Division & Period GL' },
       { id: 'debtors-ledger', label: 'Debtors Ledger' },
           { id: 'financial-statements', label: 'Financial Statements' },
           { id: 'revenue-recognition', label: 'Revenue Recognition' },
@@ -341,6 +349,10 @@ export default function AccountantPortal() {
         return <FinancialStatements defaultTab="trial" />
       case 'management-reports':
         return <ManagementReports />
+      case 'project-gl-report':
+        return <ProjectGlReport />
+      case 'division-period-report':
+        return <DivisionPeriodGlReport />
       case 'trial-balance':
         return <FinancialStatements defaultTab="trial" />
       case 'bank-accounts':
@@ -372,6 +384,10 @@ export default function AccountantPortal() {
         )
       case 'journal-history':
         return <ManualJournalList />
+      case 'period-management':
+        return <PeriodManagement />
+      case 'subledger-reconciliation':
+        return <SubledgerReconciliationReport />
       case 'debtors-ledger':
         return <DebtorsLedger readOnly={false} />
       case 'alert-log':

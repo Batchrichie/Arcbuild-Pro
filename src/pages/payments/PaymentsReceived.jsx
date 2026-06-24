@@ -12,13 +12,13 @@ import {
 } from '../../services/paymentService'
 
 const STATUS_BADGES = {
-  partially_paid: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
-  sent: 'border-sky-500/30 bg-sky-500/10 text-sky-300',
-  paid: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+  partially_paid: 'border-portal-warning bg-portal-warning text-portal-warning',
+  sent: 'border-portal-info bg-portal-info text-portal-info',
+  paid: 'border-portal-success bg-portal-success text-portal-success',
 }
 
-const PAYMENT_ACCOUNT_SELECT_CLASS = 'text-white bg-slate-800 border border-border-soft rounded-xl px-3 py-2 outline-none'
-const AMOUNT_INPUT_CLASS = 'text-white bg-slate-800 border border-border-soft rounded-xl px-3 py-2 outline-none w-full'
+const PAYMENT_ACCOUNT_SELECT_CLASS = 'text-portal-primary bg-portal-input border border-border-soft rounded-xl px-3 py-2 outline-none'
+const AMOUNT_INPUT_CLASS = 'text-portal-primary bg-portal-input border border-border-soft rounded-xl px-3 py-2 outline-none w-full'
 
 export default function PaymentsReceived() {
   const { profile } = useAuth()
@@ -192,7 +192,7 @@ export default function PaymentsReceived() {
 
     setPaymentLoading(true)
     try {
-      await recordPayment({
+      const result = await recordPayment({
         clientId: selectedClient.id,
         paymentDate,
         paymentReference: paymentReference.trim(),
@@ -203,20 +203,23 @@ export default function PaymentsReceived() {
         recordedBy: profile.id,
       })
 
-      for (const allocation of allocations) {
-        try {
-          await generateReceipt({
-            invoiceId: allocation.invoiceId,
-            amountPaid: allocation.amount,
-            paymentDate,
-            paymentReference: paymentReference.trim(),
-          })
-        } catch {
-          // Receipt download is best-effort; payment is already recorded.
+      if (result.pendingApproval) {
+        setSuccessMessage('Payment recorded and queued for director approval before GL posting.')
+      } else {
+        for (const allocation of allocations) {
+          try {
+            await generateReceipt({
+              invoiceId: allocation.invoiceId,
+              amountPaid: allocation.amount,
+              paymentDate,
+              paymentReference: paymentReference.trim(),
+            })
+          } catch {
+            // Receipt download is best-effort; payment is already recorded.
+          }
         }
+        setSuccessMessage('Payment recorded successfully. Receipt PDF(s) downloaded where applicable.')
       }
-
-      setSuccessMessage('Payment recorded successfully. Receipt PDF(s) downloaded where applicable.')
       closePaymentModal()
       await loadDebtors()
     } catch (err) {
@@ -325,21 +328,21 @@ export default function PaymentsReceived() {
     <div className="p-6 space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Payments Received</h1>
-          <p className="text-sm text-slate-400">Manage incoming client receipts and view account statements.</p>
+          <h1 className="text-2xl font-semibold text-portal-primary">Payments Received</h1>
+          <p className="text-sm text-portal-muted">Manage incoming client receipts and view account statements.</p>
         </div>
         {successMessage && (
-          <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+          <div className="rounded-2xl border border-portal-success bg-portal-success px-4 py-3 text-sm text-portal-success">
             {successMessage}
           </div>
         )}
       </div>
 
-      <div className="rounded-2xl border border-border-soft bg-slate-900/80 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
+      <div className="rounded-2xl border border-border-soft bg-portal-surface-2 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-white">Debtor List</h2>
-            <p className="text-sm text-slate-400">Clients with outstanding invoices.</p>
+            <h2 className="text-lg font-semibold text-portal-primary">Debtor List</h2>
+            <p className="text-sm text-portal-muted">Clients with outstanding invoices.</p>
           </div>
         </div>
 
@@ -347,9 +350,9 @@ export default function PaymentsReceived() {
           <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">{debtorsError}</div>
         )}
 
-        <div className="mt-6 overflow-x-auto rounded-3xl border border-border-soft bg-slate-950/40">
-          <table className="min-w-full text-sm text-slate-300">
-            <thead className="border-b border-border-soft bg-slate-900/80 text-left text-xs uppercase tracking-[0.24em] text-slate-500">
+        <div className="mt-6 overflow-x-auto rounded-3xl border border-border-soft bg-portal-surface-2">
+          <table className="min-w-full text-sm text-portal-muted">
+            <thead className="border-b border-border-soft bg-portal-surface-2 text-left text-xs uppercase tracking-[0.24em] text-portal-muted">
               <tr>
                 <th className="px-4 py-3">Client Name</th>
                 <th className="px-4 py-3">Total Outstanding Balance (GHS)</th>
@@ -359,23 +362,23 @@ export default function PaymentsReceived() {
             <tbody>
               {loadingDebtors ? (
                 <tr>
-                  <td colSpan={3} className="px-4 py-8 text-center text-slate-500">Loading…</td>
+                  <td colSpan={3} className="px-4 py-8 text-center text-portal-muted">Loading…</td>
                 </tr>
               ) : debtors.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-4 py-8 text-center text-slate-500">No debtors found.</td>
+                  <td colSpan={3} className="px-4 py-8 text-center text-portal-muted">No debtors found.</td>
                 </tr>
               ) : (
                 debtors.map((debtor) => (
-                  <tr key={debtor.id} className="border-b border-border-soft hover:bg-white/5 transition">
-                    <td className="px-4 py-4 font-medium text-white">{debtor.name ?? 'Unknown'}</td>
+                  <tr key={debtor.id} className="border-b border-border-soft hover:bg-portal-overlay transition">
+                    <td className="px-4 py-4 font-medium text-portal-primary">{debtor.name ?? 'Unknown'}</td>
                     <td className="px-4 py-4">{new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(Number(debtor.total_outstanding_balance || 0))}</td>
                     <td className="px-4 py-4 flex flex-wrap gap-2">
                       {isAccountant && (
                         <button
                           type="button"
                           onClick={() => openRecordPayment(debtor)}
-                          className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-500/20 transition"
+                          className="rounded-xl border border-portal-success bg-portal-success px-4 py-2 text-sm font-semibold text-portal-success hover:bg-portal-success/20 transition"
                         >
                           Record Payment
                         </button>
@@ -383,7 +386,7 @@ export default function PaymentsReceived() {
                       <button
                         type="button"
                         onClick={() => openStatement(debtor)}
-                        className="rounded-xl border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 hover:bg-white/10 transition"
+                        className="rounded-xl border border-border-soft bg-portal-overlay px-4 py-2 text-sm text-portal-muted-strong hover:bg-portal-overlay transition"
                       >
                         View Statement
                       </button>
@@ -397,17 +400,17 @@ export default function PaymentsReceived() {
       </div>
 
       {paymentModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-4xl max-h-[85vh] overflow-auto rounded-3xl border border-border-soft bg-slate-900/95 shadow-2xl shadow-black/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-portal-backdrop p-4">
+          <div className="w-full max-w-4xl max-h-[85vh] overflow-auto rounded-3xl border border-border-soft bg-portal-surface-2 shadow-2xl shadow-black/40">
             <div className="flex items-start justify-between gap-4 border-b border-border-soft px-6 py-5">
               <div>
-                <h2 className="text-xl font-semibold text-white">Record Payment</h2>
-                <p className="text-sm text-slate-400">Allocate payment to outstanding invoices for {selectedClient?.name}.</p>
+                <h2 className="text-xl font-semibold text-portal-primary">Record Payment</h2>
+                <p className="text-sm text-portal-muted">Allocate payment to outstanding invoices for {selectedClient?.name}.</p>
               </div>
               <button
                 type="button"
                 onClick={closePaymentModal}
-                className="rounded-full border border-border-soft bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10 transition"
+                className="rounded-full border border-border-soft bg-portal-overlay px-3 py-2 text-sm text-portal-muted-strong hover:bg-portal-overlay transition"
               >
                 Close
               </button>
@@ -415,29 +418,29 @@ export default function PaymentsReceived() {
 
             <div className="space-y-6 px-6 py-6">
               <div className="grid gap-4 md:grid-cols-3">
-                <label className="space-y-2 text-sm text-slate-200">
+                <label className="space-y-2 text-sm text-portal-muted-strong">
                   <span>Payment Date</span>
                   <input
                     type="date"
                     value={paymentDate}
                     onChange={(event) => setPaymentDate(event.target.value)}
-                    className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
+                    className="w-full rounded-xl border border-border-soft bg-portal-input px-3 py-2 text-portal-primary outline-none"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-slate-200 md:col-span-2">
+                <label className="space-y-2 text-sm text-portal-muted-strong md:col-span-2">
                   <span>Payment Reference</span>
                   <input
                     type="text"
                     value={paymentReference}
                     onChange={(event) => setPaymentReference(event.target.value)}
                     placeholder="Enter payment reference"
-                    className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
+                    className="w-full rounded-xl border border-border-soft bg-portal-input px-3 py-2 text-portal-primary outline-none"
                   />
                 </label>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <label className="space-y-2 text-sm text-slate-200">
+                <label className="space-y-2 text-sm text-portal-muted-strong">
                   <span>Payment Account</span>
                   <select
                     value={selectedPaymentAccount}
@@ -445,15 +448,15 @@ export default function PaymentsReceived() {
                     className={PAYMENT_ACCOUNT_SELECT_CLASS}
                   >
                     {paymentAccounts.map((account) => (
-                      <option key={account.account_code} value={account.account_code} className="bg-slate-900 text-white">
+                      <option key={account.account_code} value={account.account_code} className="bg-portal-surface-2 text-portal-primary">
                         {account.account_code} — {account.account_name}
                       </option>
                     ))}
                   </select>
                 </label>
-                <div className="space-y-2 text-sm text-slate-200">
+                <div className="space-y-2 text-sm text-portal-muted-strong">
                   <span>Total Allocated</span>
-                  <div className="rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white">
+                  <div className="rounded-xl border border-border-soft bg-portal-input px-3 py-2 text-portal-primary">
                     {new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(totalAllocated)}
                   </div>
                 </div>
@@ -463,9 +466,9 @@ export default function PaymentsReceived() {
                 <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{paymentError}</div>
               )}
 
-              <div className="overflow-x-auto rounded-3xl border border-border-soft bg-slate-950/40">
-                <table className="min-w-full text-sm text-slate-300">
-                  <thead className="border-b border-border-soft bg-slate-900/80 text-left text-xs uppercase tracking-[0.24em] text-slate-500">
+              <div className="overflow-x-auto rounded-3xl border border-border-soft bg-portal-surface-2">
+                <table className="min-w-full text-sm text-portal-muted">
+                  <thead className="border-b border-border-soft bg-portal-surface-2 text-left text-xs uppercase tracking-[0.24em] text-portal-muted">
                     <tr>
                       <th className="px-4 py-3">Invoice Number</th>
                       <th className="px-4 py-3">Project</th>
@@ -477,18 +480,18 @@ export default function PaymentsReceived() {
                   <tbody>
                     {outstandingLoading ? (
                       <tr>
-                        <td colSpan={5} className="px-4 py-8 text-center text-slate-500">Loading invoices…</td>
+                        <td colSpan={5} className="px-4 py-8 text-center text-portal-muted">Loading invoices…</td>
                       </tr>
                     ) : outstandingInvoices.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-4 py-8 text-center text-slate-500">No outstanding invoices found.</td>
+                        <td colSpan={5} className="px-4 py-8 text-center text-portal-muted">No outstanding invoices found.</td>
                       </tr>
                     ) : (
                       outstandingInvoices.map((invoice) => (
-                        <tr key={invoice.id} className="border-b border-border-soft hover:bg-white/5 transition">
+                        <tr key={invoice.id} className="border-b border-border-soft hover:bg-portal-overlay transition">
                           <td className="px-4 py-4">
-                            <div className="font-medium text-white">{invoice.invoice_number}</div>
-                            <div className={`mt-2 inline-flex items-center gap-2 rounded-full border px-2 py-1 text-[11px] uppercase tracking-[0.18em] ${STATUS_BADGES[invoice.status] ?? 'border-border-soft bg-white/5 text-slate-300'}`}>
+                            <div className="font-medium text-portal-primary">{invoice.invoice_number}</div>
+                            <div className={`mt-2 inline-flex items-center gap-2 rounded-full border px-2 py-1 text-[11px] uppercase tracking-[0.18em] ${STATUS_BADGES[invoice.status] ?? 'border-border-soft bg-portal-overlay text-portal-muted'}`}>
                               <span>{invoice.status}</span>
                             </div>
                           </td>
@@ -516,7 +519,7 @@ export default function PaymentsReceived() {
                 <button
                   type="button"
                   onClick={closePaymentModal}
-                  className="rounded-xl border border-border-soft bg-white/5 px-4 py-3 text-sm text-slate-200 hover:bg-white/10 transition"
+                  className="rounded-xl border border-border-soft bg-portal-overlay px-4 py-3 text-sm text-portal-muted-strong hover:bg-portal-overlay transition"
                 >
                   Cancel
                 </button>
@@ -524,7 +527,7 @@ export default function PaymentsReceived() {
                   type="button"
                   onClick={submitPayment}
                   disabled={paymentLoading}
-                  className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-300 hover:bg-emerald-500/20 transition disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-xl border border-portal-success bg-portal-success px-4 py-3 text-sm font-semibold text-portal-success hover:bg-portal-success/20 transition disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {paymentLoading ? 'Submitting…' : 'Submit Payment'}
                 </button>
@@ -534,31 +537,31 @@ export default function PaymentsReceived() {
         </div>
       )}
       {voidModalOpen && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-2xl rounded-3xl border border-border-soft bg-slate-900/95 shadow-2xl shadow-black/40">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-portal-backdrop p-4">
+          <div className="w-full max-w-2xl rounded-3xl border border-border-soft bg-portal-surface-2 shadow-2xl shadow-black/40">
             <div className="flex items-start justify-between gap-4 border-b border-border-soft px-6 py-5">
               <div>
-                <h2 className="text-xl font-semibold text-white">Void Payment</h2>
-                <p className="text-sm text-slate-400">Provide a reason to void this payment. This will be recorded in the audit log.</p>
+                <h2 className="text-xl font-semibold text-portal-primary">Void Payment</h2>
+                <p className="text-sm text-portal-muted">Provide a reason to void this payment. This will be recorded in the audit log.</p>
               </div>
               <button
                 type="button"
                 onClick={() => { setVoidModalOpen(false); setVoidTarget(null); setVoidError('') }}
-                className="rounded-full border border-border-soft bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10 transition"
+                className="rounded-full border border-border-soft bg-portal-overlay px-3 py-2 text-sm text-portal-muted-strong hover:bg-portal-overlay transition"
               >
                 Close
               </button>
             </div>
 
             <div className="space-y-4 px-6 py-6">
-              <p className="text-sm text-slate-300">Payment: {voidTarget?.payment_reference ?? voidTarget?.payment_reference}</p>
+              <p className="text-sm text-portal-muted">Payment: {voidTarget?.payment_reference ?? voidTarget?.payment_reference}</p>
               <label className="portal-label block space-y-2">
                 <span>Reason</span>
                 <textarea
                   rows={4}
                   value={voidReason}
                   onChange={(e) => setVoidReason(e.target.value)}
-                  className="w-full rounded-xl border border-border-soft bg-slate-800 px-3 py-2 text-white outline-none"
+                  className="w-full rounded-xl border border-border-soft bg-portal-input px-3 py-2 text-portal-primary outline-none"
                   placeholder="Enter a reason (required)"
                 />
               </label>
@@ -568,7 +571,7 @@ export default function PaymentsReceived() {
                 <button
                   type="button"
                   onClick={() => { setVoidModalOpen(false); setVoidTarget(null); setVoidError('') }}
-                  className="rounded-xl border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 hover:bg-white/10 transition"
+                  className="rounded-xl border border-border-soft bg-portal-overlay px-4 py-2 text-sm text-portal-muted-strong hover:bg-portal-overlay transition"
                 >
                   Cancel
                 </button>
@@ -576,7 +579,7 @@ export default function PaymentsReceived() {
                   type="button"
                   onClick={confirmVoid}
                   disabled={voidLoading}
-                  className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-100 hover:bg-rose-500/20 disabled:opacity-60"
+                  className="rounded-xl border border-portal-danger bg-portal-danger px-4 py-2 text-sm font-semibold text-portal-danger hover:bg-portal-danger disabled:opacity-60"
                 >
                   {voidLoading ? 'Voiding…' : 'Confirm Void'}
                 </button>
@@ -587,20 +590,20 @@ export default function PaymentsReceived() {
       )}
 
       {statementOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="flex max-h-[min(92vh,900px)] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-border-soft bg-slate-900/95 shadow-2xl shadow-black/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-portal-backdrop p-4">
+          <div className="flex max-h-[min(92vh,900px)] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-border-soft bg-portal-surface-2 shadow-2xl shadow-black/40">
             <div className="shrink-0 flex flex-col gap-4 border-b border-border-soft px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-white">Client Statement</h2>
-                <p className="text-sm text-slate-400">{statementClient?.name ?? 'Client details will appear here.'}</p>
+                <h2 className="text-xl font-semibold text-portal-primary">Client Statement</h2>
+                <p className="text-sm text-portal-muted">{statementClient?.name ?? 'Client details will appear here.'}</p>
                 {statementClient && (
-                  <p className="mt-2 text-sm text-slate-400">{statementClient.contact_person ?? 'No contact'} · {statementClient.contact_phone ?? 'No phone'} · {statementClient.contact_email ?? 'No email'}</p>
+                  <p className="mt-2 text-sm text-portal-muted">{statementClient.contact_person ?? 'No contact'} · {statementClient.contact_phone ?? 'No phone'} · {statementClient.contact_email ?? 'No email'}</p>
                 )}
               </div>
               <button
                 type="button"
                 onClick={closeStatement}
-                className="rounded-full border border-border-soft bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10 transition"
+                className="rounded-full border border-border-soft bg-portal-overlay px-3 py-2 text-sm text-portal-muted-strong hover:bg-portal-overlay transition"
               >
                 Close
               </button>
@@ -611,9 +614,9 @@ export default function PaymentsReceived() {
                 <div className="shrink-0 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{statementError}</div>
               )}
 
-              <div className="min-h-0 flex-1 overflow-auto rounded-3xl border border-border-soft bg-slate-950/40">
-                <table className="min-w-full text-sm text-slate-300">
-                  <thead className="border-b border-border-soft bg-slate-900/80 text-left text-xs uppercase tracking-[0.24em] text-slate-500">
+              <div className="min-h-0 flex-1 overflow-auto rounded-3xl border border-border-soft bg-portal-surface-2">
+                <table className="min-w-full text-sm text-portal-muted">
+                  <thead className="border-b border-border-soft bg-portal-surface-2 text-left text-xs uppercase tracking-[0.24em] text-portal-muted">
                     <tr>
                       <th className="px-4 py-3">Date</th>
                       <th className="px-4 py-3">Description</th>
@@ -627,15 +630,15 @@ export default function PaymentsReceived() {
                   <tbody>
                     {statementLoading ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-slate-500">Loading statement…</td>
+                        <td colSpan={6} className="px-4 py-8 text-center text-portal-muted">Loading statement…</td>
                       </tr>
                     ) : statementRows.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-slate-500">No statement records found.</td>
+                        <td colSpan={6} className="px-4 py-8 text-center text-portal-muted">No statement records found.</td>
                       </tr>
                     ) : (
                       statementRows.map((row, index) => (
-                        <tr key={`${row.type}-${index}`} className="border-b border-border-soft hover:bg-white/5 transition">
+                        <tr key={`${row.type}-${index}`} className="border-b border-border-soft hover:bg-portal-overlay transition">
                           <td className="px-4 py-4">{row.date}</td>
                           <td className="px-4 py-4">{row.description}</td>
                               <td className="px-4 py-4">{row.invoiceNumber}</td>
@@ -646,12 +649,12 @@ export default function PaymentsReceived() {
                                 {row.type === 'payment' && (
                                   <div className="flex items-center gap-2">
                                     {row.journalStatus === 'REVERSED' ? (
-                                      <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold bg-rose-500/15 text-rose-200">VOID</span>
+                                      <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold bg-portal-danger text-portal-danger">VOID</span>
                                     ) : row.journalStatus === 'POSTED' ? (
                                       <button
                                         type="button"
                                         onClick={() => { setVoidTarget(row.paymentRow); setVoidReason(''); setVoidError(''); setVoidModalOpen(true) }}
-                                        className="min-touch rounded-full border border-border-soft bg-white/5 px-3 py-2 text-xs text-slate-200 transition hover:border-rose-400/30 hover:text-rose-200"
+                                        className="min-touch rounded-full border border-border-soft bg-portal-overlay px-3 py-2 text-xs text-portal-muted-strong transition hover:border-portal-danger hover:text-portal-danger"
                                       >
                                         Void
                                       </button>
@@ -666,8 +669,8 @@ export default function PaymentsReceived() {
                 </table>
               </div>
 
-              <div className="shrink-0 flex items-center justify-end gap-3 rounded-3xl border border-border-soft bg-slate-900/80 px-4 py-4 text-sm text-slate-300">
-                <span className="font-semibold text-white">Total Outstanding Balance:</span>
+              <div className="shrink-0 flex items-center justify-end gap-3 rounded-3xl border border-border-soft bg-portal-surface-2 px-4 py-4 text-sm text-portal-muted">
+                <span className="font-semibold text-portal-primary">Total Outstanding Balance:</span>
                 <span>{new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(statementBalance)}</span>
               </div>
             </div>

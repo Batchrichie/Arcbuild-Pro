@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { formatGhs } from '../../lib/formatGhs'
 import { inputCls as clsInput, amountInputCls } from '../../lib/portal-classes'
 import ScrollableSelect from '../ui/ScrollableSelect'
+import { parseDbError } from '../../lib/dbErrorMessage'
 
 function AmountInput({ value, onChange, placeholder = '0.00', className = '' }) {
   return (
@@ -301,11 +302,11 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
       })
 
       if (rpcError) {
-        throw rpcError
+        throw new Error(parseDbError(rpcError))
       }
 
       if (!data?.success) {
-        throw new Error(data?.error || 'Manual journal posting failed.')
+        throw new Error(parseDbError(null, data))
       }
 
       setSuccess(`Journal posted: ${data.entry_number || data.journal_entry_id}`)
@@ -316,7 +317,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
       setJournalDate(new Date().toISOString().split('T')[0])
     } catch (err) {
       console.error('Journal post failed', err)
-      setError(err.message || 'Failed to post journal entry.')
+      setError(parseDbError(err))
     } finally {
       setLoading(false)
     }
@@ -332,17 +333,17 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
       <div className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Manual Journal</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Post a manual ledger entry</h2>
+            <p className="text-sm uppercase tracking-[0.22em] text-portal-muted">Manual Journal</p>
+            <h2 className="mt-2 text-2xl font-semibold text-portal-primary">Post a manual ledger entry</h2>
           </div>
-          <span className="rounded-full border border-teal-400/30 bg-teal-500/10 px-4 py-2 text-sm font-semibold text-teal-200">
+          <span className="badge-portal badge-portal-info">
             Manual Entry
           </span>
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-3">
           <label className="space-y-2">
-            <span className="text-sm font-medium text-slate-200">Journal Date</span>
+            <span className="text-sm font-medium text-portal-muted-strong">Journal Date</span>
             <input
               type="date"
               value={journalDate}
@@ -352,7 +353,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
           </label>
 
           <label className="space-y-2 lg:col-span-2">
-            <span className="text-sm font-medium text-slate-200">Description</span>
+            <span className="text-sm font-medium text-portal-muted-strong">Description</span>
             <input
               type="text"
               value={description}
@@ -363,7 +364,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
           </label>
 
           <label className="space-y-2 lg:col-span-2">
-            <span className="text-sm font-medium text-slate-200">Reference</span>
+            <span className="text-sm font-medium text-portal-muted-strong">Reference</span>
             <input
               type="text"
               value={reference}
@@ -378,8 +379,8 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
       <div className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm text-slate-400">Common journal templates</p>
-            <p className="text-xs text-slate-500">Tap a template to pre-fill the account lines.</p>
+            <p className="text-sm text-portal-muted">Common journal templates</p>
+            <p className="text-xs text-portal-muted">Tap a template to pre-fill the account lines.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {TEMPLATES.map((template) => (
@@ -387,7 +388,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
                 key={template.label}
                 type="button"
                 onClick={() => fillTemplate(template)}
-                className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-teal-400/30 hover:bg-teal-500/10"
+                className="min-touch rounded-full border border-border-soft bg-portal-overlay px-4 py-2 text-sm text-portal-muted transition hover:border-portal-info hover:bg-portal-info"
               >
                 {template.label}
               </button>
@@ -395,10 +396,10 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
           </div>
         </div>
 
-        <div className="portal-table-scroll mt-6 overflow-x-auto rounded-3xl border border-border-soft bg-slate-950/70">
+        <div className="portal-table-scroll mt-6 overflow-x-auto rounded-3xl border border-border-soft bg-portal-input">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-[0.24em] text-slate-500">
+              <tr className="text-left text-xs uppercase tracking-[0.24em] text-portal-muted">
                 <th className="min-w-[2rem] px-3 py-3">#</th>
                 <th className="min-w-[12rem] px-3 py-3">Account Code</th>
                 <th className="min-w-[10rem] px-3 py-3">Account Name</th>
@@ -413,7 +414,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
             <tbody>
               {lines.map((line, index) => (
                 <tr key={line.id} className="border-t border-border-soft">
-                  <td className="px-3 py-3 text-slate-300">{index + 1}</td>
+                  <td className="px-3 py-3 text-portal-muted">{index + 1}</td>
                   <td className="px-3 py-3">
                     <ScrollableSelect
                       searchable
@@ -427,7 +428,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
                       className="min-w-[11rem]"
                     />
                   </td>
-                  <td className="px-3 py-3 text-slate-200">{line.account_name || '—'}</td>
+                  <td className="px-3 py-3 text-portal-primary">{line.account_name || '—'}</td>
                   <td className="px-3 py-3">
                     <AmountInput
                       value={line.debit_amount}
@@ -474,7 +475,7 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
                     <button
                       type="button"
                       onClick={() => removeLine(index)}
-                      className="min-touch rounded-full border border-border-soft bg-white/5 px-3 py-2 text-xs text-slate-300 transition hover:border-red-400/40 hover:text-red-200"
+                      className="min-touch rounded-full border border-border-soft bg-portal-overlay px-3 py-2 text-xs text-portal-muted transition hover:border-portal-danger hover:text-portal-danger"
                       disabled={lines.length <= 2}
                     >
                       Remove
@@ -487,32 +488,32 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-3xl border border-border-soft bg-slate-950/80 p-4 text-sm text-slate-200">
-            <p className="font-semibold text-white">Balance</p>
+          <div className="rounded-3xl border border-border-soft bg-portal-input p-4 text-sm text-portal-primary">
+            <p className="font-semibold text-portal-primary">Balance</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               <div>
-                <p className="text-xs text-slate-400">Total Debits</p>
-                <p className="mt-1 text-lg font-semibold text-white">GHS {formatGhs(totalDebits)}</p>
+                <p className="text-xs text-portal-muted">Total Debits</p>
+                <p className="mt-1 text-lg font-semibold text-portal-primary">GHS {formatGhs(totalDebits)}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-400">Total Credits</p>
-                <p className="mt-1 text-lg font-semibold text-white">GHS {formatGhs(totalCredits)}</p>
+                <p className="text-xs text-portal-muted">Total Credits</p>
+                <p className="mt-1 text-lg font-semibold text-portal-primary">GHS {formatGhs(totalCredits)}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-400">Difference</p>
-                <p className={`mt-1 text-lg font-semibold ${balanced ? 'text-emerald-300' : 'text-rose-300'}`}>
+                <p className="text-xs text-portal-muted">Difference</p>
+                <p className={`mt-1 text-lg font-semibold ${balanced ? 'text-portal-success' : 'text-portal-danger'}`}>
                   GHS {formatGhs(Math.abs(balanceDifference))} {balanced ? '✓ Balanced' : `✗ Out of balance`}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="space-y-3 rounded-3xl border border-border-soft bg-slate-950/80 p-4">
+          <div className="space-y-3 rounded-3xl border border-border-soft bg-portal-input p-4">
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={handleSaveDraft}
-                className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-teal-400/30 hover:bg-teal-500/10"
+                className="min-touch rounded-full border border-border-soft bg-portal-overlay px-4 py-2 text-sm text-portal-muted transition hover:border-portal-info hover:bg-portal-info"
               >
                 Save as Draft
               </button>
@@ -520,15 +521,15 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
                 type="button"
                 onClick={handlePost}
                 disabled={!balanced || loading}
-                className="min-touch rounded-full border border-teal-400/40 bg-teal-500/10 px-4 py-2 text-sm font-semibold text-teal-100 transition disabled:cursor-not-allowed disabled:opacity-50"
+                className="min-touch rounded-full border border-border-soft bg-portal-action px-4 py-2 text-sm font-semibold text-portal-action-text transition disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading ? 'Posting…' : 'Post Journal'}
               </button>
             </div>
             {draftSavedAt && (
-              <p className="text-sm text-slate-400">Draft saved at {draftSavedAt.toLocaleTimeString('en-GB')}</p>
+              <p className="text-sm text-portal-muted">Draft saved at {draftSavedAt.toLocaleTimeString('en-GB')}</p>
             )}
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-portal-muted">
               Minimum two lines (debit + credit). Use &quot;Add Line&quot; only when a third account is involved — blank extra rows are ignored.
             </p>
           </div>
@@ -538,13 +539,13 @@ export default function ManualJournalForm({ initialDescription = '', initialRefe
           <button
             type="button"
             onClick={addLine}
-            className="min-touch rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-teal-400/30 hover:bg-teal-500/10"
+            className="min-touch rounded-full border border-border-soft bg-portal-overlay px-4 py-2 text-sm text-portal-muted transition hover:border-portal-info hover:bg-portal-info"
           >
             Add Line (optional)
           </button>
         </div>
-        {error && <p className="mt-4 rounded-2xl border border-rose-400/20 bg-rose-500/10 p-4 text-sm text-rose-100">{error}</p>}
-        {success && <p className="mt-4 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-4 text-sm text-emerald-100">{success} <span className="text-slate-300">Use Journal History or General Ledger to review posted entries.</span></p>}
+        {error && <p className="mt-4 rounded-2xl border border-portal-danger bg-portal-danger p-4 text-sm text-portal-danger">{error}</p>}
+        {success && <p className="mt-4 rounded-2xl border border-portal-success bg-portal-success p-4 text-sm text-portal-success">{success} <span className="text-portal-muted">Use Journal History or General Ledger to review posted entries.</span></p>}
       </div>
     </div>
   )

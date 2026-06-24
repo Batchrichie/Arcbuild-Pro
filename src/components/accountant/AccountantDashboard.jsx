@@ -13,7 +13,7 @@ const RecentJournalEntries = lazy(() => import('./RecentJournalEntries'))
 // Skeleton placeholder
 function PanelSkeleton() {
   return (
-    <div className="h-80 w-full animate-pulse rounded-2xl bg-gradient-to-br from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-600"></div>
+    <div className="h-80 w-full animate-pulse rounded-2xl bg-portal-surface-gradient"></div>
   )
 }
 
@@ -145,7 +145,7 @@ export default function AccountantDashboard({ onNavigate, onJournalSelect }) {
     <div className="space-y-8">
       <div>
         <p className="portal-section-eyebrow uppercase tracking-[0.24em]">Today&apos;s work</p>
-        <h2 className="text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white">Action dashboard</h2>
+        <h2 className="portal-h2">Action dashboard</h2>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -194,22 +194,22 @@ export default function AccountantDashboard({ onNavigate, onJournalSelect }) {
               type="button"
               onClick={card.onClick}
               disabled={loading}
-              className={`group flex h-[72px] items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 px-3 text-left transition hover:border-slate-500/70 hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 disabled:cursor-wait disabled:opacity-80 ${card.accent}`}
+              className={`group flex h-[72px] items-center justify-between gap-3 rounded-xl border border-portal-soft bg-portal-elevated px-3 text-left transition hover:border-border hover:bg-portal-overlay focus:outline-none focus:ring-2 focus:ring-amber-400/20 disabled:cursor-wait disabled:opacity-80 ${card.accent}`}
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-3xl bg-gray-50 dark:bg-slate-800 text-amber-300">
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-3xl bg-portal-input text-portal-warning">
                   {loading ? (
-                    <div className="h-5 w-5 rounded-full bg-gray-200/40 dark:bg-slate-700/40 animate-pulse" />
+                    <div className="h-5 w-5 rounded-full bg-portal-overlay animate-pulse" />
                   ) : (
                     <Icon className="h-5 w-5" />
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-xs lg:text-sm font-medium text-gray-500 dark:text-gray-400">{card.title}</p>
-                  <p className="text-lg lg:text-2xl font-semibold text-gray-900 dark:text-white">{loading ? '—' : card.value}</p>
+                  <p className="truncate text-xs lg:text-sm font-medium text-portal-muted">{card.title}</p>
+                  <p className="text-lg lg:text-2xl font-semibold text-portal-primary">{loading ? '—' : card.value}</p>
                 </div>
               </div>
-              <span className="inline-flex shrink-0 rounded-full bg-white/5 dark:bg-slate-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-300 transition group-hover:bg-white/10">
+              <span className="inline-flex shrink-0 rounded-full bg-portal-overlay px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-portal-muted transition group-hover:bg-surface-3">
                 {card.actionLabel}
               </span>
             </button>

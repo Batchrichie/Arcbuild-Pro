@@ -48,7 +48,13 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
       const [transactionsRes, glRes, balanceRes] = await Promise.all([
         supabase.from('bank_transactions').select('id,bank_account_id,transaction_date,description,debit_amount,credit_amount,match_status,matched_ledger_entry_id').eq('bank_account_id', selectedAccountId).order('transaction_date', { ascending: true }).limit(50),
         account?.gl_account_code
-          ? supabase.from('ledger_entries').select('id,journal_entry_id,account_code,debit,credit,description').eq('account_code', account.gl_account_code).order('created_at', { ascending: false }).limit(200)
+          ? supabase
+              .from('ledger_entries')
+              .select('id,journal_entry_id,account_code,debit,credit,description,journal_entries!inner(status)')
+              .eq('account_code', account.gl_account_code)
+              .eq('journal_entries.status', 'POSTED')
+              .order('created_at', { ascending: false })
+              .limit(200)
           : Promise.resolve({ data: [] }),
         account?.gl_account_code
           ? supabase.from('account_running_balance').select('account_code,running_balance,entry_date').eq('account_code', account.gl_account_code).order('entry_date', { ascending: false }).limit(1)
@@ -188,21 +194,21 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
       <div className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Bank reconciliation</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Reconciliation workspace</h2>
+            <p className="text-sm uppercase tracking-[0.22em] text-portal-muted">Bank reconciliation</p>
+            <h2 className="mt-2 text-2xl font-semibold text-portal-primary">Reconciliation workspace</h2>
           </div>
-          <span className="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-200">
+          <span className="rounded-full border border-portal-info bg-portal-info px-4 py-2 text-sm font-semibold text-portal-info">
             {bankAccounts.length} bank accounts
           </span>
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_1fr]">
-          <label className="block text-sm text-slate-300">
-            <span className="mb-2 block text-slate-400">Bank account</span>
+          <label className="block text-sm text-portal-muted">
+            <span className="mb-2 block text-portal-muted">Bank account</span>
             <select
               value={selectedAccountId}
               onChange={(e) => setSelectedAccountId(e.target.value)}
-              className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
+              className="w-full rounded-lg border border-border-soft bg-portal-surface-2 px-3 py-2 text-sm text-portal-primary"
             >
               <option value="">Select account</option>
               {bankAccounts.map((account) => (
@@ -213,88 +219,88 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
             </select>
           </label>
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block text-sm text-slate-300">
-              <span className="mb-2 block text-slate-400">Period start</span>
+            <label className="block text-sm text-portal-muted">
+              <span className="mb-2 block text-portal-muted">Period start</span>
               <input
                 type="date"
                 value={periodStart}
                 onChange={(e) => setPeriodStart(e.target.value)}
-                className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
+                className="w-full rounded-lg border border-border-soft bg-portal-surface-2 px-3 py-2 text-sm text-portal-primary"
               />
             </label>
-            <label className="block text-sm text-slate-300">
-              <span className="mb-2 block text-slate-400">Period end</span>
+            <label className="block text-sm text-portal-muted">
+              <span className="mb-2 block text-portal-muted">Period end</span>
               <input
                 type="date"
                 value={periodEnd}
                 onChange={(e) => setPeriodEnd(e.target.value)}
-                className="w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
+                className="w-full rounded-lg border border-border-soft bg-portal-surface-2 px-3 py-2 text-sm text-portal-primary"
               />
             </label>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-3">
-          <div className="rounded-3xl border border-border-soft bg-slate-950 p-4">
-            <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Statement close</p>
-            <p className="mt-3 text-3xl font-semibold text-white">{formatGhs(Number(statementClosingBalance) || 0)}</p>
+          <div className="rounded-3xl border border-border-soft bg-portal-surface-2 p-4">
+            <p className="text-sm uppercase tracking-[0.18em] text-portal-muted">Statement close</p>
+            <p className="mt-3 text-3xl font-semibold text-portal-primary">{formatGhs(Number(statementClosingBalance) || 0)}</p>
             <input
               type="number"
               step="0.01"
               value={statementClosingBalance}
               onChange={(e) => setStatementClosingBalance(e.target.value)}
-              className="mt-4 w-full rounded-lg border border-border-soft bg-slate-900 px-3 py-2 text-sm text-white"
+              className="mt-4 w-full rounded-lg border border-border-soft bg-portal-surface-2 px-3 py-2 text-sm text-portal-primary"
               placeholder="Closing balance"
             />
           </div>
-          <div className="rounded-3xl border border-border-soft bg-slate-950 p-4">
-            <p className="text-sm uppercase tracking-[0.18em] text-slate-500">GL closing</p>
-            <p className="mt-3 text-3xl font-semibold text-white">{formatGhs(glClosingBalance)}</p>
+          <div className="rounded-3xl border border-border-soft bg-portal-surface-2 p-4">
+            <p className="text-sm uppercase tracking-[0.18em] text-portal-muted">GL closing</p>
+            <p className="mt-3 text-3xl font-semibold text-portal-primary">{formatGhs(glClosingBalance)}</p>
           </div>
-          <div className="rounded-3xl border border-border-soft bg-slate-950 p-4">
-            <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Difference</p>
-            <p className={`mt-3 text-3xl font-semibold ${completionReady ? 'text-emerald-300' : 'text-rose-300'}`}>
+          <div className="rounded-3xl border border-border-soft bg-portal-surface-2 p-4">
+            <p className="text-sm uppercase tracking-[0.18em] text-portal-muted">Difference</p>
+            <p className={`mt-3 text-3xl font-semibold ${completionReady ? 'text-portal-success' : 'text-portal-danger'}`}>
               {formatGhs(balanceDifference)}
             </p>
             <button
               type="button"
               onClick={handleComplete}
               disabled={!completionReady || !selectedAccountId || loading}
-              className="mt-4 w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 disabled:opacity-50"
+              className="mt-4 w-full rounded-2xl bg-portal-success px-4 py-3 text-sm font-semibold text-portal-primary disabled:opacity-50"
             >
               Complete Reconciliation
             </button>
           </div>
         </div>
 
-        {statusMessage && <p className="mt-4 text-sm text-slate-300">{statusMessage}</p>}
+        {statusMessage && <p className="mt-4 text-sm text-portal-muted">{statusMessage}</p>}
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.3fr_0.9fr]">
         <section className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
-          <h3 className="text-lg font-semibold text-white">Matched transactions</h3>
+          <h3 className="text-lg font-semibold text-portal-primary">Matched transactions</h3>
           <div className="mt-4 space-y-4">
             {matchedPairs.length === 0 ? (
-              <p className="text-slate-400">No matched transactions yet.</p>
+              <p className="text-portal-muted">No matched transactions yet.</p>
             ) : (
               matchedPairs.map((pair) => (
-                <div key={pair.bank.id} className="rounded-3xl border border-border-soft bg-slate-950 p-4">
+                <div key={pair.bank.id} className="rounded-3xl border border-border-soft bg-portal-surface-2 p-4">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
-                      <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Bank</p>
-                      <p className="text-sm text-slate-300">{pair.bank.transaction_date} · {pair.bank.description}</p>
-                      <p className="mt-2 text-sm text-slate-200">{pair.bank.debit_amount ? formatGhs(pair.bank.debit_amount) : formatGhs(pair.bank.credit_amount)}</p>
+                      <p className="text-sm uppercase tracking-[0.2em] text-portal-muted">Bank</p>
+                      <p className="text-sm text-portal-muted">{pair.bank.transaction_date} · {pair.bank.description}</p>
+                      <p className="mt-2 text-sm text-portal-muted-strong">{pair.bank.debit_amount ? formatGhs(pair.bank.debit_amount) : formatGhs(pair.bank.credit_amount)}</p>
                     </div>
                     <div>
-                      <p className="text-sm uppercase tracking-[0.2em] text-slate-500">GL</p>
-                      <p className="text-sm text-slate-300">{pair.gl.account_code} · {pair.gl.description}</p>
-                      <p className="mt-2 text-sm text-slate-200">{pair.gl.debit ? formatGhs(pair.gl.debit) : formatGhs(pair.gl.credit)}</p>
+                      <p className="text-sm uppercase tracking-[0.2em] text-portal-muted">GL</p>
+                      <p className="text-sm text-portal-muted">{pair.gl.account_code} · {pair.gl.description}</p>
+                      <p className="mt-2 text-sm text-portal-muted-strong">{pair.gl.debit ? formatGhs(pair.gl.debit) : formatGhs(pair.gl.credit)}</p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleUnmatch(pair.bank.id)}
-                    className="mt-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-2 text-sm text-rose-200"
+                    className="mt-4 rounded-2xl border border-portal-danger bg-portal-danger px-4 py-2 text-sm text-portal-danger"
                   >
                     Unmatch
                   </button>
@@ -305,12 +311,12 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
         </section>
 
         <section className="rounded-4xl panel-surface p-6 shadow-xl shadow-black/10">
-          <h3 className="text-lg font-semibold text-white">Unmatched items</h3>
+          <h3 className="text-lg font-semibold text-portal-primary">Unmatched items</h3>
           <div className="mt-4 grid gap-6">
-            <div className="rounded-3xl border border-border-soft bg-slate-950 p-4">
-              <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Bank statements</p>
+            <div className="rounded-3xl border border-border-soft bg-portal-surface-2 p-4">
+              <p className="text-sm uppercase tracking-[0.2em] text-portal-muted">Bank statements</p>
               {unmatchedBank.length === 0 ? (
-                <p className="mt-4 text-slate-400">No unmatched bank transactions.</p>
+                <p className="mt-4 text-portal-muted">No unmatched bank transactions.</p>
               ) : (
                 <div className="space-y-3">
                   {unmatchedBank.map((tx) => (
@@ -318,32 +324,32 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
                       key={tx.id}
                       type="button"
                       onClick={() => setSelectedBankTx(tx)}
-                      className={`w-full rounded-2xl border px-4 py-3 text-left transition ${selectedBankTx?.id === tx.id ? 'border-emerald-400/40 bg-emerald-500/10' : 'border-border-soft bg-slate-900 hover:border-emerald-400/20'}`}>
+                      className={`w-full rounded-2xl border px-4 py-3 text-left transition ${selectedBankTx?.id === tx.id ? 'border-portal-success bg-portal-success' : 'border-border-soft bg-portal-surface-2 hover:border-portal-success'}`}>
                       <div className="flex items-center justify-between gap-4">
                         <span>{tx.transaction_date}</span>
                         <span>{tx.debit_amount ? formatGhs(tx.debit_amount) : formatGhs(tx.credit_amount)}</span>
                       </div>
-                      <p className="mt-1 text-sm text-slate-400">{tx.description}</p>
+                      <p className="mt-1 text-sm text-portal-muted">{tx.description}</p>
                     </button>
                   ))}
                 </div>
               )}
               {selectedBankTx && (
-                <div className="mt-4 space-y-3 rounded-3xl border border-border-soft bg-slate-900 p-4">
-                  <p className="text-sm font-semibold text-white">Selected transaction</p>
-                  <p className="text-slate-300">{selectedBankTx.description}</p>
+                <div className="mt-4 space-y-3 rounded-3xl border border-border-soft bg-portal-surface-2 p-4">
+                  <p className="text-sm font-semibold text-portal-primary">Selected transaction</p>
+                  <p className="text-portal-muted">{selectedBankTx.description}</p>
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => handleExclude(selectedBankTx.id)}
-                      className="rounded-full border border-orange-400/30 bg-orange-500/10 px-4 py-2 text-sm text-orange-200"
+                      className="rounded-full border border-portal-warning bg-orange-500/10 px-4 py-2 text-sm text-orange-200"
                     >
                       Exclude
                     </button>
                     <button
                       type="button"
                       onClick={() => setSelectedBankTx(null)}
-                      className="rounded-full border border-border-soft bg-white/5 px-4 py-2 text-sm text-slate-300"
+                      className="rounded-full border border-border-soft bg-portal-overlay px-4 py-2 text-sm text-portal-muted"
                     >
                       Clear
                     </button>
@@ -352,10 +358,10 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
               )}
             </div>
 
-            <div className="rounded-3xl border border-border-soft bg-slate-950 p-4">
-              <p className="text-sm uppercase tracking-[0.2em] text-slate-500">GL entries</p>
+            <div className="rounded-3xl border border-border-soft bg-portal-surface-2 p-4">
+              <p className="text-sm uppercase tracking-[0.2em] text-portal-muted">GL entries</p>
               {unmatchedGl.length === 0 ? (
-                <p className="mt-4 text-slate-400">No unmatched GL entries.</p>
+                <p className="mt-4 text-portal-muted">No unmatched GL entries.</p>
               ) : (
                 <div className="space-y-3">
                   {unmatchedGl.map((gl) => (
@@ -363,26 +369,26 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
                       key={gl.id}
                       type="button"
                       onClick={() => setSelectedGlEntry(gl)}
-                      className={`w-full rounded-2xl border px-4 py-3 text-left transition ${selectedGlEntry?.id === gl.id ? 'border-emerald-400/40 bg-emerald-500/10' : 'border-border-soft bg-slate-900 hover:border-emerald-400/20'}`}>
+                      className={`w-full rounded-2xl border px-4 py-3 text-left transition ${selectedGlEntry?.id === gl.id ? 'border-portal-success bg-portal-success' : 'border-border-soft bg-portal-surface-2 hover:border-portal-success'}`}>
                       <div className="flex items-center justify-between gap-4">
                         <span>{gl.account_code}</span>
                         <span>{gl.debit ? formatGhs(gl.debit) : formatGhs(gl.credit)}</span>
                       </div>
-                      <p className="mt-1 text-sm text-slate-400">{gl.description || 'No description'}</p>
+                      <p className="mt-1 text-sm text-portal-muted">{gl.description || 'No description'}</p>
                     </button>
                   ))}
                 </div>
               )}
               {selectedGlEntry && (
-                <div className="mt-4 space-y-3 rounded-3xl border border-border-soft bg-slate-900 p-4">
-                  <p className="text-sm font-semibold text-white">Selected GL entry</p>
-                  <p className="text-slate-300">{selectedGlEntry.description || 'No description'}</p>
+                <div className="mt-4 space-y-3 rounded-3xl border border-border-soft bg-portal-surface-2 p-4">
+                  <p className="text-sm font-semibold text-portal-primary">Selected GL entry</p>
+                  <p className="text-portal-muted">{selectedGlEntry.description || 'No description'}</p>
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={handleManualMatch}
                       disabled={!selectedBankTx}
-                      className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200 disabled:opacity-50"
+                      className="rounded-full border border-portal-success bg-portal-success px-4 py-2 text-sm text-portal-success disabled:opacity-50"
                     >
                       Match to transaction
                     </button>
@@ -411,7 +417,7 @@ export default function ReconciliationWorkspace({ onCreateJournal }) {
                           },
                         ],
                       })}
-                      className="rounded-full border border-slate-500/30 bg-white/5 px-4 py-2 text-sm text-slate-300"
+                      className="rounded-full border border-portal-soft bg-portal-overlay px-4 py-2 text-sm text-portal-muted"
                     >
                       Create Journal
                     </button>

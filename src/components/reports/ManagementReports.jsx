@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { formatGhs } from '../../lib/formatGhs'
 import { budgetVarianceStatus } from '../../lib/status-classes'
+import { inputCls as clsInput } from '../../lib/portal-classes'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts'
 import DebtorsLedger from '../accounting/DebtorsLedger'
 import TimesheetReport from './TimesheetReport'
@@ -149,10 +150,10 @@ export default function ManagementReports() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-white">Management Reports</h2>
+        <h2 className="text-2xl font-semibold text-portal-primary">Management Reports</h2>
         <div className="flex items-center gap-2">
           {activeTab === 'Revenue by Division' && (
-            <select value={year} onChange={(e)=>setYear(Number(e.target.value))} className="rounded px-2 py-1 bg-slate-900 text-white">
+            <select value={year} onChange={(e)=>setYear(Number(e.target.value))} className="rounded-lg border border-border-soft bg-portal-input px-2 py-1 text-sm text-portal-primary">
               {Array.from({length:5}).map((_,i)=>{
                 const y = new Date().getFullYear()-i; return <option key={y} value={y}>{y}</option>
               })}
@@ -163,7 +164,7 @@ export default function ManagementReports() {
 
       <div className="tabs flex gap-2">
         {TABS.map(t=> (
-          <button key={t} onClick={()=>setActiveTab(t)} className={`px-4 py-2 rounded ${activeTab===t?'bg-amber-500/15 text-amber-100':'text-slate-400'}`}>
+          <button key={t} onClick={()=>setActiveTab(t)} className={`px-4 py-2 rounded border border-border-soft ${activeTab===t ? 'bg-portal-overlay text-portal-primary' : 'text-portal-muted'}`}>
             {t}
           </button>
         ))}
@@ -172,7 +173,7 @@ export default function ManagementReports() {
       <div className="mt-4">
         {activeTab === 'Revenue by Division' && (
           <div>
-            <div style={{height:300}} className="bg-slate-950 rounded-2xl p-4">
+            <div style={{height:300}} className="rounded-2xl bg-portal-surface p-4">
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={revenueChartData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -187,9 +188,9 @@ export default function ManagementReports() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="mt-4 overflow-x-auto rounded-2xl bg-slate-900 p-4">
-              <table className="w-full text-sm text-slate-200">
-                <thead className="text-slate-400">
+            <div className="mt-4 overflow-x-auto rounded-2xl bg-portal-input p-4">
+              <table className="w-full text-sm text-portal-primary">
+                <thead className="text-portal-muted">
                   <tr><th>Division</th>{Array.from({length:12}).map((_,i)=><th key={i} className="text-right">{new Date(0, i).toLocaleString('en-GH',{month:'short'})}</th>)}<th className="text-right">YTD</th></tr>
                 </thead>
                 <tbody>
@@ -198,31 +199,31 @@ export default function ManagementReports() {
                     const ytd = monthly.reduce((s,n)=>s+Number(n||0),0)
                     return (<tr key={div}><td>{div}</td>{monthly.map((m,idx)=><td key={idx} className="text-right">{formatGhs(m)}</td>)}<td className="text-right font-semibold">{formatGhs(ytd)}</td></tr>)
                   })}
-                  <tr className="border-t text-slate-200"><td className="font-semibold">Totals</td>{Array.from({length:12}).map((_,i)=>{
+                  <tr className="border-t text-portal-primary"><td className="font-semibold">Totals</td>{Array.from({length:12}).map((_,i)=>{
                     return <td key={i} className="text-right">{formatGhs(0)}</td>
                   })}<td className="text-right font-semibold">{formatGhs(incomeRows.reduce((s,r)=>s+Number(r.amount||0),0))}</td></tr>
                 </tbody>
               </table>
-              <div className="mt-3"><button onClick={()=>downloadCsv(`revenue_${year}.csv`, incomeRows)} className="rounded bg-emerald-500 px-3 py-2">Export CSV</button></div>
+              <div className="mt-3"><button onClick={()=>downloadCsv(`revenue_${year}.csv`, incomeRows)} className="rounded-full bg-portal-success px-3 py-2 text-sm text-portal-success">Export CSV</button></div>
             </div>
           </div>
         )}
 
         {activeTab === 'Project Profitability' && (
           <div>
-            <div className="rounded-2xl bg-slate-950 p-4">
+            <div className="rounded-2xl bg-portal-input p-4">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-slate-200">
-                  <thead className="text-slate-400"><tr><th>Rank</th><th>Project</th><th>Division</th><th className="text-right">Contract</th><th className="text-right">Invoiced</th><th className="text-right">Costs</th><th className="text-right">Gross Profit</th><th className="text-right">Margin %</th><th>Status</th></tr></thead>
+                <table className="w-full text-sm text-portal-primary">
+                  <thead className="text-portal-muted"><tr><th>Rank</th><th>Project</th><th>Division</th><th className="text-right">Contract</th><th className="text-right">Invoiced</th><th className="text-right">Costs</th><th className="text-right">Gross Profit</th><th className="text-right">Margin %</th><th>Status</th></tr></thead>
                   <tbody>
                     {(projects||[]).sort((a,b)=>Number(b.gross_profit_ghs||0)-Number(a.gross_profit_ghs||0)).map((p,idx)=>{
                       const margin = p.contract_value_ghs?((p.gross_profit_ghs||0)/p.contract_value_ghs)*100:0
-                      const color = margin>20? 'text-emerald-300': margin>=10? 'text-amber-300':'text-rose-300'
+                      const color = margin>20 ? 'text-portal-success' : margin>=10 ? 'text-portal-warning' : 'text-portal-danger'
                       return (<tr key={p.id}><td>{idx+1}</td><td>{p.project_name}</td><td>{p.division_name}</td><td className="text-right">{formatGhs(p.contract_value_ghs)}</td><td className="text-right">{formatGhs(p.total_invoiced_ghs)}</td><td className="text-right">{formatGhs(p.total_costs_ghs)}</td><td className="text-right">{formatGhs(p.gross_profit_ghs)}</td><td className={`text-right ${color}`}>{Number(margin).toFixed(1)}%</td><td>{p.status}</td></tr>)
                     })}
                   </tbody>
                 </table>
-                <div className="mt-3"><button onClick={()=>downloadCsv('project_profitability.csv', projects||[])} className="rounded bg-emerald-500 px-3 py-2">Export CSV</button></div>
+                <div className="mt-3"><button onClick={()=>downloadCsv('project_profitability.csv', projects||[])} className="rounded-full bg-portal-success px-3 py-2 text-sm text-portal-success">Export CSV</button></div>
               </div>
             </div>
           </div>
@@ -230,25 +231,25 @@ export default function ManagementReports() {
 
         {activeTab === 'Aged Receivables' && (
           <div>
-            <div className="rounded-2xl bg-slate-950 p-4">
-              <div className="mb-3">As-at: <input type="date" className="rounded bg-slate-900 px-2 py-1 text-white" /></div>
+            <div className="rounded-2xl bg-portal-input p-4">
+              <div className="mb-3">As-at: <input type="date" className={clsInput} /></div>
               <DebtorsLedger readOnly={true} />
-              <div className="mt-3"><button className="rounded bg-emerald-500 px-3 py-2">Export PDF</button></div>
+              <div className="mt-3"><button className="rounded-full bg-portal-success px-3 py-2 text-sm text-portal-success">Export PDF</button></div>
             </div>
           </div>
         )}
 
         {activeTab === 'Aged Payables' && (
           <div>
-            <div className="rounded-2xl bg-slate-950 p-4">
+            <div className="rounded-2xl bg-portal-input p-4">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-slate-200">
-                  <thead className="text-slate-400"><tr><th>Supplier</th><th>Journal Date</th><th>Description</th><th className="text-right">Amount</th><th>Reference</th></tr></thead>
+                <table className="w-full text-sm text-portal-primary">
+                  <thead className="text-portal-muted"><tr><th>Supplier</th><th>Journal Date</th><th>Description</th><th className="text-right">Amount</th><th>Reference</th></tr></thead>
                   <tbody>
                     {(payables||[]).map((r,idx)=> (<tr key={idx}><td>{r.line_description}</td><td>{r.journal_date}</td><td>{r.description}</td><td className="text-right">{formatGhs(r.amount)}</td><td>{r.reference}</td></tr>))}
                   </tbody>
                 </table>
-                <div className="mt-3"><button onClick={()=>downloadCsv('aged_payables.csv', payables||[])} className="rounded bg-emerald-500 px-3 py-2">Export CSV</button></div>
+                <div className="mt-3"><button onClick={()=>downloadCsv('aged_payables.csv', payables||[])} className="rounded-full bg-portal-success px-3 py-2 text-sm text-portal-success">Export CSV</button></div>
               </div>
             </div>
           </div>
@@ -256,10 +257,10 @@ export default function ManagementReports() {
 
         {activeTab === 'Employee Cost' && (
           <div>
-            <div className="rounded-2xl bg-slate-950 p-4">
+            <div className="rounded-2xl bg-portal-input p-4">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-slate-200"><thead className="text-slate-400"><tr><th>Employee</th><th>Department</th><th>Division</th><th className="text-right">Basic</th><th className="text-right">Allowances</th><th className="text-right">Gross</th><th className="text-right">PAYE</th><th className="text-right">SSNIT(E)</th><th className="text-right">SSNIT(ER)</th><th className="text-right">Net</th></tr></thead><tbody>{(employeeCosts||[]).map((e,idx)=>(<tr key={idx}><td>{e.employee}</td><td>{e.department}</td><td>{e.division}</td><td className="text-right">{formatGhs(e.basic)}</td><td className="text-right">{formatGhs(e.allowances)}</td><td className="text-right">{formatGhs(e.gross)}</td><td className="text-right">{formatGhs(e.paye)}</td><td className="text-right">{formatGhs(e.ssnit_employee)}</td><td className="text-right">{formatGhs(e.ssnit_employer)}</td><td className="text-right">{formatGhs(e.net)}</td></tr>))}</tbody></table>
-                <div className="mt-3"><button onClick={()=>downloadCsv('employee_costs.csv', employeeCosts||[])} className="rounded bg-emerald-500 px-3 py-2">Export CSV</button></div>
+                <table className="w-full text-sm text-portal-primary"><thead className="text-portal-muted"><tr><th>Employee</th><th>Department</th><th>Division</th><th className="text-right">Basic</th><th className="text-right">Allowances</th><th className="text-right">Gross</th><th className="text-right">PAYE</th><th className="text-right">SSNIT(E)</th><th className="text-right">SSNIT(ER)</th><th className="text-right">Net</th></tr></thead><tbody>{(employeeCosts||[]).map((e,idx)=>(<tr key={idx}><td>{e.employee}</td><td>{e.department}</td><td>{e.division}</td><td className="text-right">{formatGhs(e.basic)}</td><td className="text-right">{formatGhs(e.allowances)}</td><td className="text-right">{formatGhs(e.gross)}</td><td className="text-right">{formatGhs(e.paye)}</td><td className="text-right">{formatGhs(e.ssnit_employee)}</td><td className="text-right">{formatGhs(e.ssnit_employer)}</td><td className="text-right">{formatGhs(e.net)}</td></tr>))}</tbody></table>
+                <div className="mt-3"><button onClick={()=>downloadCsv('employee_costs.csv', employeeCosts||[])} className="rounded-full bg-portal-success px-3 py-2 text-sm text-portal-success">Export CSV</button></div>
               </div>
             </div>
           </div>
@@ -267,10 +268,10 @@ export default function ManagementReports() {
 
         {activeTab === 'Budget vs Actual' && (
           <div>
-            <div className="rounded-2xl bg-slate-950 p-4">
+            <div className="rounded-2xl bg-portal-input p-4">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-text-primary"><thead className="text-text-muted"><tr><th className="py-2 text-left">Cost Category</th><th className="py-2 text-right">Total Budget</th><th className="py-2 text-right">Total Actual</th><th className="py-2 text-right">Variance</th><th className="py-2 text-right">Variance %</th><th className="py-2 text-left">Status</th></tr></thead><tbody>{(budgetRows||[]).map((b,idx)=>{const { label, className } = budgetVarianceStatus(b.variance_pct); return (<tr key={idx} className="border-t border-border-soft"><td className="py-2">{b.cost_category}</td><td className="py-2 text-right">{formatGhs(b.total_budget)}</td><td className="py-2 text-right">{formatGhs(b.total_actual)}</td><td className="py-2 text-right">{formatGhs(b.variance)}</td><td className="py-2 text-right">{b.variance_pct.toFixed(1)}%</td><td className="py-2"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${className}`}>{label}</span></td></tr>)})}</tbody></table>
-                <div className="mt-3"><button onClick={()=>downloadCsv('budget_vs_actual.csv', budgetRows||[])} className="rounded bg-emerald-500 px-3 py-2">Export CSV</button></div>
+                <table className="w-full text-sm text-portal-primary"><thead className="text-portal-muted"><tr><th className="py-2 text-left">Cost Category</th><th className="py-2 text-right">Total Budget</th><th className="py-2 text-right">Total Actual</th><th className="py-2 text-right">Variance</th><th className="py-2 text-right">Variance %</th><th className="py-2 text-left">Status</th></tr></thead><tbody>{(budgetRows||[]).map((b,idx)=>{const { label, className } = budgetVarianceStatus(b.variance_pct); return (<tr key={idx} className="border-t border-border-soft"><td className="py-2">{b.cost_category}</td><td className="py-2 text-right">{formatGhs(b.total_budget)}</td><td className="py-2 text-right">{formatGhs(b.total_actual)}</td><td className="py-2 text-right">{formatGhs(b.variance)}</td><td className="py-2 text-right">{b.variance_pct.toFixed(1)}%</td><td className="py-2"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${className}`}>{label}</span></td></tr>)})}</tbody></table>
+                <div className="mt-3"><button onClick={()=>downloadCsv('budget_vs_actual.csv', budgetRows||[])} className="rounded-full bg-portal-success px-3 py-2 text-sm text-portal-success">Export CSV</button></div>
               </div>
             </div>
           </div>

@@ -43,8 +43,9 @@ export default function GeneralLedger({ readOnly = false }) {
     setSelectedJournal({ loading: true })
     const { data, error } = await supabase
       .from('ledger_entries')
-      .select('id, journal_entry_id, account_code, account_name, debit_amount, credit_amount, description, created_at')
+      .select('id, journal_entry_id, account_code, account_name, debit_amount, credit_amount, description, created_at, journal_entries!inner(status)')
       .eq('journal_entry_id', journalId)
+      .eq('journal_entries.status', 'POSTED')
       .order('created_at', { ascending: true })
 
     if (error) {
@@ -105,7 +106,7 @@ export default function GeneralLedger({ readOnly = false }) {
                     type="button"
                     disabled={isReadOnly}
                     onClick={() => expandJournal(r.journal_entry_id)}
-                    className="font-medium text-amber-700 underline decoration-amber-700/50 hover:text-amber-800 disabled:text-text-muted disabled:no-underline dark:text-amber-300 dark:decoration-amber-300/50"
+                    className="font-medium text-portal-warning underline decoration-amber-300/50 hover:text-portal-warning disabled:text-text-muted disabled:no-underline"
                   >
                     {r.entry_number}
                   </button>
@@ -114,7 +115,7 @@ export default function GeneralLedger({ readOnly = false }) {
                   <button
                     type="button"
                     onClick={() => setShowAccount(r.account_code)}
-                    className="font-medium text-text-primary underline decoration-border-soft hover:text-teal-700 dark:hover:text-teal-300"
+                    className="font-medium text-text-primary underline decoration-border-soft hover:text-portal-info-200"
                   >
                     {r.account_code}
                   </button>
