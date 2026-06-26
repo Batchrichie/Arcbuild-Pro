@@ -29,14 +29,40 @@ export default function InviteToPortal({
         body: JSON.stringify(payload),
       })
 
+      // Handle transport-level error returned by Supabase client
       if (error) {
-        throw error
+        const msg = error?.message || 'Failed to send invite.'
+        if (error?.status === 409 || String(msg).toLowerCase().includes('already')) {
+          setError('This email already has portal access.')
+        } else {
+          setError(msg)
+        }
+        onError?.(msg)
+        return
       }
 
-      setSent(true)
-      onSuccess?.(email, data)
+      // `data` may be an object or a JSON string depending on client; normalize it
+      let result = data
+      if (typeof data === 'string') {
+        try { result = JSON.parse(data) } catch { result = { message: data } }
+      }
+
+      if (result?.success) {
+        setSent(true)
+        onSuccess?.(email, result)
+        return
+      }
+
+      // Handle application-level error from the function
+      const appError = result?.error || result?.message || 'Failed to send invite.'
+      if (String(appError).toLowerCase().includes('already')) {
+        setError('This email already has portal access.')
+      } else {
+        setError(String(appError))
+      }
+      onError?.(String(appError))
     } catch (err) {
-      const message = err?.message || 'Failed to send invite.'
+      const message = err?.message || String(err) || 'Failed to send invite.'
       setError(message)
       onError?.(message)
     } finally {

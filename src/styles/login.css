@@ -1,296 +1,1002 @@
-/* ===== LOGIN PAGE STYLES ===== */
+/* ============================================================
+   ARCBUILD PRO — Login page
+   Scoped: .ab-login  |  body modifier: body.ab-light-mode
+   Breakpoints:
+     Phone   < 640px   — stacked, full-width hero + card
+     Tablet  640–1023  — stacked banner + floating card
+     Desktop ≥ 1024px  — side-by-side split
+   ============================================================ */
 
-.login-container {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at top, rgba(249, 115, 22, 0.1), transparent 28%),
-    linear-gradient(180deg, #020202 0%, #09090b 100%);
-  color: #ffffff;
-  transition: background-color 0.5s ease, color 0.5s ease;
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+/* ── DESIGN TOKENS (dark default) ── */
+.ab-login {
+  --ab-bg:              #020202;
+  --ab-panel-bg:        #020202;
+  --ab-card-bg:         #0e0e10;
+  --ab-card-border:     rgba(255,255,255,0.07);
+  --ab-card-shadow:     0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+
+  --ab-input-bg:        #111113;
+  --ab-input-border:    #2a2a2d;
+  --ab-input-focus-bg:  #0e0e10;
+  --ab-placeholder:     #4a4a52;
+
+  --ab-text:            #f5f5f7;
+  --ab-text-muted:      #6b6b78;
+  --ab-text-dimmer:     #3f3f46;
+  --ab-text-secondary:  #a1a1aa;
+
+  --ab-orange:          #f97316;
+  --ab-orange-hover:    #fb923c;
+  --ab-orange-deep:     #ea6d0c;
+  --ab-orange-glow:     rgba(249,115,22,0.22);
+  --ab-orange-ring:     rgba(249,115,22,0.18);
+  --ab-orange-tint:     rgba(249,115,22,0.06);
+
+  --ab-brand-h1:        #facc15;
+  --ab-brand-sub:       rgba(251,191,36,0.7);
+  --ab-tagline:         rgba(255,255,255,0.55);
+  --ab-overlay-from:    rgba(2,2,2,0.92);
+  --ab-overlay-mid:     rgba(2,2,2,0.72);
+  --ab-overlay-to:      rgba(2,2,2,0.30);
+
+  --ab-pill-bg:         rgba(255,255,255,0.06);
+  --ab-pill-border:     rgba(255,255,255,0.10);
+  --ab-pill-text:       rgba(255,255,255,0.65);
+
+  --ab-divider:         rgba(255,255,255,0.08);
+  --ab-divider-text:    #3f3f46;
+
+  --ab-sso-bg:          rgba(255,255,255,0.03);
+  --ab-sso-border:      rgba(255,255,255,0.09);
+  --ab-sso-text:        #71717a;
+  --ab-sso-hover-bg:    rgba(255,255,255,0.07);
+  --ab-sso-hover-border:rgba(255,255,255,0.16);
+
+  --ab-toggle-track:    #27272a;
+  --ab-toggle-knob:     #71717a;
+
+  --ab-warn-bg:         rgba(249,115,22,0.09);
+  --ab-warn-border:     rgba(249,115,22,0.28);
+  --ab-warn-text:       #fb923c;
+  --ab-err-bg:          rgba(239,68,68,0.09);
+  --ab-err-border:      rgba(239,68,68,0.28);
+  --ab-err-text:        #f87171;
+
+  --ab-toast-bg:        #18181b;
+  --ab-toast-border:    #2a2a2d;
+  --ab-toast-text:      #d4d4d8;
+
+  /* Layout sizes */
+  --ab-form-max:        420px;
+  --ab-brand-desktop:   55%;
+
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ab-text);
+  background-color: var(--ab-bg);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  position: relative;
 }
 
-body {
-  background: #020202;
-  color: #ffffff;
-  transition: background-color 0.5s ease, color 0.5s ease;
+/* ── GLOBAL RESET — neutralise portal globals.css bleed ──
+   globals.css has bare `input, textarea, select` rules that set
+   color/background via portal CSS vars. Override them all here. */
+.ab-login *,
+.ab-login *::before,
+.ab-login *::after {
+  box-sizing: border-box;
 }
 
-/* ===== NOISE ===== */
-.noise-overlay {
+/* All text nodes inside the login page use our own tokens */
+.ab-login,
+.ab-login p,
+.ab-login h1,
+.ab-login h2,
+.ab-login h3,
+.ab-login label,
+.ab-login span,
+.ab-login a {
+  color: inherit;
+}
+
+/* Prevent portal's bare `a, button { min-height: 2.75rem }` from inflating our controls */
+.ab-login button,
+.ab-login a {
+  min-height: 0;
+}
+
+/* Prevent globals.css `input, textarea, select` rules from overriding our token colours.
+   These !important declarations are intentional — they exist solely to win specificity
+   against the unscoped portal global rules. */
+.ab-login input,
+.ab-login textarea,
+.ab-login select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background-color: var(--ab-input-bg) !important;
+  border: 1px solid var(--ab-input-border) !important;
+  box-shadow: none !important;
+  color: var(--ab-text) !important;
+  border-radius: 12px !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+.ab-login input:focus,
+.ab-login textarea:focus,
+.ab-login select:focus {
+  border-color: var(--ab-orange) !important;
+  box-shadow: 0 0 0 3px var(--ab-orange-ring) !important;
+  outline: none !important;
+}
+
+/* ── LIGHT MODE OVERRIDES ── */
+body.ab-light-mode .ab-login {
+  --ab-bg:              #f0ede8;
+  --ab-panel-bg:        #f0ede8;
+  --ab-card-bg:         #ffffff;
+  --ab-card-border:     rgba(0,0,0,0.06);
+  --ab-card-shadow:     0 24px 64px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.04);
+
+  --ab-input-bg:        #ffffff;
+  --ab-input-border:    #d4d4d8;
+  --ab-input-focus-bg:  #ffffff;
+  --ab-placeholder:     #a1a1aa;
+
+  --ab-text:            #09090b;
+  --ab-text-muted:      #52525b;
+  --ab-text-dimmer:     #71717a;
+  --ab-text-secondary:  #71717a;
+
+  --ab-orange-tint:     rgba(249,115,22,0.05);
+  --ab-orange-ring:     rgba(249,115,22,0.15);
+
+  --ab-brand-h1:        #92400e;
+  --ab-brand-sub:       rgba(146,64,14,0.65);
+  --ab-tagline:         rgba(26,26,26,0.65);
+  --ab-overlay-from:    rgba(240,237,232,0.95);
+  --ab-overlay-mid:     rgba(240,237,232,0.80);
+  --ab-overlay-to:      rgba(240,237,232,0.35);
+
+  --ab-pill-bg:         rgba(0,0,0,0.04);
+  --ab-pill-border:     rgba(0,0,0,0.08);
+  --ab-pill-text:       rgba(26,26,26,0.65);
+
+  --ab-divider:         #e5e0d8;
+  --ab-divider-text:    #a8a49e;
+
+  --ab-sso-bg:          rgba(0,0,0,0.02);
+  --ab-sso-border:      #ddd9d3;
+  --ab-sso-text:        #78716c;
+  --ab-sso-hover-bg:    rgba(0,0,0,0.04);
+  --ab-sso-hover-border:#bbb5ac;
+
+  --ab-toggle-track:    #f97316;
+  --ab-toggle-knob:     #ffffff;
+
+  --ab-warn-text:       #c2410c;
+  --ab-err-text:        #b91c1c;
+
+  --ab-toast-bg:        #ffffff;
+  --ab-toast-border:    #e5e0d8;
+  --ab-toast-text:      #292524;
+
+  color: var(--ab-text);
+  background-color: var(--ab-bg);
+}
+
+/* ── EXPLICIT TEXT COLOUR OVERRIDES (both modes) ──
+   globals.css sets `body { color: var(--color-text) }` and
+   `input { color: var(--color-text) }` with portal CSS vars.
+   We hardcode here to guarantee correct contrast in both themes. */
+
+/* Dark mode — white text on dark backgrounds */
+.ab-login .ab-heading,
+.ab-login .ab-subheading,
+.ab-login .ab-field-label,
+.ab-login .ab-check-label,
+.ab-login .ab-footer-text,
+.ab-login .ab-copyright,
+.ab-login .ab-logo-text,
+.ab-login .ab-form-hint { color: var(--ab-text-muted); }
+
+.ab-login .ab-heading { color: #f5f5f7; }
+
+/* Light mode — explicit dark text */
+body.ab-light-mode .ab-login .ab-heading    { color: #09090b; }
+body.ab-light-mode .ab-login .ab-subheading { color: #52525b; }
+body.ab-light-mode .ab-login .ab-field-label { color: #52525b; }
+body.ab-light-mode .ab-login .ab-check-label { color: #52525b; }
+body.ab-light-mode .ab-login .ab-footer-text { color: #71717a; }
+body.ab-light-mode .ab-login .ab-copyright   { color: #71717a; }
+body.ab-light-mode .ab-login .ab-logo-text   { color: rgba(26,26,26,0.65); }
+body.ab-light-mode .ab-login .ab-form-hint   { color: #52525b; }
+body.ab-light-mode .ab-login .ab-divider-text{ color: #a1a1aa; }
+body.ab-light-mode .ab-login .ab-sso-text    { color: #71717a; }
+body.ab-light-mode .ab-login .ab-sso-btn     { color: #52525b; }
+
+/* Light mode inputs — explicit, not relying on CSS vars that globals may stomp */
+body.ab-light-mode .ab-login input,
+body.ab-light-mode .ab-login textarea {
+  color: #09090b !important;
+  background-color: #ffffff !important;
+  border-color: #d4d4d8 !important;
+}
+body.ab-light-mode .ab-login input::placeholder,
+body.ab-light-mode .ab-login textarea::placeholder {
+  color: #a1a1aa !important;
+}
+
+/* Dark mode inputs — explicit */
+.ab-login input,
+.ab-login textarea {
+  color: #f5f5f7 !important;
+  background-color: #111113 !important;
+  border-color: #2a2a2d !important;
+}
+.ab-login input::placeholder,
+.ab-login textarea::placeholder {
+  color: #4a4a52 !important;
+}
+
+/* ── NOISE ── */
+.ab-login .ab-noise-overlay {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 1;
   pointer-events: none;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+body.ab-light-mode .ab-login .ab-noise-overlay { opacity: 0.012; }
 
-/* ===== DARK MODE DEFAULTS ===== */
-.brand-panel {
-  background: linear-gradient(to right, rgba(2,2,2,0.94) 0%, rgba(2,2,2,0.75) 50%, rgba(2,2,2,0.35) 100%),
-    url('https://picsum.photos/seed/construction-ghana-steel/1600/1000.jpg') center/cover no-repeat;
-  transition: background 0.5s ease;
-}
-
-.form-glow {
-  background: radial-gradient(ellipse at center, rgba(249,115,22,0.06) 0%, transparent 68%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(22px);
-  transition: background 0.5s ease, border-color 0.5s ease;
-}
-
-.right-panel-bg {
-  background: #020202;
-  transition: background 0.5s ease, box-shadow 0.5s ease;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 30px 80px rgba(0, 0, 0, 0.25);
-}
-
-.input-field {
-  background: #09090b;
-  border-color: #27272a;
-  color: #ffffff;
-  border-radius: 1rem;
-  padding: 0.95rem 1rem;
-  transition: all 0.3s ease;
-}
-.input-field::placeholder { color: #52525b; }
-.input-field:focus {
-  border-color: #f97316;
-  box-shadow: 0 0 0 3px rgba(249,115,22,0.14);
-  outline: none;
-}
-
-.brand-h1 { color: #facc15; transition: color 0.5s ease; }
-.brand-sub { color: #fbbf24; transition: color 0.5s ease; }
-.tagline  { color: #d4d4d8; transition: color 0.5s ease; }
-.form-label { color: #71717a; transition: color 0.5s ease; }
-.form-hint  { color: #71717a; transition: color 0.5s ease; }
-.input-icon { color: #52525b; transition: color 0.5s ease; }
-.divider-line { background: #27272a; transition: background 0.5s ease; }
-.divider-text { color: #52525b; transition: color 0.5s ease; }
-.signup-text { color: #52525b; transition: color 0.5s ease; }
-.copyright   { color: #d4d4d8; transition: color 0.5s ease; }
-.pill-border  { border-color: rgba(255,255,255,0.12); transition: border-color 0.5s ease; }
-.pill-text    { color: #f8fafc; transition: color 0.5s ease; }
-.pill-icon    { color: #f8fafc; transition: color 0.5s ease; }
-.social-border { border-color: #27272a; transition: border-color 0.5s ease; }
-.social-text   { color: #a1a1aa; transition: color 0.5s ease; }
-.toast-bg {
-  background: #18181b;
-  border-color: #27272a;
-  transition: all 0.5s ease;
-  --toast-text: #d4d4d8;
-}
-
-/* ===== LIGHT MODE ===== */
-body.light-mode,
-body.light-mode .login-container {
-  background: #f4f4f5;
-  color: #09090b;
-}
-
-body.light-mode .brand-panel {
-  background: linear-gradient(to right, rgba(244,244,245,0.96) 0%, rgba(244,244,245,0.85) 50%, rgba(244,244,245,0.5) 100%),
-    url('https://picsum.photos/seed/construction-ghana-steel/1600/1000.jpg') center/cover no-repeat;
-}
-
-body.light-mode .form-glow {
-  background: radial-gradient(ellipse at center, rgba(249,115,22,0.06) 0%, transparent 70%);
-}
-
-body.light-mode .right-panel-bg { background: #f4f4f5; }
-body.light-mode .input-field { background: #ffffff; border-color: #d4d4d8; color: #09090b; }
-body.light-mode .input-field::placeholder { color: #a1a1aa; }
-body.light-mode .input-field:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
-body.light-mode .brand-h1 { color: #b45309; }
-body.light-mode .brand-sub { color: #d97706; }
-body.light-mode .tagline  { color: #27272a; }
-body.light-mode .form-label { color: #52525b; }
-body.light-mode .form-hint  { color: #71717a; }
-body.light-mode .input-icon { color: #6b7280; }
-body.light-mode .divider-line { background: #d4d4d8; }
-body.light-mode .divider-text { color: #6b7280; }
-body.light-mode .signup-text { color: #4b5563; }
-body.light-mode .copyright   { color: #6b7280; }
-body.light-mode .pill-border  { border-color: #d1d5db; }
-body.light-mode .pill-text    { color: #111827; }
-body.light-mode .pill-icon    { color: #374151; }
-body.light-mode .social-border { border-color: #d4d4d8; }
-body.light-mode .social-text   { color: #52525b; }
-body.light-mode .toast-bg {
-  background: #ffffff;
-  border-color: #d4d4d8;
-  --toast-text: #27272a;
-}
-body.light-mode .noise-overlay { opacity: 0.015; }
-
-/* ===== BUTTON ===== */
-.btn-glow {
-  box-shadow: 0 10px 30px -5px rgba(249,115,22,0.25);
-  transition: all 0.3s ease;
-}
-.btn-glow:hover:not(:disabled) {
-  box-shadow: 0 15px 40px -5px rgba(249,115,22,0.35);
-  background: #fb923c;
-}
-
-/* ===== CATEGORY PILLS ===== */
-.category-pill { transition: all 0.3s ease; }
-.category-pill:hover { border-color: #52525b !important; color: #a1a1aa !important; }
-body.light-mode .category-pill:hover { border-color: #a1a1aa !important; color: #27272a !important; }
-
-/* ===== SOCIAL BUTTONS ===== */
-.social-btn { transition: all 0.2s ease; }
-.social-btn:hover { border-color: #52525b !important; background: rgba(39,39,42,0.3); }
-body.light-mode .social-btn:hover { border-color: #a1a1aa !important; background: rgba(0,0,0,0.04); }
-
-/* ===== THEME TOGGLE ===== */
-.theme-toggle {
-  width: 48px;
-  height: 26px;
+/* ── THEME TOGGLE — fixed top-right, all breakpoints ── */
+.ab-login .ab-theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 200;
+  width: 52px;
+  height: 28px;
   min-height: 0;
-  border-radius: 13px;
-  cursor: pointer;
-  position: relative;
+  border-radius: 14px;
   border: none;
   padding: 0;
-  background: #27272a;
-  transition: background 0.4s ease;
+  background: var(--ab-toggle-track);
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
-  justify-content: flex-start;
-  line-height: 0;
+  transition: background 0.35s ease;
 }
 
-.toggle-knob {
+.ab-login .ab-toggle-knob {
   position: absolute;
-  top: 3px;
-  left: 3px;
+  top: 4px;
+  left: 4px;
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #a1a1aa;
+  background: var(--ab-toggle-knob);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), background 0.4s ease;
+  transition: transform 0.38s cubic-bezier(0.68,-0.55,0.27,1.55), background 0.35s ease;
+  overflow: hidden;
+}
+body.ab-light-mode .ab-login .ab-toggle-knob { transform: translateX(24px); }
+
+.ab-login .ab-moon-icon,
+.ab-login .ab-sun-icon {
+  position: absolute;
+  pointer-events: none;
+  line-height: 0;
+  transition: opacity 0.25s ease;
+}
+.ab-login .ab-moon-icon { color: #52525b; opacity: 1; }
+.ab-login .ab-sun-icon  { color: #fbbf24; opacity: 0; }
+body.ab-light-mode .ab-login .ab-moon-icon { opacity: 0; }
+body.ab-light-mode .ab-login .ab-sun-icon  { opacity: 1; }
+
+/* ─────────────────────────────────────────────────────────
+   LAYOUT — three different layouts driven by one CSS class
+   ───────────────────────────────────────────────────────── */
+
+/* ── PHONE: stacked full-height ── */
+.ab-login .ab-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* ── BRAND PANEL — phone ── */
+.ab-login .ab-brand-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 220px;
+  padding: 24px 20px 28px;
+  background:
+    linear-gradient(to bottom, var(--ab-overlay-from) 0%, var(--ab-overlay-mid) 60%, var(--ab-overlay-to) 100%),
+    url('https://picsum.photos/seed/construction-ghana-steel/1600/1000.jpg') center/cover no-repeat;
   overflow: hidden;
 }
 
-body.light-mode .theme-toggle {
-  background: #f97316;
-}
-
-body.light-mode .toggle-knob {
-  transform: translateX(20px);
-  background: #ffffff;
-}
-
-.moon-icon,
-.sun-icon {
-  position: absolute;
-  transition: opacity 0.3s ease;
-  line-height: 0;
-  pointer-events: none;
-}
-
-.moon-icon {
-  color: #4b5563;
-  opacity: 1;
-}
-
-.sun-icon {
-  color: #facc15;
-  opacity: 0;
-}
-
-body.light-mode .moon-icon {
-  opacity: 0;
-}
-
-body.light-mode .sun-icon {
-  opacity: 1;
-}
-
-/* ===== REVEAL ANIMATION ===== */
-.reveal {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: revealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-@keyframes revealUp {
-  to { opacity: 1; transform: translateY(0); }
-}
-.delay-1 { animation-delay: 0.1s; }
-.delay-2 { animation-delay: 0.2s; }
-.delay-3 { animation-delay: 0.3s; }
-.delay-4 { animation-delay: 0.4s; }
-.delay-5 { animation-delay: 0.5s; }
-.delay-6 { animation-delay: 0.6s; }
-.delay-7 { animation-delay: 0.7s; }
-.delay-8 { animation-delay: 0.8s; }
-
-/* ===== CUSTOM CHECKBOX ===== */
-.custom-checkbox {
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border: 1px solid #3f3f46;
-  border-radius: 4px;
-  background: #09090b;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.3s ease;
-}
-body.light-mode .custom-checkbox { border-color: #d4d4d8; background: #ffffff; }
-.custom-checkbox:checked { background: #f97316; border-color: #f97316; }
-.custom-checkbox:checked::after {
+/* Subtle warm radial behind brand content */
+.ab-login .ab-brand-panel::after {
   content: '';
   position: absolute;
-  left: 4.5px;
-  top: 1.5px;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 60% at 30% 80%, rgba(249,115,22,0.12) 0%, transparent 70%);
+}
+
+.ab-login .ab-brand-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.ab-login .ab-logo-mark {
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(249,115,22,0.4));
+}
+
+.ab-login .ab-logo-text {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+}
+body.ab-light-mode .ab-login .ab-logo-text { color: rgba(26,26,26,0.65); }
+
+.ab-login .ab-brand-middle {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.ab-login .ab-brand-h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2.4rem, 8vw, 5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+  color: var(--ab-brand-h1);
+  margin: 0;
+  transition: color 0.4s ease;
+}
+
+.ab-login .ab-brand-sub {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ab-brand-sub);
+  margin-top: 6px;
+  transition: color 0.4s ease;
+}
+
+.ab-login .ab-divider-accent {
+  width: 40px;
+  height: 2px;
+  background: var(--ab-orange);
+  border-radius: 1px;
+  margin-bottom: 12px;
+}
+
+.ab-login .ab-tagline {
+  font-size: clamp(0.875rem, 2.5vw, 1.1rem);
+  font-weight: 300;
+  line-height: 1.55;
+  color: var(--ab-tagline);
+  max-width: 400px;
+  transition: color 0.4s ease;
+}
+
+.ab-login .ab-brand-bottom {
+  margin-top: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.ab-login .ab-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.ab-login .ab-category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--ab-pill-bg);
+  border: 1px solid var(--ab-pill-border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ab-pill-text);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.ab-login .ab-copyright {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ab-text-dimmer);
+}
+
+/* ── FORM PANEL — phone ── */
+.ab-login .ab-form-panel {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 16px 40px;
+  background: var(--ab-panel-bg);
+  transition: background 0.4s ease;
+}
+
+.ab-login .ab-form-inner {
+  width: 100%;
+  max-width: var(--ab-form-max);
+  padding-top: 32px;
+}
+
+.ab-login .ab-dot-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.ab-login .ab-accent-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ab-orange);
+  box-shadow: 0 0 14px var(--ab-orange-glow);
+}
+
+.ab-login .ab-heading {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.5rem, 4vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--ab-text);
+  margin: 0 0 6px;
+  text-align: center;
+  transition: color 0.4s ease;
+}
+
+.ab-login .ab-subheading {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ab-text-muted);
+  text-align: center;
+  margin: 0 0 28px;
+  line-height: 1.5;
+  transition: color 0.4s ease;
+}
+
+/* ── ALERTS ── */
+.ab-login .ab-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  margin-bottom: 16px;
+  border: 1px solid;
+}
+.ab-login .ab-alert--warning {
+  background: var(--ab-warn-bg);
+  border-color: var(--ab-warn-border);
+  color: var(--ab-warn-text);
+}
+.ab-login .ab-alert--error {
+  background: var(--ab-err-bg);
+  border-color: var(--ab-err-border);
+  color: var(--ab-err-text);
+}
+.ab-login .ab-alert .iconify { flex-shrink: 0; margin-top: 1px; }
+
+/* ── FORM ── */
+.ab-login .ab-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ab-login .ab-field {
+  margin-bottom: 18px;
+}
+
+.ab-login .ab-field-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ab-text-muted);
+  margin-bottom: 7px;
+  transition: color 0.4s ease;
+}
+
+.ab-login .ab-input-wrap {
+  position: relative;
+}
+
+.ab-login .ab-input-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ab-placeholder);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+  z-index: 1;
+}
+
+.ab-login .ab-input {
+  display: block;
+  width: 100%;
+  height: 50px;
+  padding: 0 14px 0 42px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  /* !important beats globals.css bare `input` rule */
+  color: var(--ab-text) !important;
+  background: var(--ab-input-bg) !important;
+  border: 1px solid var(--ab-input-border) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.ab-login .ab-input::placeholder { color: var(--ab-placeholder) !important; }
+
+.ab-login .ab-input:focus {
+  border-color: var(--ab-orange) !important;
+  background: var(--ab-input-focus-bg) !important;
+  box-shadow: 0 0 0 3px var(--ab-orange-ring) !important;
+  outline: none !important;
+}
+
+.ab-login .ab-input-wrap:focus-within .ab-input-icon { color: var(--ab-orange); }
+
+.ab-login .ab-input--password { padding-right: 46px; }
+
+.ab-login .ab-eye-btn {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px;
+  min-height: 0;
+  cursor: pointer;
+  color: var(--ab-placeholder);
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+  border-radius: 6px;
+}
+.ab-login .ab-eye-btn:hover { color: var(--ab-text-secondary); }
+
+/* ── CHECKBOX ROW ── */
+.ab-login .ab-check-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.ab-login .ab-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--ab-text-muted);
+  user-select: none;
+}
+
+.ab-login .ab-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  min-height: 0;
+  border-radius: 5px;
+  border: 1.5px solid var(--ab-input-border);
+  background: var(--ab-input-bg);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.ab-login .ab-checkbox:checked {
+  background: var(--ab-orange);
+  border-color: var(--ab-orange);
+}
+.ab-login .ab-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
   width: 5px;
   height: 9px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
+  border: 2px solid white;
+  border-top: none;
+  border-left: none;
   transform: rotate(45deg);
 }
 
-/* ===== PASSWORD TOGGLE ===== */
-.password-toggle {
-  cursor: pointer;
+.ab-login .ab-forgot-link {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(249,115,22,0.65);
+  text-decoration: none;
+  white-space: nowrap;
   transition: color 0.2s ease;
-  background: none;
+}
+.ab-login .ab-forgot-link:hover { color: var(--ab-orange); text-decoration: underline; }
+
+/* ── SUBMIT BUTTON ── */
+.ab-login .ab-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 52px;
   border: none;
-  color: #52525b;
+  border-radius: 13px;
+  background: var(--ab-orange);
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 0;
+  box-shadow: 0 8px 24px -4px var(--ab-orange-glow);
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
-.password-toggle:hover { color: #a1a1aa; }
-body.light-mode .password-toggle { color: #a1a1aa; }
-body.light-mode .password-toggle:hover { color: #52525b; }
 
-/* ===== SCROLLBAR ===== */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #020202; }
-::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
-body.light-mode ::-webkit-scrollbar-track { background: #f4f4f5; }
-body.light-mode ::-webkit-scrollbar-thumb { background: #d4d4d8; }
+/* top sheen */
+.ab-login .ab-submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 48%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.13) 0%, transparent 100%);
+  border-radius: 13px 13px 0 0;
+  pointer-events: none;
+}
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-  .split-layout { flex-direction: column; }
-  .brand-panel {
-    min-height: 280px;
-    background: linear-gradient(to bottom, rgba(2,2,2,0.85) 0%, rgba(2,2,2,0.5) 100%),
+.ab-login .ab-submit-btn:hover:not(:disabled) {
+  background: var(--ab-orange-hover);
+  box-shadow: 0 12px 32px -4px var(--ab-orange-glow);
+  transform: translateY(-1px);
+}
+.ab-login .ab-submit-btn:active:not(:disabled) {
+  transform: scale(0.985) translateY(0);
+  box-shadow: 0 4px 12px -4px var(--ab-orange-glow);
+}
+.ab-login .ab-submit-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ab-login .ab-spinner {
+  width: 16px;
+  height: 16px;
+  animation: ab-spin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+.ab-login .ab-spinner-track { opacity: 0.25; }
+@keyframes ab-spin { to { transform: rotate(360deg); } }
+
+/* ── DIVIDER ── */
+.ab-login .ab-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 20px;
+}
+.ab-login .ab-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--ab-divider);
+  transition: background 0.4s ease;
+}
+.ab-login .ab-divider-text {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ab-divider-text);
+  white-space: nowrap;
+  transition: color 0.4s ease;
+}
+
+/* ── SSO ── */
+.ab-login .ab-sso-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.ab-login .ab-sso-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  border-radius: 11px;
+  border: 1px solid var(--ab-sso-border);
+  background: var(--ab-sso-bg);
+  color: var(--ab-sso-text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.ab-login .ab-sso-btn:hover {
+  border-color: var(--ab-sso-hover-border);
+  background: var(--ab-sso-hover-bg);
+  color: var(--ab-text-secondary);
+}
+
+/* ── FOOTER ── */
+.ab-login .ab-footer-text {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ab-text-dimmer);
+  margin: 0;
+  transition: color 0.4s ease;
+}
+.ab-login .ab-signup-link {
+  color: var(--ab-orange);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+.ab-login .ab-signup-link:hover { color: var(--ab-orange-hover); text-decoration: underline; }
+
+/* ── TOAST ── */
+.ab-login .ab-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  background: var(--ab-toast-bg);
+  border: 1px solid var(--ab-toast-border);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.35);
+  max-width: calc(100vw - 32px);
+  transition: opacity 0.4s ease, transform 0.4s ease, background 0.4s ease;
+}
+.ab-login .ab-toast-text {
+  font-size: 13px;
+  color: var(--ab-toast-text);
+  white-space: nowrap;
+  transition: color 0.4s ease;
+}
+
+/* ── REVEAL ANIMATION ── */
+.ab-login .ab-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: ab-reveal-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes ab-reveal-up { to { opacity: 1; transform: translateY(0); } }
+.ab-login .ab-delay-1 { animation-delay: 0.08s; }
+.ab-login .ab-delay-2 { animation-delay: 0.16s; }
+.ab-login .ab-delay-3 { animation-delay: 0.24s; }
+.ab-login .ab-delay-4 { animation-delay: 0.32s; }
+.ab-login .ab-delay-5 { animation-delay: 0.40s; }
+.ab-login .ab-delay-6 { animation-delay: 0.48s; }
+.ab-login .ab-delay-7 { animation-delay: 0.56s; }
+.ab-login .ab-delay-8 { animation-delay: 0.64s; }
+
+/* ─────────────────────────────────────────────────────────
+   TABLET  640px – 1023px
+   Brand becomes a top banner, form floats as a card below
+   ───────────────────────────────────────────────────────── */
+@media (min-width: 640px) {
+  /* Taller, more dramatic banner */
+  .ab-login .ab-brand-panel {
+    min-height: 300px;
+    padding: 36px 48px 40px;
+    justify-content: space-between;
+    flex-direction: column;
+    background:
+      linear-gradient(to bottom, var(--ab-overlay-from) 0%, var(--ab-overlay-mid) 55%, var(--ab-overlay-to) 100%),
+      url('https://picsum.photos/seed/construction-ghana-steel/1600/1000.jpg') center 35%/cover no-repeat;
+  }
+
+  .ab-login .ab-brand-top { margin-bottom: 0; }
+
+  .ab-login .ab-brand-middle {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+  }
+
+  .ab-login .ab-brand-h1 { font-size: clamp(2.8rem, 6vw, 4rem); }
+  .ab-login .ab-divider-accent { width: 56px; margin-bottom: 10px; }
+
+  .ab-login .ab-brand-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0;
+  }
+
+  .ab-login .ab-pills { margin-bottom: 0; flex-wrap: nowrap; }
+
+  /* Form panel: centered card with shadow */
+  .ab-login .ab-form-panel {
+    padding: 0 24px 60px;
+    background: var(--ab-bg);
+  }
+
+  .ab-login .ab-form-inner {
+    background: var(--ab-card-bg);
+    border: 1px solid var(--ab-card-border);
+    border-radius: 24px;
+    box-shadow: var(--ab-card-shadow);
+    padding: 40px 44px;
+    padding-top: 36px;
+    margin-top: -24px; /* slide up over brand panel bottom edge */
+    position: relative;
+    z-index: 10;
+    transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  /* Re-center dot + headings inside card */
+  .ab-login .ab-dot-row { margin-bottom: 16px; }
+  .ab-login .ab-subheading { margin-bottom: 24px; }
+}
+
+/* ─────────────────────────────────────────────────────────
+   DESKTOP  ≥ 1024px
+   Side-by-side: brand left 55%, form right 45%
+   ───────────────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  .ab-login .ab-layout {
+    flex-direction: row;
+    min-height: 100dvh;
+  }
+
+  /* Brand panel: left column, full height */
+  .ab-login .ab-brand-panel {
+    width: var(--ab-brand-desktop);
+    min-height: 100dvh;
+    flex-shrink: 0;
+    padding: 48px 56px;
+    justify-content: space-between;
+    background:
+      linear-gradient(to right, var(--ab-overlay-from) 0%, var(--ab-overlay-mid) 55%, var(--ab-overlay-to) 100%),
       url('https://picsum.photos/seed/construction-ghana-steel/1600/1000.jpg') center/cover no-repeat;
   }
-  body.light-mode .brand-panel {
-    background: linear-gradient(to bottom, rgba(244,244,245,0.9) 0%, rgba(244,244,245,0.6) 100%),
+  body.ab-light-mode .ab-login .ab-brand-panel {
+    background:
+      linear-gradient(to right, var(--ab-overlay-from) 0%, var(--ab-overlay-mid) 55%, var(--ab-overlay-to) 100%),
       url('https://picsum.photos/seed/construction-ghana-steel/1600/1000.jpg') center/cover no-repeat;
   }
-  .category-grid { display: none; }
+
+  .ab-login .ab-brand-top { margin-bottom: 0; }
+
+  .ab-login .ab-brand-middle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 32px;
+  }
+
+  .ab-login .ab-brand-h1 { font-size: clamp(3.5rem, 5vw, 5.5rem); }
+  .ab-login .ab-divider-accent { width: 64px; }
+  .ab-login .ab-tagline { font-size: clamp(1rem, 1.4vw, 1.2rem); }
+
+  .ab-login .ab-brand-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .ab-login .ab-pills { flex-wrap: wrap; }
+
+  /* Right column: form centered */
+  .ab-login .ab-form-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 40px;
+    background: var(--ab-panel-bg);
+    position: relative;
+  }
+
+  /* Subtle radial glow on right panel */
+  .ab-login .ab-form-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 70% 60% at 50% 45%, var(--ab-orange-tint) 0%, transparent 70%);
+  }
+
+  .ab-login .ab-form-inner {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    margin-top: 0;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Headings left-aligned on desktop */
+  .ab-login .ab-dot-row { justify-content: flex-start; }
+  .ab-login .ab-heading,
+  .ab-login .ab-subheading { text-align: left; }
 }
 
-@media (max-width: 768px) {
-  .brand-panel { min-height: 200px; }
-  .brand-h1 { font-size: 2.5rem; }
-  .category-grid { display: none; }
+/* ─────────────────────────────────────────────────────────
+   LARGE DESKTOP  ≥ 1280px — more breathing room
+   ───────────────────────────────────────────────────────── */
+@media (min-width: 1280px) {
+  .ab-login .ab-brand-panel { padding: 56px 72px; }
+  .ab-login .ab-form-panel  { padding: 56px 64px; }
 }
+
+/* ─────────────────────────────────────────────────────────
+   EXTRA-SMALL PHONE  < 390px — tighten everything
+   ───────────────────────────────────────────────────────── */
+@media (max-width: 389px) {
+  .ab-login .ab-brand-panel { min-height: 180px; padding: 20px 16px 22px; }
+  .ab-login .ab-form-inner  { padding-top: 24px; }
+  .ab-login .ab-form-panel  { padding: 0 12px 32px; }
+  .ab-login .ab-submit-btn  { height: 48px; }
+  .ab-login .ab-input       { height: 46px; }
+  .ab-login .ab-pills       { display: none; }
+}
+
+/* ── SCROLLBAR ── */
+.ab-login ::-webkit-scrollbar { width: 5px; }
+.ab-login ::-webkit-scrollbar-track { background: transparent; }
+.ab-login ::-webkit-scrollbar-thumb { background: var(--ab-input-border); border-radius: 3px; }
