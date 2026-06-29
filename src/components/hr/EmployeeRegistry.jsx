@@ -8,7 +8,7 @@ const EMPTY = {
   full_name: '', email: '', phone: '', employee_number: '', job_title: '', department: '',
   division_id: '', contract_type: 'permanent', hire_date: '', termination_date: '',
   basic_salary: '', monthly_allowances: '', tin: '', ssnit_number: '', bank_name: '',
-  bank_account: '', is_ssnit_exempt: false, is_paye_exempt: false, send_invite: true,
+  bank_account: '', is_ssnit_exempt: false, is_paye_exempt: false,
 }
 
 export default function EmployeeRegistry() {
@@ -79,17 +79,30 @@ export default function EmployeeRegistry() {
   const finishWizard = async () => {
     setSaving(true); setError(null)
     try {
-      const pw = crypto.randomUUID().slice(0, 12) + 'Aa1!'
-      const { data: auth, error: se } = await supabase.auth.signUp({
-        email: form.email.trim(), password: pw,
-        options: { data: { full_name: form.full_name.trim(), role: 'employee' } },
+      const invitePayload = {
+        role: 'employee',
+        email: form.email.trim(),
+        name: form.full_name.trim(),
+        employee_id: form.employee_number.trim() || null,
+      }
+
+      const { data: inviteResult, error: inviteError } = await supabase.functions.invoke('invite-user', {
+        body: JSON.stringify(invitePayload),
       })
-      if (se) throw se
-      const uid = auth.user?.id
-      if (!uid) throw new Error('Account not created — check email confirmation settings.')
+
+      if (inviteError) throw inviteError
+
+      const result = typeof inviteResult === 'string' ? JSON.parse(inviteResult) : inviteResult
+      if (!result?.success) {
+        throw new Error(result?.error || result?.message || 'Failed to send employee invite.')
+      }
+
+      const uid = result?.user?.id
+      if (!uid) throw new Error('Account not created — invite response did not include a user id.')
+
       await new Promise((r) => setTimeout(r, 400))
-      const { data: prof, error: pfe } = await supabase.from('profiles').select('id').eq('user_id', uid).single()
-      if (pfe || !prof) throw new Error('Profile not found after signup')
+      const { data: prof, error: pfe } = await supabase.from('profiles').select('id').eq('user_id', uid).maybeSingle()
+      if (pfe || !prof) throw new Error('Profile not found after invite')
       if (form.phone) await supabase.from('profiles').update({ phone: form.phone }).eq('id', prof.id)
       const { error: ie } = await supabase.from('employees').insert({
         profile_id: prof.id, employee_number: form.employee_number.trim(),
@@ -100,7 +113,6 @@ export default function EmployeeRegistry() {
         bank_account: form.bank_account || null, is_ssnit_exempt: form.is_ssnit_exempt, is_paye_exempt: form.is_paye_exempt, is_active: true,
       })
       if (ie) throw ie
-      if (form.send_invite) await supabase.auth.resetPasswordForEmail(form.email.trim())
       setWizard(false); setStep(0); setForm(EMPTY); load()
     } catch (err) { setError(err.message || 'Failed') } finally { setSaving(false) }
   }
@@ -139,7 +151,7 @@ export default function EmployeeRegistry() {
     </div>),
     (<div key="3" className="space-y-2 text-sm text-slate-300">
       <p>Role: <strong className="text-white">employee</strong></p>
-      <label className="flex gap-2"><input type="checkbox" checked={form.send_invite} onChange={(e) => setForm({ ...form, send_invite: e.target.checked })} />Send password reset invitation</label>
+      <p>An invitation will be sent automatically after creation.</p>
     </div>),
   ]
 

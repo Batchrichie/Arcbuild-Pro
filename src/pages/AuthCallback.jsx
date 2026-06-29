@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { roleHomeRoutes } from '../lib/roleRoutes'
 
 export default function AuthCallback() {
   const navigate = useNavigate()
@@ -47,11 +48,31 @@ export default function AuthCallback() {
           throw new Error('No active session was created from this link.')
         }
 
+        const isPasswordFlow = type === 'invite' || type === 'recovery'
+
         if (mounted) {
-          setStatus('Redirecting to password setup…')
+          setStatus(isPasswordFlow ? 'Redirecting to password setup…' : 'Redirecting to your portal…')
         }
 
-        const destination = type === 'invite' || type === 'recovery' ? '/auth/update-password' : '/auth/update-password'
+        if (isPasswordFlow) {
+          navigate('/auth/update-password', { replace: true })
+          return
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .maybeSingle()
+
+        if (profileError) {
+          throw profileError
+        }
+
+        const destination = profile?.role && roleHomeRoutes[profile.role]
+          ? roleHomeRoutes[profile.role]
+          : '/login'
+
         navigate(destination, { replace: true })
       } catch (err) {
         if (mounted) {
