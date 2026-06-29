@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     // Invite the user via Supabase Admin invite API
     const { data: inviteData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(email, {
       data: userMeta,
-      // Do not set redirectTo here; the default Supabase invite flow will email the link
+      redirectTo: 'https://arcbuildpro.vercel.app/auth/callback',
     })
 
     if (inviteError) {

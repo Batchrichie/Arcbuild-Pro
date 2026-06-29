@@ -11,6 +11,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ConfirmResetPassword from './pages/ConfirmResetPassword'
 import UpdatePassword from './pages/UpdatePassword'
 import AuthConfirm from './pages/AuthConfirm'
+import AuthCallback from './pages/AuthCallback'
 
 // Portal lazy imports
 const CeoPortal        = lazy(() => import('./pages/portals/CeoPortal'))
@@ -58,6 +59,7 @@ export default function App() {
           {/* Password reset flow */}
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/auth/confirm-reset-password" element={<ConfirmResetPassword />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/auth/update-password" element={<UpdatePassword />} />
           <Route path="/auth/confirm" element={<AuthConfirm />} />
 
