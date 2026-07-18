@@ -65,7 +65,7 @@ export default function App() {
 
           {/* CEO portal */}
           <Route path="/ceo" element={
-            <ProtectedRoute allowedRoles={['ceo']}>
+            <ProtectedRoute allowedRoles={['ceo', 'admin']}>
               <CeoPortal />
             </ProtectedRoute>
           } />

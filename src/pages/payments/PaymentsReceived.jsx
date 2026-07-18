@@ -23,8 +23,7 @@ const AMOUNT_INPUT_CLASS = 'text-portal-primary bg-portal-input border border-bo
 export default function PaymentsReceived() {
   const { profile } = useAuth()
   const navigate = useNavigate()
-  const isAccountant = profile?.role === 'accountant'
-  const isCeo = profile?.role === 'ceo'
+  const isFinanceAdmin = ['accountant', 'admin', 'ceo'].includes(profile?.role)
 
   const [debtors, setDebtors] = useState([])
   const [loadingDebtors, setLoadingDebtors] = useState(true)
@@ -58,10 +57,10 @@ export default function PaymentsReceived() {
   const { generateReceipt } = usePaymentReceipt()
 
   useEffect(() => {
-    if (profile && !isAccountant && !isCeo) {
+    if (profile && !isFinanceAdmin) {
       navigate('/unauthorized', { replace: true })
     }
-  }, [profile, isAccountant, isCeo, navigate])
+  }, [profile, isFinanceAdmin, navigate])
 
   useEffect(() => {
     loadDebtors()
@@ -374,7 +373,7 @@ export default function PaymentsReceived() {
                     <td className="px-4 py-4 font-medium text-portal-primary">{debtor.name ?? 'Unknown'}</td>
                     <td className="px-4 py-4">{new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(Number(debtor.total_outstanding_balance || 0))}</td>
                     <td className="px-4 py-4 flex flex-wrap gap-2">
-                      {isAccountant && (
+                      {isFinanceAdmin && (
                         <button
                           type="button"
                           onClick={() => openRecordPayment(debtor)}

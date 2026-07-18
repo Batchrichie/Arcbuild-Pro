@@ -5,7 +5,7 @@ import Modal from '../ui/Modal'
 import { inputClsRounded as cls } from '../../lib/portal-classes'
 
 const EMPTY = {
-  full_name: '', email: '', phone: '', employee_number: '', job_title: '', department: '',
+  full_name: '', email: '', phone: '', job_title: '', department: '',
   division_id: '', contract_type: 'permanent', hire_date: '', termination_date: '',
   basic_salary: '', monthly_allowances: '', tin: '', ssnit_number: '', bank_name: '',
   bank_account: '', is_ssnit_exempt: false, is_paye_exempt: false,
@@ -21,6 +21,7 @@ export default function EmployeeRegistry() {
   const [form, setForm] = useState(EMPTY)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(null)
   const [selected, setSelected] = useState(null)
   const [edit, setEdit] = useState(null)
 
@@ -83,7 +84,6 @@ export default function EmployeeRegistry() {
         role: 'employee',
         email: form.email.trim(),
         name: form.full_name.trim(),
-        employee_id: form.employee_number.trim() || null,
       }
 
       const { data: inviteResult, error: inviteError } = await supabase.functions.invoke('invite-user', {
@@ -104,15 +104,16 @@ export default function EmployeeRegistry() {
       const { data: prof, error: pfe } = await supabase.from('profiles').select('id').eq('user_id', uid).maybeSingle()
       if (pfe || !prof) throw new Error('Profile not found after invite')
       if (form.phone) await supabase.from('profiles').update({ phone: form.phone }).eq('id', prof.id)
-      const { error: ie } = await supabase.from('employees').insert({
-        profile_id: prof.id, employee_number: form.employee_number.trim(),
+      const { data: insertedEmployee, error: ie } = await supabase.from('employees').insert({
+        profile_id: prof.id, employee_number: null,
         job_title: form.job_title || null, department: form.department || null, division_id: form.division_id || null,
         contract_type: form.contract_type, hire_date: form.hire_date || null, termination_date: form.termination_date || null,
         basic_salary: parseFloat(form.basic_salary) || 0, monthly_allowances: parseFloat(form.monthly_allowances) || 0,
         tin: form.tin || null, ssnit_number: form.ssnit_number || null, bank_name: form.bank_name || null,
         bank_account: form.bank_account || null, is_ssnit_exempt: form.is_ssnit_exempt, is_paye_exempt: form.is_paye_exempt, is_active: true,
-      })
+      }).select('employee_number').single()
       if (ie) throw ie
+      setSuccess(`Employee created: ${insertedEmployee?.employee_number ?? 'unknown'}`)
       setWizard(false); setStep(0); setForm(EMPTY); load()
     } catch (err) { setError(err.message || 'Failed') } finally { setSaving(false) }
   }
@@ -124,7 +125,6 @@ export default function EmployeeRegistry() {
       <input className={cls} placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
     </div>),
     (<div key="1" className="space-y-3">
-      <input required className={cls} placeholder="Employee number" value={form.employee_number} onChange={(e) => setForm({ ...form, employee_number: e.target.value })} />
       <input className={cls} placeholder="Job title" value={form.job_title} onChange={(e) => setForm({ ...form, job_title: e.target.value })} />
       <input className={cls} placeholder="Department" value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })} />
       <select className={cls} value={form.division_id} onChange={(e) => setForm({ ...form, division_id: e.target.value })}>
@@ -158,6 +158,7 @@ export default function EmployeeRegistry() {
   return (
     <div className="space-y-4">
       {error && <p className="text-sm text-red-300">{error}</p>}
+      {success && <p className="text-sm text-emerald-300">{success}</p>}
       <div className="flex flex-wrap justify-between gap-3">
         <div className="flex flex-wrap gap-2">
           <select className={cls + ' w-auto'} value={filters.department} onChange={(e) => setFilters({ ...filters, department: e.target.value })}>
@@ -179,7 +180,7 @@ export default function EmployeeRegistry() {
       </div>
       {loading ? <div className="h-40 animate-pulse rounded-2xl bg-white/5" /> : (
         <div className="portal-table-scroll overflow-x-auto rounded-2xl border border-border-soft">
-          <table className="w-full min-w-[880px] text-sm">
+          <table className="w-full min-w-220 text-sm">
             <thead><tr className="border-b border-border-soft text-left text-xs uppercase text-slate-500">
               <th className="px-3 py-3">#</th><th className="px-3 py-3">Name</th><th className="px-3 py-3">Title</th>
               <th className="px-3 py-3">Dept</th><th className="px-3 py-3">Division</th><th className="px-3 py-3">Basic</th>

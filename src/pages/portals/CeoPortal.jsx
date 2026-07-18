@@ -9,6 +9,7 @@ import TaxDueAlerts from '../../components/ceo/TaxDueAlerts'
 import ThemeToggle from '../../components/ui/ThemeToggle'
 import PortalSidebarFooter from '../../components/ui/PortalSidebarFooter'
 import KpiCard from '../../components/ui/KpiCard'
+import InviteUserModal from '../../components/InviteUserModal'
 import { COMPANY } from '../../lib/company-config'
 import logo from '../../assets/ModuloDevLogo.png'
 import ChartSkeleton from '../../components/skeletons/ChartSkeleton'
@@ -36,7 +37,7 @@ const ChartOfAccounts = lazy(() => import('../accounts/ChartOfAccounts'))
 // Component skeleton loader
 function PortalComponentLoader() {
   return (
-    <div className="flex h-96 w-full items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-600">
+    <div className="flex h-96 w-full items-center justify-center rounded-2xl bg-linear-to-br from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-600">
       <div className="text-center">
         <div className="mb-3 inline-flex h-10 w-10 animate-spin rounded-full border-3 border-slate-200 border-t-slate-900 dark:border-slate-600 dark:border-t-white"></div>
         <p className="text-sm text-slate-600 dark:text-slate-400">Loading panel...</p>
@@ -213,6 +214,7 @@ export default function CeoPortal() {
   const [bankAccounts, setBankAccounts] = useState([])
   const [bankBalances, setBankBalances] = useState({})
   const [moreOpen, setMoreOpen] = useState(false)
+  const [inviteModalOpen, setInviteModalOpen] = useState(false)
 
   // CEO executive summary query
   const { data: execData, isLoading: execLoading } = useQuery({
@@ -553,6 +555,16 @@ export default function CeoPortal() {
               ))}
             </nav>
 
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => setInviteModalOpen(true)}
+                className="min-touch w-full rounded-2xl border border-border-soft bg-white/5 px-4 py-3 text-left text-sm font-semibold text-white transition hover:border-amber-400/20 hover:bg-white/10"
+              >
+                Invite User
+              </button>
+            </div>
+
             <PortalSidebarFooter
               onSignOut={signOut}
               signOutClassName="border-border-soft bg-white/5 text-white hover:border-amber-400/40"
@@ -807,7 +819,7 @@ export default function CeoPortal() {
               <section className="w-full rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 sm:p-6 lg:p-8">
                 <SectionHeader title="Banking" subtitle="Bank accounts (read-only)" />
                 <div className="w-full overflow-x-auto">
-                  <table className="w-full min-w-[720px] text-sm text-slate-200">
+                  <table className="w-full min-w-180 text-sm text-slate-200">
                     <thead className="text-slate-400">
                       <tr>
                         <th className="px-3 py-3 text-left">Account</th>
@@ -941,7 +953,7 @@ export default function CeoPortal() {
               key={tab.id}
               type="button"
               onClick={() => handleMobileTab(tab.id)}
-              className={`flex flex-1 flex-col items-center justify-center min-h-[3rem] py-2 text-xs font-medium transition ${
+              className={`flex flex-1 flex-col items-center justify-center min-h-12 py-2 text-xs font-medium transition ${
                 activeTab === tab.id ? 'text-amber-300' : 'text-slate-500'
               }`}
             >
@@ -1005,6 +1017,13 @@ export default function CeoPortal() {
           </div>
         </>
       )}
+
+      <InviteUserModal
+        open={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        callerRole={profile?.role}
+        onSuccess={() => setInviteModalOpen(false)}
+      />
 
       {/* Project finance slide-over */}
       {slideOverProjectId && (

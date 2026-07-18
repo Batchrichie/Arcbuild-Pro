@@ -634,7 +634,11 @@ body.ab-light-mode .ab-login .ab-logo-text { color: rgba(26,26,26,0.65); }
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.ab-login .ab-checkbox:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25);
 }
 .ab-login .ab-checkbox:checked {
   background: var(--ab-orange);
@@ -644,9 +648,9 @@ body.ab-light-mode .ab-login .ab-logo-text { color: rgba(26,26,26,0.65); }
   content: '';
   position: absolute;
   left: 4px;
-  top: 1px;
+  top: 2px;
   width: 5px;
-  height: 9px;
+  height: 8px;
   border: 2px solid white;
   border-top: none;
   border-left: none;

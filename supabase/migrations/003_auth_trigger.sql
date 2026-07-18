@@ -34,8 +34,8 @@ BEGIN
         'employee'
     );
 
-    -- Validate role is one of the 6 defined system roles
-    IF _role NOT IN ('ceo', 'accountant', 'project_manager', 'hr_manager', 'employee', 'client') THEN
+    -- Validate role is one of the 7 defined system roles
+    IF _role NOT IN ('ceo', 'admin', 'accountant', 'project_manager', 'hr_manager', 'employee', 'client') THEN
         _role := 'employee';
     END IF;
 

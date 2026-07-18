@@ -46,7 +46,7 @@ body.theme-light .portal-eyebrow {
   color: var(--color-success) !important;
 }
 
-input,
+input:not([type="checkbox"]):not([type="radio"]),
 textarea,
 input[type="date"] {
   appearance: none;

@@ -363,7 +363,7 @@ CREATE POLICY profiles_own_select ON profiles
     TO authenticated
     USING (
         user_id = auth.uid()
-        AND get_user_role() IN ('project_manager', 'employee', 'client')
+        AND get_user_role() IN ('admin', 'project_manager', 'employee', 'client')
     );
 
 CREATE POLICY profiles_own_update ON profiles
@@ -371,11 +371,11 @@ CREATE POLICY profiles_own_update ON profiles
     TO authenticated
     USING (
         user_id = auth.uid()
-        AND get_user_role() IN ('project_manager', 'employee', 'client')
+        AND get_user_role() IN ('admin', 'project_manager', 'employee', 'client')
     )
     WITH CHECK (
         user_id = auth.uid()
-        AND get_user_role() IN ('project_manager', 'employee', 'client')
+        AND get_user_role() IN ('admin', 'project_manager', 'employee', 'client')
     );
 
 

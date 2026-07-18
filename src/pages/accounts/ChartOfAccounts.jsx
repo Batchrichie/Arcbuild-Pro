@@ -54,8 +54,7 @@ const EMPTY_FORM = {
 export default function ChartOfAccounts() {
   const { profile } = useAuth()
   const navigate = useNavigate()
-  const isAccountant = profile?.role === 'accountant'
-  const isCeo = profile?.role === 'ceo'
+  const isFinanceAdmin = ['accountant', 'admin', 'ceo'].includes(profile?.role)
 
   const [accountsByCategory, setAccountsByCategory] = useState({})
   const [loading, setLoading] = useState(true)
@@ -71,10 +70,10 @@ export default function ChartOfAccounts() {
   const [successMessage, setSuccessMessage] = useState('')
 
   useEffect(() => {
-    if (profile && !isAccountant && !isCeo) {
+    if (profile && !isFinanceAdmin) {
       navigate('/unauthorized', { replace: true })
     }
-  }, [profile, isAccountant, isCeo, navigate])
+  }, [profile, isFinanceAdmin, navigate])
 
   useEffect(() => {
     loadAccounts()
@@ -248,7 +247,7 @@ export default function ChartOfAccounts() {
           <h1 className="text-2xl font-semibold text-white">Chart of Accounts</h1>
           <p className="mt-1 text-sm text-slate-400">Browse and manage the general ledger account structure.</p>
         </div>
-        {isAccountant && (
+        {isFinanceAdmin && (
           <button
             type="button"
             onClick={openCreate}
@@ -318,7 +317,7 @@ export default function ChartOfAccounts() {
                 </div>
               </div>
               <div className="portal-table-scroll overflow-x-auto">
-                <table className="w-full min-w-[720px] text-sm text-text-primary">
+                <table className="w-full min-w-180 text-sm text-text-primary">
                   <thead className="border-b border-border-soft bg-surface-2 text-xs uppercase tracking-widest text-text-muted">
                     <tr>
                       <th className="px-4 py-3 text-left">Code</th>
@@ -351,7 +350,7 @@ export default function ChartOfAccounts() {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          {isAccountant ? (
+                          {isFinanceAdmin ? (
                             <button
                               type="button"
                               onClick={() => openEdit(account)}

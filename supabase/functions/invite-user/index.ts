@@ -6,8 +6,17 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-// Who may CALL this function (unchanged — not part of this extension)
-const ALLOWED_ROLES = ['hr_manager', 'ceo', 'accountant']
+const PERMISSION_MATRIX = {
+  ceo: ['admin', 'ceo', 'accountant', 'project_manager', 'hr_manager', 'employee', 'client'],
+  admin: ['accountant', 'project_manager', 'hr_manager', 'employee', 'client'],
+  hr_manager: ['employee', 'client'],
+  accountant: [],
+  project_manager: [],
+  employee: [],
+  client: [],
+}
+
+const ALLOWED_CALLER_ROLES = Object.keys(PERMISSION_MATRIX)
 
 const REDIRECT_TO = 'https://arcbuildpro.vercel.app/auth/callback'
 
@@ -24,7 +33,18 @@ function validateEmail(email: any) {
   return typeof email === 'string' && email.includes('@')
 }
 
-Deno.serve(async (req) => {
+export function sanitizeInviteUserPayload(body: any, callerRole: string) {
+  const employeeNumber = typeof body.employee_number === 'string' ? body.employee_number.trim() : ''
+
+  return {
+    ...body,
+    employee_number: (callerRole === 'admin' || callerRole === 'ceo')
+      ? (employeeNumber || null)
+      : null,
+  }
+}
+
+export async function inviteUserHandler(req: Request) {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -35,7 +55,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // --- Caller authorization check: only hr_manager, ceo, accountant may invite ---
+    // --- Caller authorization check ---
     const authHeader = req.headers.get('Authorization') ?? ''
     const token = authHeader.replace('Bearer ', '').trim()
 
@@ -54,18 +74,19 @@ Deno.serve(async (req) => {
       .eq('user_id', callerData.user.id)
       .maybeSingle()
 
-    if (callerProfileError || !callerProfile || !ALLOWED_ROLES.includes(callerProfile.role)) {
+    if (callerProfileError || !callerProfile || !ALLOWED_CALLER_ROLES.includes(callerProfile.role)) {
       return new Response(JSON.stringify({ error: 'Forbidden: insufficient permissions to invite users' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
     // --- End authorization check ---
 
     const body = await req.json().catch(() => ({}))
-    const email = (body.email || '').toString().trim().toLowerCase()
-    const name = (body.name || '').toString().trim()
+    const sanitizedBody = sanitizeInviteUserPayload(body, callerProfile.role)
+    const email = (sanitizedBody.email || '').toString().trim().toLowerCase()
+    const name = (sanitizedBody.name || '').toString().trim()
     // Default to 'client' when role is omitted — preserves existing caller behavior exactly
-    const role = (body.role || 'client').toString().trim().toLowerCase()
-    const client_id = body.client_id || null
-    const employee_id = body.employee_id || null
+    const role = (sanitizedBody.role || 'client').toString().trim().toLowerCase()
+    const client_id = sanitizedBody.client_id || null
+    const employee_id = sanitizedBody.employee_id || null
 
     if (!validateEmail(email)) {
       return new Response(JSON.stringify({ error: 'Invalid or missing email' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
@@ -81,6 +102,12 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({
         error: `Invalid role '${role}'. Must be one of: ${validRoleNames.filter((r: string) => !NON_INVITABLE_ROLES.includes(r)).join(', ')}`,
       }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    if (!PERMISSION_MATRIX[callerProfile.role]?.includes(role)) {
+      return new Response(JSON.stringify({
+        error: `You do not have permission to create an account with role: ${role}`,
+      }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
     // --- End role validation ---
 
@@ -168,4 +195,8 @@ Deno.serve(async (req) => {
     console.error('invite-user error:', message)
     return new Response(JSON.stringify({ success: false, error: message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
-})
+}
+
+if (import.meta.main) {
+  Deno.serve(inviteUserHandler)
+}

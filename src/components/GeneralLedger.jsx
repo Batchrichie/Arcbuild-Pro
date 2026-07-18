@@ -5,7 +5,7 @@ import AccountStatement from './AccountStatement'
 
 export default function GeneralLedger({ readOnly = false }) {
   const { profile } = useAuth()
-  const isReadOnly = readOnly || profile?.role === 'ceo'
+  const isReadOnly = readOnly || ['ceo', 'admin'].includes(profile?.role)
 
   const [rows, setRows] = useState([])
   const [page, setPage] = useState(1)
@@ -84,7 +84,7 @@ export default function GeneralLedger({ readOnly = false }) {
       </div>
 
       <div className="portal-table-scroll mt-4 overflow-x-auto rounded-3xl border border-border-soft bg-surface-2">
-        <table className="w-full min-w-[800px] table-auto text-sm dark-table">
+        <table className="w-full min-w-200 table-auto text-sm dark-table">
           <thead>
             <tr className="text-left text-text-muted">
               <th className="p-2">Date</th>
